@@ -16,7 +16,7 @@ ANSI to draw window and ball. Make screen output react to program.
 
 ## [Exercise 4](https://github.com/Group-00000011/30010/tree/main/journal/exc4)
 
-Setup GPIO ports/pins to both input and output.
+Setup GPIO ports/pins to both input and output. Can detect more than one of the joystick directions being turned on (diagonal/pressed and direction). 
 
 setLED() sets the RBG LED to one of 7 colours (or turned off). 
 
