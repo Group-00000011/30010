@@ -11,6 +11,8 @@ Sinus LUT, Bit Mask, Bit shifting
 
 ANSI to draw window and ball. Make screen output react to program. 
 
+These files also contain an alternate solution for exercise 2. 
+
 
 ![Ball simulation from exercise 3](journal/exc3/imgs/bold.png "Ball Simulation")
 
