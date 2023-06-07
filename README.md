@@ -1,7 +1,7 @@
 # 30010
 Programmeringsprojekt.
 
-Section titles link to folders with code for that exercise. Below the title is a (very) short description of what is used in that exercise. This makes it easier to find examples of certain solutions in future. 
+Section titles link to folders with code for that exercise. Below the title is a (very) short description of what is used in that exercise. This makes it easier to find examples of certain solutions in future. Exercise 0 is omitted. 
 
 ## [Exercise 1](https://github.com/Group-00000011/30010/tree/main/journal/exc1)
 Drawing simple windows with ansi escape codes. Two different styles
