@@ -1,5 +1,30 @@
 #include "hal.h"
 
+void init_timer_2 () {
+	RCC->APB2ENR |= RCC_APB2Periph_TIM15;
+	TIM15->CR1 &= 0xF400;	// Configure and disable timer
+	TIM15->ARR = 64000;		// Set auto reload value to 100Hz
+	TIM15->PSC = 9;			// Set prescaling to 1/9
+	TIM15->DIER |= 1;		// Enable timer 15 interrupts
+
+	NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 0); // Set priority of interrupt
+	NVIC_EnableIRQ(TIM1_BRK_TIM15_IRQn); 		// Enable the interrupt
+
+	TIM15->CR1 |= 1;
+}
+
+void init_timer_15() {
+	RCC->APB2ENR |= RCC_APB2Periph_TIM15;
+	TIM15->CR1 &= 0xF470;	// Configure and disable timer
+	TIM15->ARR = 64000;		// Set auto reload value to 100Hz
+	TIM15->PSC = 9;			// Set prescaling to 1/9
+	TIM15->DIER |= 1;		// Enable timer 15 interrupts
+
+	NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 0); // Set priority of interrupt
+	NVIC_EnableIRQ(TIM1_BRK_TIM15_IRQn); 		// Enable the interrupt
+
+	TIM15->CR1 |= 1;
+}
 
 void led_init() {
 	// Enable clock for used ports
