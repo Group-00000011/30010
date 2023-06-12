@@ -1,0 +1,3 @@
+../Src/lcd.c:10:6:lcd_write_line	48	static
+../Src/lcd.c:35:6:lcd_write_string	40	static
+../Src/lcd.c:70:6:lcd_scrolling_field	16	static

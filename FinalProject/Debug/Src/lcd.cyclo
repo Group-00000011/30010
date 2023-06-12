@@ -1,0 +1,3 @@
+lcd.c:10:6:lcd_write_line	6
+lcd.c:35:6:lcd_write_string	7
+lcd.c:70:6:lcd_scrolling_field	1
