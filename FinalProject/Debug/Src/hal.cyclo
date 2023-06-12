@@ -1,0 +1,2 @@
+hal.c:4:6:led_init	1
+hal.c:53:6:set_led	10
