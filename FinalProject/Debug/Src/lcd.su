@@ -1,3 +1,4 @@
 ../Src/lcd.c:10:6:lcd_write_line	48	static
-../Src/lcd.c:35:6:lcd_write_string	40	static
-../Src/lcd.c:70:6:lcd_scrolling_field	16	static
+../Src/lcd.c:42:6:lcd_write_string	24	static
+../Src/lcd.c:65:6:lcd_init_text	24	static
+../Src/lcd.c:73:6:lcd_scroll_text	24	static

@@ -7,12 +7,22 @@
 
 #ifndef LCD_H_
 #define LCD_H_
-#include "30010_io.h"
+
 #include "charset.h"
 #include "string.h"
+#include <stdint.h>
 
-void lcd_write_line(uint8_t * buffer, uint8_t line, char text[]);
-void lcd_write_string(uint8_t buffer[], uint8_t line, uint8_t c, char text[]) ;
+typedef struct {
+    char* content;
+    uint8_t column, row;
+    uint16_t text_width, scroll_offset;
+} lcd_text_t;
+
+void lcd_write_line(uint8_t buffer[], lcd_text_t * text);
+void lcd_write_string(uint8_t buffer[], lcd_text_t * text);
+void lcd_init_text(lcd_text_t* text, char* content, uint8_t column, uint8_t row, uint16_t text_width);
+void lcd_scroll_text (lcd_text_t* text);
+
 
 
 #endif /* LCD_H_ */
