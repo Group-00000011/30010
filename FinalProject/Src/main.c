@@ -2,18 +2,15 @@
 #include "30010_io.h" 		// Input/output library for this course
 #include "ansi.h"
 #include "hal.h"
-<<<<<<< HEAD
 #include "string.h"
 #include "lcd.h"
 
-=======
 #include "daftpunk8bit.h"
 
 
 volatile uint8_t* punk_address = punk_long;
 uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
 uint8_t* punk_begin = punk_long + 18500;
->>>>>>> buzzer
 
 int main(void)
 {

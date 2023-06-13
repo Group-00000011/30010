@@ -1,8 +1,14 @@
+# Ignore everything in the FinalProject/ directory
 /FinalProject/*
-!/FinalProject/Src/
-!/FinalProject/Src/*
-!/FinalProject/Inc/
-!/FinalProject/Inc/*
-
+# except subfolders
+!/FinalProject/*/
+# but still ignore the Debug/ directory
+/FinalProject/Debug/
+#!/FinalProject/Src/
+#!/FinalProject/Inc/
+#!/FinalProject/Src/*
+#!/FinalProject/Inc/*
+# Ignore daftpunk/ directory
 daftpunk/
+# Ignore everything in daftpunk/
 daftpunk/*
