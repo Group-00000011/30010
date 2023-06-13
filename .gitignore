@@ -1,2 +1,7 @@
-FinalProject/.metadata
-FinalProject/.settings
+/FinalProject/*
+!/FinalProject/Src/
+!/FinalProject/Src/*
+!/FinalProject/Inc/
+!/FinalProject/Inc/*
+daftpunk/
+
