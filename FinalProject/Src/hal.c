@@ -7,7 +7,7 @@ void init_timer_2 () { // Timer 2 is used for PWM for buzzer
 	//RCC->AHBENR |= RCC_AHBPeriph_GPIOB; // Enable clock for GPIO Port B
 	TIM2->CR1 &= 0xF400;	// Configure and disable timer
 	TIM2->ARR = AUDIO_BIT_DEPTH;		// Set resolution to 8 bits
-	TIM2->PSC = 2;		// Set prescaling/frequency to 568~440Hz, 4=62.5kHz, 2=125kHz
+	TIM2->PSC = 4;		// Set prescaling/frequency to 568~440Hz, 4=62.5kHz, 2=125kHz
 	TIM2->DIER |= 1;		// Enable timer 2 interrupts
 
 	//NVIC_SetPriority(TIM2_IRQn, 0); // Set priority of interrupt
@@ -44,8 +44,8 @@ void buzzer_set_pwm (uint8_t value) { // Sets the buzzer PWM pulse width to valu
 void init_timer_15() {
 	RCC->APB2ENR |= RCC_APB2Periph_TIM15;
 	TIM15->CR1 &= 0xF470;	// Configure and disable timer
-	TIM15->ARR = 64000;		// Set auto reload value to 100Hz
-	TIM15->PSC = 9;			// Set prescaling to 1/9
+	TIM15->ARR = 16000;		// Set auto reload value to 100Hz (original:64000)
+	TIM15->PSC = 0;			// Set prescaling to 1/(9+1) (original:9)
 	TIM15->DIER |= 1;		// Enable timer 15 interrupts
 
 	NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 1); // Set priority of interrupt
