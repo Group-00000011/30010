@@ -31,7 +31,9 @@ Src/main.o: ../Src/main.c \
  /home/asbjorn/Documents/DTU/prog-project/30010/FinalProject/SPL/inc/stm32f30x_misc.h \
  /home/asbjorn/Documents/DTU/prog-project/30010/FinalProject/Inc/30010_io.h \
  /home/asbjorn/Documents/DTU/prog-project/30010/FinalProject/Inc/ansi.h \
- /home/asbjorn/Documents/DTU/prog-project/30010/FinalProject/Inc/hal.h
+ /home/asbjorn/Documents/DTU/prog-project/30010/FinalProject/Inc/hal.h \
+ /home/asbjorn/Documents/DTU/prog-project/30010/FinalProject/Inc/lcd.h \
+ /home/asbjorn/Documents/DTU/prog-project/30010/FinalProject/Inc/charset.h
 /home/asbjorn/Documents/DTU/prog-project/30010/FinalProject/Inc/stm32f30x_conf.h:
 /home/asbjorn/Documents/DTU/prog-project/30010/FinalProject/SPL/inc/stm32f30x_adc.h:
 /home/asbjorn/Documents/DTU/prog-project/30010/FinalProject/Inc/stm32f30x.h:
@@ -65,3 +67,5 @@ Src/main.o: ../Src/main.c \
 /home/asbjorn/Documents/DTU/prog-project/30010/FinalProject/Inc/30010_io.h:
 /home/asbjorn/Documents/DTU/prog-project/30010/FinalProject/Inc/ansi.h:
 /home/asbjorn/Documents/DTU/prog-project/30010/FinalProject/Inc/hal.h:
+/home/asbjorn/Documents/DTU/prog-project/30010/FinalProject/Inc/lcd.h:
+/home/asbjorn/Documents/DTU/prog-project/30010/FinalProject/Inc/charset.h:
