@@ -31,7 +31,8 @@ Src/main.o: ../Src/main.c \
  /home/oskar/Documents/prog_proj/30010/FinalProject/SPL/inc/stm32f30x_misc.h \
  /home/oskar/Documents/prog_proj/30010/FinalProject/Inc/30010_io.h \
  /home/oskar/Documents/prog_proj/30010/FinalProject/Inc/ansi.h \
- /home/oskar/Documents/prog_proj/30010/FinalProject/Inc/hal.h
+ /home/oskar/Documents/prog_proj/30010/FinalProject/Inc/hal.h \
+ /home/oskar/Documents/prog_proj/30010/FinalProject/Inc/daftpunk8bit.h
 /home/oskar/Documents/prog_proj/30010/FinalProject/Inc/stm32f30x_conf.h:
 /home/oskar/Documents/prog_proj/30010/FinalProject/SPL/inc/stm32f30x_adc.h:
 /home/oskar/Documents/prog_proj/30010/FinalProject/Inc/stm32f30x.h:
@@ -65,3 +66,4 @@ Src/main.o: ../Src/main.c \
 /home/oskar/Documents/prog_proj/30010/FinalProject/Inc/30010_io.h:
 /home/oskar/Documents/prog_proj/30010/FinalProject/Inc/ansi.h:
 /home/oskar/Documents/prog_proj/30010/FinalProject/Inc/hal.h:
+/home/oskar/Documents/prog_proj/30010/FinalProject/Inc/daftpunk8bit.h:
