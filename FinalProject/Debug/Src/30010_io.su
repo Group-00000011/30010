@@ -1,4 +1,4 @@
-/home/asbjorn/Documents/DTU/prog-project/30010/FinalProject/cmsis/core_cm4.h:1071:22:NVIC_EnableIRQ	16	static
+/home/oskar/Documents/prog_proj/30010/FinalProject/cmsis/core_cm4.h:1071:22:NVIC_EnableIRQ	16	static
 ../Src/30010_io.c:11:9:uart_get_char	16	static
 ../Src/30010_io.c:20:6:uart_put_char	16	static
 ../Src/30010_io.c:25:5:_write_r	32	static

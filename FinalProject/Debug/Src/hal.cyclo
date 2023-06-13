@@ -1,2 +1,7 @@
-hal.c:4:6:led_init	1
-hal.c:53:6:set_led	10
+core_cm4.h:1071:22:NVIC_EnableIRQ	1
+core_cm4.h:1156:22:NVIC_SetPriority	2
+hal.c:5:6:init_timer_2	1
+hal.c:40:6:buzzer_set_pwm	1
+hal.c:44:6:init_timer_15	1
+hal.c:57:6:led_init	1
+hal.c:106:6:set_led	10

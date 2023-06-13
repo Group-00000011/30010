@@ -13,6 +13,9 @@
 
 void led_init();
 void set_led(uint8_t color);
+void init_timer_15();
+void init_timer_2();
+void buzzer_set_pwm(uint8_t value);
 
 
 

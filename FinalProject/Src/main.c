@@ -8,6 +8,5 @@ int main(void)
 	uart_init(9600);
 	led_init();
 
-
 	while(1){}
 }
