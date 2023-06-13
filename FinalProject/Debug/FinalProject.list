@@ -27,23 +27,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000030  00000000  00000000  00020090  2**0
                   CONTENTS, READONLY
- 12 .debug_info   000047cf  00000000  00000000  000200c0  2**0
+ 12 .debug_info   00004814  00000000  00000000  000200c0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 00000d6a  00000000  00000000  0002488f  2**0
+ 13 .debug_abbrev 00000d96  00000000  00000000  000248d4  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_aranges 000004f8  00000000  00000000  00025600  2**3
+ 14 .debug_aranges 000004f8  00000000  00000000  00025670  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_ranges 00000470  00000000  00000000  00025af8  2**3
+ 15 .debug_ranges 00000470  00000000  00000000  00025b68  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  000031ce  00000000  00000000  00025f68  2**0
+ 16 .debug_macro  000031d8  00000000  00000000  00025fd8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   00004b01  00000000  00000000  00029136  2**0
+ 17 .debug_line   00004b13  00000000  00000000  000291b0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    00059f87  00000000  00000000  0002dc37  2**0
+ 18 .debug_str    00059f9d  00000000  00000000  0002dcc3  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000050  00000000  00000000  00087bbe  2**0
+ 19 .comment      00000050  00000000  00000000  00087c60  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00001a68  00000000  00000000  00087c10  2**2
+ 20 .debug_frame  00001a68  00000000  00000000  00087cb0  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1612,7 +1612,7 @@ void init_timer_2 () { // Timer 2 is used for PWM for buzzer
  8000af0:	f04f 4380 	mov.w	r3, #1073741824	; 0x40000000
  8000af4:	22ff      	movs	r2, #255	; 0xff
  8000af6:	62da      	str	r2, [r3, #44]	; 0x2c
-	TIM2->PSC = 2;		// Set prescaling/frequency to 568=440Hz, 4=62.5kHz, 2=125kHz
+	TIM2->PSC = 2;		// Set prescaling/frequency to 568~440Hz, 4=62.5kHz, 2=125kHz
  8000af8:	f04f 4380 	mov.w	r3, #1073741824	; 0x40000000
  8000afc:	2202      	movs	r2, #2
  8000afe:	851a      	strh	r2, [r3, #40]	; 0x28
@@ -1907,9 +1907,9 @@ void led_init() {
  8000d28:	48000800 	.word	0x48000800
 
 08000d2c <main>:
-#include "30010_io.h" 		// Input/output library for this course
 #include "ansi.h"
 #include "hal.h"
+#include "daftpunk8bit.h"
 
 int main(void)
 {
