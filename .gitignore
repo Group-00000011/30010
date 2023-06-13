@@ -1,3 +1,8 @@
-/BaseProject/.metadata
-.wav
+/FinalProject/*
+!/FinalProject/Src/
+!/FinalProject/Src/*
+!/FinalProject/Inc/
+!/FinalProject/Inc/*
+
+daftpunk/
 daftpunk/*
