@@ -45,6 +45,9 @@ int main(void)
 	list_remove(&enemies, 0);
 	printf("%2d\n", list_length(enemies));
 
+	fixp_t num1 = fixp_fromint(22);
+	fixp_t num2 = fixp_fromint(7);
+	fixp_print(fixp_div(num1,num2));
 
 	while(1){}
 }
