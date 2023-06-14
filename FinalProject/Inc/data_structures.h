@@ -24,5 +24,11 @@ void list_remove(listnode_t** head, uint16_t idx);
 listnode_t* list_getnode(listnode_t* head, uint16_t idx);
 uint16_t list_length(listnode_t* head);
 
+int32_t fixp_add (int32_t n1, int32_t n2);
+int32_t fixp_mult (int32_t n1, int32_t n2);
+int32_t fixp_div (int32_t n1, int32_t n2);
+
+
+
 
 #endif /* DATA_STRUCTURES_H_ */

@@ -71,3 +71,20 @@ uint16_t list_length(listnode_t* head) { // Return the number of nodes in list [
 	}
 	return s;
 }
+
+int32_t fixp_add (int32_t n1, int32_t n2) {
+	return n1 + n2;
+}
+
+int32_t fixp_sub (int32_t n1, int32_t n2) {
+	return n1 - n2;
+}
+
+int32_t fixp_mult (int32_t n1, int32_t n2) {
+	int64_t result = (int64_t) n1 * (int64_t) n2;
+	return result >> 14;
+}
+
+int32_t fixp_div (int32_t n1, int32_t n2) {
+	return ((int64_t) n1 << 14) / (int64_t) n2;
+}
