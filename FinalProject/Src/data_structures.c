@@ -48,8 +48,16 @@ void list_remove(listnode_t** head, uint16_t idx) { // Remove node from specific
 	free(node_to_remove);
 }
 
-void* list_getnode(listnode_t* head, uint16_t idx) { // Return pointer to node at idx [O(n)]
-	return 0;
+listnode_t* list_getnode(listnode_t* head, uint16_t idx) { // Return pointer to node at idx [O(n)]
+	if (idx == 0) {
+		return head;
+	}
+	for (uint16_t i = 0; i < idx-1; i++) {
+		head = head->next;
+		if (head == NULL)
+			return NULL;
+	}
+	return head;
 }
 
 uint16_t list_length(listnode_t* head) { // Return the number of nodes in list [O(n)]
