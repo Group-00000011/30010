@@ -7,7 +7,7 @@ void init_timer_2 () { // Timer 2 is used for PWM for buzzer
 	//RCC->AHBENR |= RCC_AHBPeriph_GPIOB; // Enable clock for GPIO Port B
 	TIM2->CR1 &= 0xF400;	// Configure and disable timer
 	TIM2->ARR = AUDIO_BIT_DEPTH;		// Set resolution to 8 bits
-	TIM2->PSC = 4;		// Set prescaling/frequency to 568~440Hz, 4=62.5kHz, 2=125kHz
+	TIM2->PSC = 1;		// Set prescaling/frequency to 568~440Hz, 4=62.5kHz, 2=125kHz
 	TIM2->DIER |= 1;		// Enable timer 2 interrupts
 
 	//NVIC_SetPriority(TIM2_IRQn, 0); // Set priority of interrupt
@@ -34,7 +34,7 @@ void init_timer_2 () { // Timer 2 is used for PWM for buzzer
 	// If above AFR doesn't work use this:
 	//GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_1);
 
-	TIM2->CR1 |= 1;
+	//TIM2->CR1 |= 1;
 }
 
 void buzzer_set_pwm (uint8_t value) { // Sets the buzzer PWM pulse width to value/255
@@ -51,7 +51,23 @@ void init_timer_15() {
 	NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 1); // Set priority of interrupt
 	NVIC_EnableIRQ(TIM1_BRK_TIM15_IRQn); 		// Enable the interrupt
 
-	TIM15->CR1 |= 1;
+	//TIM15->CR1 |= 1;
+}
+
+void enable_timer_2 (uint8_t on) {
+	if (on) {
+		TIM2->CR1 |= 1;
+	} else {
+		TIM2->CR1 &= ~1;
+	}
+}
+
+void enable_timer_15 (uint8_t on) {
+	if (on) {
+		TIM15->CR1 |= 1;
+	} else {
+		TIM15->CR1 &= ~1;
+	}
 }
 
 void led_init() {

@@ -22,19 +22,26 @@ int main(void)
 	init_timer_2();
 	init_timer_15();
 
+	//enable_timer_2(1);
+	//enable_timer_15(1);
 
 
 	//buzzer_set_pwm(128);
 
 	while (1) {
+		/*TIM2->CCR3 = 0;
+		for (int i = 0; i < 5; i++) {}
+		TIM2->CCR3 = 255;
+		for (int i = 0; i < 5; i++) {}*/
 
-		//TIM2->CCR3 = 255;
 		/*buzzer_set_pwm(0);
 		buzzer_set_pwm(255);*/
 	}
 
 	while(1){}
 }
+
+uint8_t c = 0;
 
 void TIM1_BRK_TIM15_IRQHandler(void) {
 	TIM2->CCR3 = *punk_address;
