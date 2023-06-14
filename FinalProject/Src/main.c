@@ -4,6 +4,7 @@
 #include "hal.h"
 #include "string.h"
 #include "lcd.h"
+#include "entities.h"
 
 #include "daftpunk8bit.h"
 
@@ -22,6 +23,31 @@ int main(void)
 	init_timer_2();
 	init_timer_15();
 
+	clrscr();
+	gotoxy(0,0);
+
+	entity_t spaceship;
+	entity_t enemy;
+	entity_t bullet;
+	entity_t bomb;
+	entity_t nuke;
+	entity_t powerup;
+
+	initialise_entity(&spaceship, Spaceship, 1, 1, 0);
+	initialise_entity(&enemy, Enemy, 2, 5, 0);
+	initialise_entity(&bullet, Bullet, 6, 15, 0);
+	initialise_entity(&bomb, Bomb, 9, 50, 0);
+	initialise_entity(&nuke, Nuke, 40, 30, 0);
+	initialise_entity(&powerup, Powerup, 20, 80, 0);
+
+	spaceship.draw(&spaceship);
+	enemy.draw(&enemy);
+	bullet.draw(&bullet);
+	bomb.draw(&bomb);
+	nuke.draw(&nuke);
+	powerup.draw(&powerup);
+
+
 
 
 	//buzzer_set_pwm(128);
@@ -33,7 +59,6 @@ int main(void)
 		buzzer_set_pwm(255);*/
 	}
 
-	while(1){}
 }
 
 void TIM1_BRK_TIM15_IRQHandler(void) {
