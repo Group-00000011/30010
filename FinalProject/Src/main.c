@@ -6,13 +6,16 @@
 #include "lcd.h"
 #include "entities.h"
 #include "graphics.h"
-
 #include "daftpunk8bit.h"
+#include "data_structures.h"
 
 
 volatile uint8_t* punk_address = punk_long;
 uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
 uint8_t* punk_begin = punk_long + 18500;
+
+
+
 
 int main(void)
 {
@@ -20,22 +23,25 @@ int main(void)
 	uart_init(500000);
 	led_init();
 	lcd_init();
-
-	init_timer_2();
-	init_timer_15();
-
 	clrscr();
-	gotoxy(0,0);
+	gotoxy(1,1);
+	printf("Hello\n");
 
 	//buzzer_set_pwm(128);
 
-	while (1) {
+	//init_timer_2();
+	//init_timer_15();
+	//enable_timer_2(1);
+	//enable_timer_15(1);
+  	while (1) {
 		//TIM2->CCR3 = 255;
 		/*buzzer_set_pwm(0);
 		buzzer_set_pwm(255);*/
 	}
 
 }
+
+uint8_t c = 0;
 
 void TIM1_BRK_TIM15_IRQHandler(void) {
 	/*
