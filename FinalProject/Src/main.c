@@ -4,13 +4,16 @@
 #include "hal.h"
 #include "string.h"
 #include "lcd.h"
-
 #include "daftpunk8bit.h"
+#include "data_structures.h"
 
 
 volatile uint8_t* punk_address = punk_long;
 uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
 uint8_t* punk_begin = punk_long + 18500;
+
+
+
 
 int main(void)
 {
@@ -18,25 +21,30 @@ int main(void)
 	uart_init(9600);
 	led_init();
 	lcd_init();
+	clrscr();
+	gotoxy(1,1);
+	printf("Hello\n");
 
-	init_timer_2();
-	init_timer_15();
-
+	//init_timer_2();
+	//init_timer_15();
 	//enable_timer_2(1);
 	//enable_timer_15(1);
 
+	listnode_t* enemies = NULL;
+	printf("%2d\n", list_length(enemies));
+	list_push(&enemies, (int32_t*) 234567);
+	printf("%2d\n", list_length(enemies));
+	list_push(&enemies, (int32_t*) 234567);
+	printf("%2d\n", list_length(enemies));
+	list_push(&enemies, (int32_t*) 234567);
+	printf("%2d\n", list_length(enemies));
+	list_push(&enemies, (int32_t*) 234567);
+	printf("%2d\n", list_length(enemies));
+	list_remove(&enemies, 2);
+	printf("%2d\n", list_length(enemies));
+	list_remove(&enemies, 0);
+	printf("%2d\n", list_length(enemies));
 
-	//buzzer_set_pwm(128);
-
-	while (1) {
-		/*TIM2->CCR3 = 0;
-		for (int i = 0; i < 5; i++) {}
-		TIM2->CCR3 = 255;
-		for (int i = 0; i < 5; i++) {}*/
-
-		/*buzzer_set_pwm(0);
-		buzzer_set_pwm(255);*/
-	}
 
 	while(1){}
 }
