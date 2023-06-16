@@ -27,6 +27,8 @@ int main(void)
 	gotoxy(1,1);
 	printf("Hello\n");
 
+	gfx_draw_background();
+
 	//buzzer_set_pwm(128);
 
 	//init_timer_2();
