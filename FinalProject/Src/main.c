@@ -20,7 +20,7 @@ uint8_t* punk_begin = punk_long + 18500;
 int main(void)
 {
 	// Initialise hardware
-	uart_init(9600);
+	uart_init(500000);
 	led_init();
 	lcd_init();
 
