@@ -7,7 +7,6 @@
 
 #include "daftpunk8bit.h"
 
-
 volatile uint8_t* punk_address = punk_long;
 uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
 uint8_t* punk_begin = punk_long + 18500;
@@ -22,18 +21,13 @@ int main(void)
 	init_timer_2();
 	init_timer_15();
 
+	joystick_conf();
 
-
-	//buzzer_set_pwm(128);
-
-	while (1) {
-
-		//TIM2->CCR3 = 255;
-		/*buzzer_set_pwm(0);
-		buzzer_set_pwm(255);*/
+	while(1){
+		gotoxy(0,0);
+		printf("vert: %d    \n",joystick_vert());
+		printf("hori: %d    ",joystick_hori());
 	}
-
-	while(1){}
 }
 
 void TIM1_BRK_TIM15_IRQHandler(void) {

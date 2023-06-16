@@ -54,6 +54,66 @@ void init_timer_15() {
 	TIM15->CR1 |= 1;
 }
 
+uint16_t joystick_vert(){
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 1, ADC_SampleTime_1Cycles5);
+
+	ADC_StartConversion(ADC1); // Start ADC read
+	while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0); // Wait for ADC read
+
+	return ADC_GetConversionValue(ADC1); // Read the ADC value
+}
+
+uint16_t joystick_hori(){
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 1, ADC_SampleTime_1Cycles5);
+
+	ADC_StartConversion(ADC1); // Start ADC read
+	while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0); // Wait for ADC read
+
+	return ADC_GetConversionValue(ADC1); // Read the ADC value
+}
+
+void joystick_conf(){
+	RCC->AHBENR |= RCC_AHBPeriph_GPIOC; // Enable clock for GPIO Port A
+
+	// Set pin PC0 to input
+	GPIOC->MODER &= ~(0x00000003 << (0 * 2)); // Clear mode register
+	GPIOC->MODER |= (0x00000000 << (0 * 2)); // Set mode register (0x00 –Input, 0x01 - Output, 0x02 - Alternate Function, 0x03 - Analog in/out)
+	GPIOC->PUPDR &= ~(0x00000003 << (0 * 2)); // Clear push/pull register
+	GPIOC->PUPDR |= (0x00000002 << (0 * 2)); // Set push/pull register (0x00 - 	No pull, 0x01 - Pull-up, 0x02 - Pull-down)
+
+	// Set pin PC1 to input
+	GPIOC->MODER &= ~(0x00000003 << (1 * 2)); // Clear mode register
+	GPIOC->MODER |= (0x00000000 << (1 * 2)); // Set mode register (0x00 –Input, 0x01 - Output, 0x02 - Alternate Function, 0x03 - Analog in/out)
+	GPIOC->PUPDR &= ~(0x00000003 << (1 * 2)); // Clear push/pull register
+	GPIOC->PUPDR |= (0x00000002 << (1 * 2)); // Set push/pull register (0x00 - 	No pull, 0x01 - Pull-up, 0x02 - Pull-down)
+
+	// Configure clock source
+	RCC->CFGR2 &= ~RCC_CFGR2_ADCPRE12; // Clear ADC12 prescaler bits
+	RCC->CFGR2 |= RCC_CFGR2_ADCPRE12_DIV6; // Set ADC12 prescaler to 6
+	RCC->AHBENR |= RCC_AHBPeriph_ADC12; // Enable clock for ADC12
+
+	// Reset ADC to use standard reset configuration
+	ADC1->CR = 0x00000000; // Clear CR register
+	ADC1->CFGR &= 0xFDFFC007; // Clear ADC1 config register
+	ADC1->SQR1 &= ~ADC_SQR1_L; // Clear regular sequence register 1
+
+	// Prep for calibration
+	ADC1->CR |= 0x10000000; // Enable internal ADC voltage regulator
+	for (int i = 0 ; i < 1000 ; i++) {} // Wait for about 16 microseconds
+
+	// Calibration
+	ADC1->CR |= 0x80000000; // Start ADC1 calibration
+	while (!(ADC1->CR & 0x80000000)); // Wait for calibration to finish
+	for (int i = 0 ; i < 100 ; i++) {} // Wait for a little while
+
+	// Finally enables ADC
+	ADC1->CR |= 0x00000001; // (0x01 - Enable, 0x02 - Disable)
+	while (!(ADC1->ISR & 0x00000001)); // Wait until ready
+
+
+}
+
+
 void led_init() {
 	// Enable clock for used ports
 	RCC->AHBENR |= RCC_AHBPeriph_GPIOA;
