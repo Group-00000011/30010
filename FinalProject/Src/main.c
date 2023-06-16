@@ -9,17 +9,18 @@
 #include "daftpunk8bit.h"
 #include "data_structures.h"
 
+/*
 volatile uint8_t* punk_address = punk_long;
 uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
 uint8_t* punk_begin = punk_long + 18500;
-
+*/
 
 
 
 int main(void)
 {
 	// Initialise hardware
-	uart_init(500000);
+	uart_init(9600);
 	led_init();
 	lcd_init();
 
@@ -27,11 +28,25 @@ int main(void)
 	init_timer_15();
 
 	//joystick_conf();
+	bgcolor(SPACE_COLOR);
 	clrscr();
 	gotoxy(1,1);
 	printf("Hello\n");
 
 	gfx_draw_background();
+
+
+	/*for (int i = 0; i < 256; ++i) {
+		printf("%c", 'k');
+	}*/
+	//gfx_draw_background();
+
+	/*bgcolor(5);
+	char c[20];
+	sprintf(c, "hello%c[47mhello", ESC);
+	printf(c);
+	bgcolor(0);
+
 
 	//buzzer_set_pwm(128);
 
@@ -46,9 +61,8 @@ int main(void)
 
       /*		printf("vert: %d    \n",joystick_vert());
 		printf("hori: %d    ",joystick_hori());
-*/
-    }
 
+    }*/
 }
 
 uint8_t c = 0;
