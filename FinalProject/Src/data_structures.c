@@ -35,20 +35,19 @@ void list_append() { // Add node to end of list
 
 }
 
-void list_remove(listnode_t** head, uint16_t idx) { // Remove node from specific place in list [O(n)]
-	if (idx == 0) {
-		list_pop(head);
-		return;
+void* list_remove(listnode_t** head, uint16_t idx) { // Remove node from specific place in list [O(n)]
+	if (idx == 0) { // If idx is 0, remove==pop
+		return list_pop(head);
 	}
 	listnode_t* current = *head;
-	for (uint16_t i = 0; i < idx-1; i++) {
+	for (uint16_t i = 0; i < idx-1; i++) { // Go to the idx'th node
 		current = current->next;
-		if (current == NULL)
-			return;
+		if (current == NULL) // If end of list is reached, return null
+			return NULL;
 	}
 	listnode_t* node_to_remove = current->next;
 	current->next = current->next->next;
-	free(node_to_remove);
+	return node_to_remove->ptr;
 }
 
 listnode_t* list_getnode(listnode_t* head, uint16_t idx) { // Return pointer to node at idx [O(n)]

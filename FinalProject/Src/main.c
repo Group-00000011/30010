@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "stm32f30x_conf.h" // STM32 config
 #include "30010_io.h" 		// Input/output library for this course
 #include "ansi.h"
@@ -36,16 +37,19 @@ int main(void)
 	gfx_draw_background();
 
 	listnode_t* enemies = NULL;
-	//EntityType type = Spaceship;
 	entity_t* e1 = entity_init(Enemy, 7<<14, 10<<14, 0);
 	list_push(&enemies, e1);
+	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, 0));
+	list_push(&enemies, entity_init(Spaceship, 50<<14, 35<<14, 0));
+	free(list_remove(&enemies, 1));
 
 	fgcolor(8);
-	e1->draw(e1);
 
-
-
-
+	listnode_t* current = enemies;
+	while (current != NULL) {
+		((entity_t*) (current->ptr))->draw(current->ptr);
+		current = current->next;
+	}
 
 }
 
