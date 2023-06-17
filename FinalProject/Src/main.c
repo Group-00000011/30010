@@ -9,27 +9,46 @@
 #include "daftpunk8bit.h"
 #include "data_structures.h"
 
-volatile uint8_t* punk_address = punk_long;
-uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
-uint8_t* punk_begin = punk_long + 18500;
+//volatile uint8_t* punk_address = punk_long;
+//uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
+//uint8_t* punk_begin = punk_long + 18500;
 
+	entity_t spaceship;
 
-
+	uint8_t pos_x;
 
 int main(void)
 {
+
+
 	// Initialise hardware
-	uart_init(500000);
+	uart_init(9600);
 	led_init();
 	lcd_init();
-
 	init_timer_2();
 	init_timer_15();
-
 	//joystick_conf();
+
+	// Create spaceship
+	pos_x=10;
+	initialise_entity(&spaceship, Spaceship, pos_x, 10,0);
+
+
 	clrscr();
 	gotoxy(1,1);
 	printf("Hello\n");
+//
+//	printf("%c>\n\n",0xDC);
+//	printf("<%c\n\n",0xDC);
+//	printf("%c\nV\n\n",0xDC);
+//	printf("%c\nv\n\n",0xDC);
+//	printf("^\n%c\n\n",0xDC);
+//	printf("A\n%c\n\n",0xDC);
+	gotoxy(2,2);
+	printf("%c%c%c%c%c%c ", 0x5C,0xDB,0xDF,0xDF,0xDB,0x5C);
+	gotoxy(2,3);
+	printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
+
 
 	gfx_draw_background();
 
@@ -40,14 +59,19 @@ int main(void)
 	//enable_timer_2(1);
 	//enable_timer_15(1);
   	while (1) {
-		//TIM2->CCR3 = 255;
+
+
+    }
+
+//  		spaceship.draw(&spaceship);
+//  		spaceship.update_position(&spaceship, pos_x, 10);
+  		//TIM2->CCR3 = 255;
 		/*buzzer_set_pwm(0);
 		buzzer_set_pwm(255);*/
 
       /*		printf("vert: %d    \n",joystick_vert());
 		printf("hori: %d    ",joystick_hori());
 */
-    }
 
 }
 

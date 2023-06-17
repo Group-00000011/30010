@@ -8,8 +8,13 @@
 
 
 static void draw_spaceship(entity_t * self) {
-	gotoxy(self->x>>14,self->y>>14);
+	gfx_clear_area(self->last_x,self->last_y,(self->last_x)+2,(self->last_y)+2);
+	gotoxy(self->x,self->y);
+
+	//gotoxy(self->x>>14,self->y>>14);
+
 	printf("s");
+
 }
 
 
