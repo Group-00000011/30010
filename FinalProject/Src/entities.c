@@ -16,7 +16,9 @@ static void draw_spaceship(entity_t * self) {
 
 
 static void draw_enemy(entity_t * self) {
-	gotoxy(self->x>>14,self->y>>14);
+	gotoxy((self->last_x>>14)+1, (self->last_y>>14)+1);
+	printf(" ");
+	gotoxy((self->x>>14)+1, (self->y>>14)+1);
 	printf("e");
 }
 
@@ -57,6 +59,33 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 	self->rotation = rotation;
 }
 
+static uint8_t check_collision(entity_t* self, uint8_t type, uint8_t* heightmap) {
+	// [0] collision with left wall
+	// [1] collision with right wall
+	// [2] collision with roof
+	// [3] collision with ground
+
+	uint8_t collision = 0;
+
+	if (type && 1) { // Check collisions with sides
+		if (self->x < 0) { // Left wall
+			collision |= 1;
+		} else if (self->x > fixp_fromint(255)) { // Right wall
+			collision |= 1<<1;
+		}
+	}
+
+	if (type && 1<<1) { // Check collisions with ground/roof
+		if (self->y < 0) {
+			collision |= 1<<2;
+		} else if (self->y > fixp_fromint(63-heightmap[fixp_toint(self->x)])) {
+			collision |= 1<<3;
+		}
+	}
+
+	return collision;
+}
+
 entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t rotation) {
 	entity_t* entity = malloc(sizeof (entity_t));
 
@@ -84,10 +113,13 @@ entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t rotation) {
 	case Powerup:
 		entity->draw = &draw_powerup;
 		break;
+	default:
+		return NULL;
 	}
 
 	entity->update_position = &update_position;
 	entity->update_rotation = &update_rotation;
+	entity->check_collision = &check_collision;
 
 	return entity;
 }

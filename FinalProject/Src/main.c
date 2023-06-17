@@ -36,19 +36,32 @@ int main(void)
 
 	uint8_t* planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
 
-	listnode_t* enemies = NULL;
-	entity_t* e1 = entity_init(Enemy, 7<<14, 10<<14, 0);
-	list_push(&enemies, e1);
-	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, 0));
-	list_push(&enemies, entity_init(Spaceship, 50<<14, 35<<14, 0));
-	free(list_remove(&enemies, 1));
+	listnode_t* enemies = NULL; // Initialise empty list of enemies
+	list_push(&enemies, entity_init(Enemy, 7<<14, 10<<14, fixp_fromint(1)));
+	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1)));
+	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1)));
+	//free(list_remove(&enemies, 1)); // This is the syntax to pop or remove items from a list
 
-	fgcolor(8);
+	while (1) {
+		bgcolor(0);
+		fgcolor(8);
 
-	listnode_t* current = enemies;
-	while (current != NULL) {
-		((entity_t*) (current->ptr))->draw(current->ptr); // This is the syntax to call draw() on an entity in a list:((
-		current = current->next;
+		listnode_t* current = enemies;
+		while (current != NULL) {
+
+			fixp_t dir = ((entity_t*) (current->ptr))->rotation;
+			fixp_t new_x = ((entity_t*) (current->ptr))->x;
+			new_x += dir;
+			fixp_t new_y = fixp_fromint(63-planet_heightmap[fixp_toint(new_x)]);
+
+			((entity_t*) (current->ptr))->update_position(current->ptr, new_x, new_y);
+
+			((entity_t*) (current->ptr))->draw(current->ptr); // This is the syntax to call draw() on an entity in a list:((
+
+			current = current->next;
+		}
+
+		for (int i = 0; i < 100000; ++i) {} // Wait a bit
 	}
 
 }
