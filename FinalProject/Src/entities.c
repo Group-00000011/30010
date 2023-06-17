@@ -4,6 +4,8 @@
  *  Created on: 13 Jun 2023
  *      Author: asbjorn
  */
+
+#include <stdlib.h>
 #include "entities.h"
 
 

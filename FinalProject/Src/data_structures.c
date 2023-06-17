@@ -21,10 +21,10 @@ void list_push(listnode_t** head, void* elem) { // Add node to the beginning of 
 	*head = new_node;
 }
 
-void list_pop(listnode_t** head) { // Remove node from the beginning of list [O(1)]
+void* list_pop(listnode_t** head) { // Remove node from the beginning of list [O(1)]
 	listnode_t* old_head = *head;
 	*head = (*head)->next;
-	free(old_head);
+	return old_head->ptr;
 }
 
 void list_add() { // Add node to specific place in list
