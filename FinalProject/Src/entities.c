@@ -67,7 +67,7 @@ static uint8_t check_collision(entity_t* self, uint8_t type, uint8_t* heightmap)
 
 	uint8_t collision = 0;
 
-	if (type && 1) { // Check collisions with sides
+	if (type & 1) { // Check collisions with sides
 		if (self->x < 0) { // Left wall
 			collision |= 1;
 		} else if (self->x > fixp_fromint(255)) { // Right wall
@@ -75,10 +75,10 @@ static uint8_t check_collision(entity_t* self, uint8_t type, uint8_t* heightmap)
 		}
 	}
 
-	if (type && 1<<1) { // Check collisions with ground/roof
-		if (self->y < 0) {
+	if (type & 1<<1) { // Check collisions with ground/roof
+		if (self->y < 0) { // Roof
 			collision |= 1<<2;
-		} else if (self->y > fixp_fromint(63-heightmap[fixp_toint(self->x)])) {
+		} else if (self->y > fixp_fromint(63-heightmap[fixp_toint(self->x)])) { // Ground
 			collision |= 1<<3;
 		}
 	}
