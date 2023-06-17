@@ -2,8 +2,9 @@
 /FinalProject/*
 # except subfolders
 !/FinalProject/*/
-# but still ignore the Debug/ directory
+# but still ignore the Debug/  and .settings/ directory
 /FinalProject/Debug/
+/FinalProject/.settings/
 #!/FinalProject/Src/
 #!/FinalProject/Inc/
 #!/FinalProject/Src/*

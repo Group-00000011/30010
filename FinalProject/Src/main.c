@@ -50,6 +50,8 @@ int main(void)
 	printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
 
 
+	gfx_draw_background();
+
 	//buzzer_set_pwm(128);
 
 	//init_timer_2();
