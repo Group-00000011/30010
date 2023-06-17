@@ -15,7 +15,7 @@
 #define SPACE_COLOR 0
 #define PLANET_COLOR 7
 
-void gfx_draw_background();
+uint8_t* gfx_draw_background();
 void gfx_clear_area(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
 
 extern uint8_t ground[256];

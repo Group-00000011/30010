@@ -34,7 +34,7 @@ int main(void)
 	gotoxy(1,1);
 	printf("Hello\n");
 
-	gfx_draw_background();
+	uint8_t* planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
 
 	listnode_t* enemies = NULL;
 	entity_t* e1 = entity_init(Enemy, 7<<14, 10<<14, 0);
@@ -47,7 +47,7 @@ int main(void)
 
 	listnode_t* current = enemies;
 	while (current != NULL) {
-		((entity_t*) (current->ptr))->draw(current->ptr);
+		((entity_t*) (current->ptr))->draw(current->ptr); // This is the syntax to call draw() on an entity in a list:((
 		current = current->next;
 	}
 
