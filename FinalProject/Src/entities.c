@@ -55,7 +55,9 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 	self->rotation = rotation;
 }
 
-void initialise_entity(entity_t * entity, EntityType type, fixp_t x, fixp_t y, fixp_t rotation) {
+entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t rotation) {
+	entity_t* entity = malloc(sizeof (entity_t));
+
 	entity->type = type;
 	entity->x = entity->last_x = x;
 	entity->y = entity->last_y = y;
@@ -84,6 +86,8 @@ void initialise_entity(entity_t * entity, EntityType type, fixp_t x, fixp_t y, f
 
 	entity->update_position = &update_position;
 	entity->update_rotation = &update_rotation;
+
+	return entity;
 }
 
 

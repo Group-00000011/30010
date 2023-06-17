@@ -71,7 +71,7 @@ void gfx_draw_background() {
 
 
 void gfx_clear_area(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
-	/*char blankline[x2 - x1 + 1];
+	char blankline[x2 - x1 + 1];
 	memset(blankline, ' ', x2 - x1);
 	blankline[x2 - x1] = '\0';
 	bgcolor(0);
@@ -83,7 +83,7 @@ void gfx_clear_area(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
 		}
 		printf("%s", blankline);
 	}
-	bgcolor(0);*/
+	bgcolor(0);
 }
 
 

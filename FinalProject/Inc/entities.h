@@ -25,7 +25,7 @@ typedef struct entity {
 } entity_t;
 
 
-void initialise_entity(entity_t * entity, EntityType type, fixp_t x, fixp_t y, fixp_t rotation);
+entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t rotation);
 
 
 #endif /* ENTITIES_H_ */

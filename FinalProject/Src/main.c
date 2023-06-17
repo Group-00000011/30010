@@ -35,34 +35,16 @@ int main(void)
 
 	gfx_draw_background();
 
+	listnode_t* enemies = NULL;
+	//EntityType type = Spaceship;
+	entity_t* e1 = entity_init(Enemy, 7<<14, 10<<14, 0);
+	list_push(&enemies, e1);
 
-	/*for (int i = 0; i < 256; ++i) {
-		printf("%c", 'k');
-	}*/
-	//gfx_draw_background();
-
-	/*bgcolor(5);
-	char c[20];
-	sprintf(c, "hello%c[47mhello", ESC);
-	printf(c);
-	bgcolor(0);
+	fgcolor(8);
+	e1->draw(e1);
 
 
-	//buzzer_set_pwm(128);
 
-	//init_timer_2();
-	//init_timer_15();
-	//enable_timer_2(1);
-	//enable_timer_15(1);
-  	while (1) {
-		//TIM2->CCR3 = 255;
-		/*buzzer_set_pwm(0);
-		buzzer_set_pwm(255);*/
-
-      /*		printf("vert: %d    \n",joystick_vert());
-		printf("hori: %d    ",joystick_hori());
-
-    }*/
 }
 
 uint8_t c = 0;
