@@ -124,4 +124,25 @@ entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t rotation) {
 	return entity;
 }
 
+void enemy_move (entity_t* self, uint8_t* heightmap) {
+	fixp_t dir = self->rotation;
+	fixp_t new_x = self->x;
+	new_x += dir;
+	fixp_t new_y = fixp_fromint(63-heightmap[fixp_toint(new_x)]);
+
+	uint8_t collisions = self->check_collision(new_x, new_y, 1, NULL); // Check collision with walls only
+
+	if (collisions) {
+		if (collisions & 1) {
+			new_x = 0;
+		} else if (collisions & 0b10) {
+			new_x = fixp_fromint(255);
+		}
+		new_y = fixp_fromint(63-heightmap[fixp_toint(new_x)]);
+		self->rotation = -dir;
+	}
+
+	self->update_position(self, new_x, new_y);
+}
+
 

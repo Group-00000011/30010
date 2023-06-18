@@ -28,5 +28,7 @@ typedef struct entity {
 
 entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t rotation);
 
+void enemy_move(entity_t* self, uint8_t* heightmap);
+
 
 #endif /* ENTITIES_H_ */

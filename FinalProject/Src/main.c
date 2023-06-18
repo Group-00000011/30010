@@ -37,7 +37,7 @@ int main(void)
 	uint8_t* planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
-	list_push(&enemies, entity_init(Enemy, 7<<14, 10<<14, fixp_fromint(-1)));
+	list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1)));
 	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1)));
 	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1)));
 	//free(list_remove(&enemies, 1)); // This is the syntax to pop or remove items from a list
@@ -48,26 +48,13 @@ int main(void)
 
 		listnode_t* current = enemies;
 		while (current != NULL) {
+			entity_t* current_entity = current->ptr;
 
-			fixp_t dir = ((entity_t*) (current->ptr))->rotation;
-			fixp_t new_x = ((entity_t*) (current->ptr))->x;
-			new_x += dir;
-			fixp_t new_y = fixp_fromint(63-planet_heightmap[fixp_toint(new_x)]);
-
-			uint8_t collisions = ((entity_t*) (current->ptr))->check_collision(new_x, new_y, 1, NULL);
-
-			if (collisions) {
-				if (collisions & 1) {
-					new_x = 0;
-				} else if (collisions & 0b10) {
-					new_x = fixp_fromint(255);
-				}
-				new_y = fixp_fromint(63-planet_heightmap[fixp_toint(new_x)]);
-				((entity_t*) (current->ptr))->rotation = -dir;
+			if (current_entity->type == Enemy) {
+				enemy_move(current_entity, planet_heightmap);
 			}
 
-			((entity_t*) (current->ptr))->update_position(current->ptr, new_x, new_y);
-			((entity_t*) (current->ptr))->draw(current->ptr); // This is the syntax to call draw() on an entity in a list:((
+			current_entity->draw(current_entity);
 
 			current = current->next;
 		}
