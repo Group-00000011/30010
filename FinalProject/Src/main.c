@@ -22,7 +22,7 @@ int main(void)
 
 
 	// Initialise hardware
-	uart_init(9600);
+	uart_init(500000);
 	led_init();
 	lcd_init();
 	init_timer_2();

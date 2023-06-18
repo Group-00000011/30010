@@ -54,13 +54,14 @@ void draw_menu_screen() {
 
 	bgcolor(0);
 	clrscr();
+	gotoxy(1,1);
 	char blankline[257];
 	memset(blankline, ' ', 256);
 	blankline[256] = '\0';
 
 	char sidebar[50];
 	memset(sidebar, ' ', 49);
-	sidebar[51] = '\0';
+	sidebar[49] = '\0';
 
 
 	char window[157];
