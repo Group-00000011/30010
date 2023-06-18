@@ -49,8 +49,14 @@ int main(void)
 	gotoxy(2,3);
 	printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
 
+	draw_menu_screen();
+	//draw_menu_title("Main Menu");
+	//draw_main_menu_opts(1);
 
-	gfx_draw_background();
+	draw_menu_title("Help Menu");
+	draw_help_menu();
+
+
 
 	//buzzer_set_pwm(128);
 

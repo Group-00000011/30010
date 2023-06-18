@@ -10,8 +10,13 @@
 #include <stdint.h>
 #include "ansi.h"
 #include <string.h>
+
+
 void gfx_draw_background();
 void gfx_clear_area(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
-
+void draw_menu_screen();
+void draw_menu_title(char title[]);
+void draw_main_menu(uint8_t sel);
+void draw_help_menu();
 
 #endif /* GRAPHICS_H_ */
