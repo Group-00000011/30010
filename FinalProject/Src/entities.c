@@ -59,7 +59,7 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 	self->rotation = rotation;
 }
 
-static uint8_t check_collision(entity_t* self, uint8_t type, uint8_t* heightmap) {
+static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* heightmap) {
 	// [0] collision with left wall
 	// [1] collision with right wall
 	// [2] collision with roof
@@ -68,17 +68,17 @@ static uint8_t check_collision(entity_t* self, uint8_t type, uint8_t* heightmap)
 	uint8_t collision = 0;
 
 	if (type & 1) { // Check collisions with sides
-		if (self->x < 0) { // Left wall
+		if (x < 0) { // Left wall
 			collision |= 1;
-		} else if (self->x > fixp_fromint(255)) { // Right wall
+		} else if (x > fixp_fromint(255)) { // Right wall
 			collision |= 1<<1;
 		}
 	}
 
 	if (type & 1<<1) { // Check collisions with ground/roof
-		if (self->y < 0) { // Roof
+		if (y < 0) { // Roof
 			collision |= 1<<2;
-		} else if (self->y > fixp_fromint(63-heightmap[fixp_toint(self->x)])) { // Ground
+		} else if (y > fixp_fromint(63-heightmap[fixp_toint(x)])) { // Ground
 			collision |= 1<<3;
 		}
 	}
