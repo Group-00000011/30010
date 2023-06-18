@@ -70,22 +70,22 @@ void enable_timer_15 (uint8_t on) {
 	}
 }
 
-uint16_t joystick_vert(){
+fixp_t joystick_vert(){
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 1, ADC_SampleTime_1Cycles5);
 
 	ADC_StartConversion(ADC1); // Start ADC read
 	while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0); // Wait for ADC read
 
-	return ADC_GetConversionValue(ADC1); // Read the ADC value
+	return fixp_fromint(ADC_GetConversionValue(ADC1)); // Read the ADC value
 }
 
-uint16_t joystick_hori(){
+fixp_t joystick_hori(){
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 1, ADC_SampleTime_1Cycles5);
 
 	ADC_StartConversion(ADC1); // Start ADC read
 	while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0); // Wait for ADC read
 
-	return ADC_GetConversionValue(ADC1); // Read the ADC value
+	return fixp_fromint(ADC_GetConversionValue(ADC1)); // Read the ADC value
 }
 
 void joystick_conf(){

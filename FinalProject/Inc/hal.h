@@ -9,6 +9,7 @@
 #define HAL_H_
 
 #include "stm32f30x_conf.h" // STM32 config
+#include "data_structures.h"
 
 void led_init();
 void set_led(uint8_t color);
@@ -16,8 +17,8 @@ void init_timer_15();
 void init_timer_2();
 
 void joystick_conf();
-uint16_t joystick_hori();
-uint16_t joystick_vert();
+fixp_t joystick_hori();
+fixp_t joystick_vert();
 
 void enable_timer_2 (uint8_t on);
 void enable_timer_15 (uint8_t on);

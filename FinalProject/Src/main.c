@@ -14,68 +14,84 @@
 //uint8_t* punk_begin = punk_long + 18500;
 
 	entity_t spaceship;
+	void spaceship_input();
+	uint8_t rot;
 
-	uint8_t pos_x;
+	fixp_t x;
+	fixp_t y;
 
 int main(void)
 {
-
-
 	// Initialise hardware
 	uart_init(9600);
 	led_init();
 	lcd_init();
 	init_timer_2();
 	init_timer_15();
-	//joystick_conf();
+	joystick_conf();
 
 	// Create spaceship
-	pos_x=10;
-	initialise_entity(&spaceship, Spaceship, pos_x, 10,0);
 
+	initialise_entity(&spaceship, Spaceship, fixp_fromint(9), fixp_fromint(10), 0);
 
 	clrscr();
-	gotoxy(1,1);
 	printf("Hello\n");
 //
-//	printf("%c>\n\n",0xDC);
-//	printf("<%c\n\n",0xDC);
-//	printf("%c\nV\n\n",0xDC);
-//	printf("%c\nv\n\n",0xDC);
-//	printf("^\n%c\n\n",0xDC);
-//	printf("A\n%c\n\n",0xDC);
-	gotoxy(2,2);
-	printf("%c%c%c%c%c%c ", 0x5C,0xDB,0xDF,0xDF,0xDB,0x5C);
-	gotoxy(2,3);
-	printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
 
 
-	gfx_draw_background();
+//	gfx_draw_background();
 
-	//buzzer_set_pwm(128);
-
-	//init_timer_2();
-	//init_timer_15();
-	//enable_timer_2(1);
-	//enable_timer_15(1);
   	while (1) {
 
+  		spaceship.draw(&spaceship);
 
-    }
+  		spaceship_input();
+  	}
 
-//  		spaceship.draw(&spaceship);
-//  		spaceship.update_position(&spaceship, pos_x, 10);
-  		//TIM2->CCR3 = 255;
-		/*buzzer_set_pwm(0);
-		buzzer_set_pwm(255);*/
-
-      /*		printf("vert: %d    \n",joystick_vert());
-		printf("hori: %d    ",joystick_hori());
-*/
 
 }
 
-uint8_t c = 0;
+void spaceship_input(){
+
+
+	x = fixp_sub(joystick_hori(), fixp_fromint(1252));
+	y = fixp_sub(joystick_vert(), fixp_fromint(1300));
+
+
+	if(x > 0)
+		x = fixp_div(x, fixp_fromint(2750));
+	else
+		x = fixp_div(x, fixp_fromint(1250));
+
+	if(y > 0 )
+		y = fixp_div(y, fixp_fromint(2590));
+	else
+		y = fixp_div(y, fixp_fromint(1280));
+
+
+	if ((x & 0x80000000) != 0)
+		x |= 0x00000FFF;
+	else
+		x &= 0xFFFFF000;
+
+	if ((y & 0x80000000) != 0)
+		y |= 0x00000FFF;
+	else
+		y &= 0xFFFFF000;
+
+
+	gotoxy(10,1);
+	fixp_print((&spaceship)->x);
+	gotoxy(10,2);
+	fixp_print((&spaceship)->y);
+
+	if(x != 0 && y != 0){
+		x = fixp_add((&spaceship)->x, x);
+		y = fixp_sub((&spaceship)->y, y);
+		spaceship.update_position(&spaceship, x, y);
+	}
+}
+
 
 void TIM1_BRK_TIM15_IRQHandler(void) {
 	/*
