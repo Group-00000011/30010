@@ -46,9 +46,16 @@ int main(void)
 	// Initialise state machine
 	State state = MainMenu;
 	State last_state = NullState;
-	State next_state = NullState;
+	State next_state = MainMenu;
 	uint8_t state_transition = 1; // Flag to set true when changing state, the flag can then be set false to run code only when entering state.
 	uint8_t menu_selection = 0;
+	uint8_t last_menu_sel = 0;
+
+	uint8_t red_btn;
+	uint8_t gray_btn;
+
+	fixp_t js_vert;
+	fixp_t js_hori;
 
 	// Create spaceship
 	entity_t * spaceship;
@@ -66,6 +73,12 @@ int main(void)
 	printf("Hello\n");
 
   	while (1) {
+
+  		red_btn = buttonRed();
+  		gray_btn = buttonGray();
+
+  		js_vert = joystick_vert();
+  		js_hori = joystick_hori();
 
   		// Handle user input from joystick/buttons
   		if (state != last_state) {
@@ -85,12 +98,40 @@ int main(void)
   				if (!(last_state == HelpMenu || last_state == DeathMenu)) {
   					draw_menu_screen();
   				}
+  				draw_main_menu(menu_selection);
   				draw_menu_title("Main Menu");
+  			}
+
+  			if (js_vert > (0x3 << 13)) {
+  				if (menu_selection) {
+  					last_menu_sel = menu_selection;
+  					menu_selection--;
+  				}
+  			}
+
+  			if (js_vert < (0x1 << 13)) {
+				if (!menu_selection) {
+					last_menu_sel = menu_selection;
+					menu_selection++;
+				}
+			}
+
+  			if (menu_selection != last_menu_sel) {
   				draw_main_menu(menu_selection);
   			}
 
+  			last_menu_sel = menu_selection;
+
+  			if (gray_btn) {
+  				if (menu_selection == 0) {
+  					next_state = Game;
+  				} else if (menu_selection == 1) {
+  					next_state = HelpMenu;
+  				}
+  			}
+
   			// Check if user input is select/move up/move down
-  			next_state = HelpMenu;
+  			break;
 
 		// ------------------------------
 		// |  HELP MENU STATE			|
@@ -103,6 +144,10 @@ int main(void)
 				}
   				draw_menu_title("Help");
   				draw_help_menu();
+  			}
+
+  			if (red_btn) {
+  				next_state = MainMenu;
   			}
 
   			break;
