@@ -12,8 +12,15 @@
 #include "ansi.h"
 #include <string.h>
 
+
 #define SPACE_COLOR 0
 #define PLANET_COLOR 7
+#define MENU_BG_COLOR 6
+#define MENU_WINDOW_COLOR 7
+#define MENU_SHADOW_COLOR 0
+#define MENU_FG_COLOR 0
+#define RED_BTN_FG_COLOR 1
+#define WHITE_BTN_FG_COLOR 15
 #define DISPLAY_WIDTH 256
 #define DISPLAY_HEIGHT 64
 

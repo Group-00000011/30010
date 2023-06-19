@@ -43,6 +43,12 @@ int main(void)
 	clrscr();
 	gotoxy(1,1);
 	printf("Hello\n");
+
+	draw_menu_screen();
+	draw_menu_title("TITLTLTLTLTLEE");
+	draw_main_menu(1);
+	draw_help_menu();
+
 //
 //	printf("%c>\n\n",0xDC);
 //	printf("<%c\n\n",0xDC);
@@ -63,7 +69,7 @@ int main(void)
 	draw_help_menu();*/
 
 
-
+/*
 	uint8_t* planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
@@ -71,8 +77,8 @@ int main(void)
 	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1)));
 	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1)));
 	//free(list_remove(&enemies, 1)); // This is the syntax to pop or remove items from a list
-
-	while (1) {
+*/
+	while (1) {/*
 		if (update_flag & 1) {
 			bgcolor(0);
 			fgcolor(8);
@@ -93,11 +99,11 @@ int main(void)
 			//spaceship.update_position(&spaceship, pos_x, 10);
   			//TIM2->CCR3 = 255;
 
-      			/*printf("vert: %d    \n",joystick_vert());
-			printf("hori: %d    ",joystick_hori());*/
+      			printf("vert: %d    \n",joystick_vert());
+			printf("hori: %d    ",joystick_hori());
 
 			update_flag &= ~1;
-		}
+		}*/
 	}
 }
 

@@ -88,94 +88,89 @@ void gfx_clear_area(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
 
 
 void draw_menu_screen() {
-	// BG: Cyan (6)
-	// Window: Light gray (7)
-	// Shadow: Black (0)
-	// Text/highlight: Red (1)
-
-	bgcolor(0);
+	bgcolor(MENU_SHADOW_COLOR);
 	clrscr();
 	gotoxy(1,1);
-	char blankline[257];
-	memset(blankline, ' ', 256);
-	blankline[256] = '\0';
+	char blankline[DISPLAY_WIDTH + 1];
+	memset(blankline, ' ', DISPLAY_WIDTH);
+	blankline[DISPLAY_WIDTH] = '\0';
 
 	char sidebar[50];
 	memset(sidebar, ' ', 49);
 	sidebar[49] = '\0';
 
 
-	char window[157];
-	memset(window, 196, 156);
+	char window[DISPLAY_WIDTH - 99];
+	memset(window, 196, DISPLAY_WIDTH - 100);
 	window[0] = 218;
-	window[155] = 191;
-	window[156] = '\0';
+	window[DISPLAY_WIDTH - 101] = 191;
+	window[DISPLAY_WIDTH - 100] = '\0';
 
-	bgcolor(6);
+	bgcolor(MENU_BG_COLOR);
 
 	for (int i = 0; i < 10; i++) {
 		printf("%s\n", blankline);
 	}
 
 	printf("%s ", sidebar);
-	moveright(156);
+	moveright(DISPLAY_WIDTH - 100);
 	printf(" %s\n", sidebar);
 
 
-	for (int i = 1 ; i < 44; i++) {
+	for (int i = 1 ; i < DISPLAY_HEIGHT - 20; i++) {
 		printf("%s ", sidebar);
-		moveright(157);
+		moveright(DISPLAY_WIDTH - 99);
 		printf("%s\n", sidebar);
 	}
 
 	printf(" %s ", sidebar);
-	moveright(156);
+	moveright(DISPLAY_WIDTH - 100);
 	printf("%s\n", sidebar);
 
 
-	gotoxy(1, 56);
+	gotoxy(1, DISPLAY_HEIGHT - 8);
 
 	for (int i = 0; i < 8; i++) {
 		printf("%s\n", blankline);
 	}
 	printf("%s", blankline);
 
-	bgcolor(7);
-	fgcolor(0);
+	bgcolor(MENU_WINDOW_COLOR);
+	fgcolor(MENU_FG_COLOR);
 
 	gotoxy(51, 11);
 	printf("%s", window);
-	memset(window, ' ', 156);
+	memset(window, ' ', DISPLAY_WIDTH - 100);
 	window[0] = 179;
-	window[155] = 179;
+	window[DISPLAY_WIDTH - 101] = 179;
 
-	for (int i = 1; i < 43 ; i++) {
+	for (int i = 1; i < DISPLAY_HEIGHT - 21 ; i++) {
 		gotoxy(51, 11 + i);
 		printf("%s", window);
 	}
 
-	gotoxy(51, 54);
+	gotoxy(51, DISPLAY_HEIGHT - 10);
 
-	memset(window, 196, 156);
+	memset(window, 196, DISPLAY_WIDTH - 100);
 	window[0] = 192;
-	window[155] = 217;
+	window[DISPLAY_WIDTH - 101] = 217;
 
 	printf("%s", window);
 
-	gotoxy(120, 44);
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 20);
 	printf("--- MENU CONTROLS ---");
-	gotoxy(115, 46);
+	gotoxy((DISPLAY_WIDTH >> 1) - 13, DISPLAY_HEIGHT - 18);
 	printf("Joystick to change selection");
 
 
-	fgcolor(1);
-	gotoxy(120, 48);
+	fgcolor(RED_BTN_FG_COLOR);
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 16);
 	printf("BTN");
 	fgcolor(0);
 	printf(" to select");
 
-	fgcolor(15);
-	gotoxy(120, 50);
+	fgcolor(WHITE_BTN_FG_COLOR);
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 14);
 	printf("BTN");
 	fgcolor(0);
 	printf(" to go back");
@@ -183,15 +178,15 @@ void draw_menu_screen() {
 }
 
 void draw_menu_title(char title[]) {
-	fgcolor(0);
-	bgcolor(7);
+	fgcolor(MENU_FG_COLOR);
+	bgcolor(MENU_WINDOW_COLOR);
 
-	char window[157];
+	char window[DISPLAY_WIDTH - 99];
 	gotoxy(51, 11);
 
-	memset(window, 196, 156);
+	memset(window, 196, DISPLAY_WIDTH - 100);
 	window[0] = 218;
-	window[155] = 191;
+	window[DISPLAY_WIDTH - 101] = 191;
 
 	printf("%s", window);
 
@@ -202,12 +197,12 @@ void draw_menu_title(char title[]) {
 
 
 static void clear_menu_content() {
-	char window[152];
-	memset(window, ' ', 151);
-	window[151] = '\0';
-	bgcolor(7);
+	char window[DISPLAY_WIDTH - 104];
+	memset(window, ' ', DISPLAY_WIDTH - 105);
+	window[DISPLAY_WIDTH - 105] = '\0';
+	bgcolor(MENU_WINDOW_COLOR);
 
-	for (int i = 0; i < 32; i++) {
+	for (int i = 0; i < DISPLAY_HEIGHT - 32; i++) {
 		gotoxy(53, 12 + i);
 		printf("%s", window);
 	}
@@ -220,53 +215,52 @@ void draw_main_menu(uint8_t sel) {
 	// 1 to show help as selected
 	clear_menu_content();
 	if (sel == 0) {
-		bgcolor(0);
-		fgcolor(7);
+		bgcolor(MENU_SHADOW_COLOR);
+		fgcolor(MENU_WINDOW_COLOR);
 	} else {
-		bgcolor(7);
-		fgcolor(0);
+		bgcolor(MENU_WINDOW_COLOR);
+		fgcolor(MENU_FG_COLOR);
 	}
 
-	gotoxy(120, 25);
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, 25);
 	printf(" * START GAME ");
 
 	if (sel == 1) {
-		bgcolor(0);
-		fgcolor(7);
+		bgcolor(MENU_SHADOW_COLOR);
+		fgcolor(MENU_WINDOW_COLOR);
 	} else {
-		bgcolor(7);
-		fgcolor(0);
+		bgcolor(MENU_WINDOW_COLOR);
+		fgcolor(MENU_FG_COLOR);
 	}
 
-	gotoxy(120, 29);
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, 29);
 	printf(" * HELP ");
 }
 
 void draw_help_menu() {
 	clear_menu_content();
-	bgcolor(7);
-	fgcolor(0);
+	bgcolor(MENU_WINDOW_COLOR);
+	fgcolor(MENU_FG_COLOR);
 
 
 	// GAME CONTROLS
-	gotoxy(120, 30);
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 34);
 	printf("--- GAME CONTROLS ---");
-	gotoxy(120, 44);
 
-	gotoxy(115, 32);
+	gotoxy((DISPLAY_WIDTH >> 1) - 13, DISPLAY_HEIGHT - 32);
 	printf("Joystick to steer spaceship");
 
 
-	fgcolor(1);
-	gotoxy(120, 34);
+	fgcolor(RED_BTN_FG_COLOR);
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 30);
 	printf("BTN");
-	fgcolor(0);
+	fgcolor(MENU_FG_COLOR);
 	printf(" to drop bomb");
 
-	fgcolor(15);
-	gotoxy(120, 36);
+	fgcolor(WHITE_BTN_FG_COLOR);
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 28);
 	printf("BTN");
-	fgcolor(0);
+	fgcolor(MENU_FG_COLOR);
 	printf(" to drop nuke");
 
 
