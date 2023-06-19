@@ -163,13 +163,13 @@ void draw_menu_screen() {
 	printf("Joystick to change selection");
 
 
-	fgcolor(RED_BTN_FG_COLOR);
+	fgcolor(GRAY_BTN_FG_COLOR);
 	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 16);
 	printf("BTN");
 	fgcolor(0);
 	printf(" to select");
 
-	fgcolor(WHITE_BTN_FG_COLOR);
+	fgcolor(RED_BTN_FG_COLOR);
 	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 14);
 	printf("BTN");
 	fgcolor(0);
@@ -251,13 +251,13 @@ void draw_help_menu() {
 	printf("Joystick to steer spaceship");
 
 
-	fgcolor(RED_BTN_FG_COLOR);
+	fgcolor(GRAY_BTN_FG_COLOR);
 	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 30);
 	printf("BTN");
 	fgcolor(MENU_FG_COLOR);
 	printf(" to drop bomb");
 
-	fgcolor(WHITE_BTN_FG_COLOR);
+	fgcolor(RED_BTN_FG_COLOR);
 	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 28);
 	printf("BTN");
 	fgcolor(MENU_FG_COLOR);
