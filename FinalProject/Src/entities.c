@@ -139,6 +139,8 @@ entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t vel_x, fixp_t 
 	entity->type = type;
 	entity->x = entity->last_x = x;
 	entity->y = entity->last_y = y;
+	entity->vel_x = vel_x;
+	entity->vel_y = vel_y;
 
 	switch (type) {
 	case Spaceship:

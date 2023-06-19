@@ -26,7 +26,7 @@ void spaceship_input();
 int main(void)
 {
 	// Initialise hardware
-	uart_init(9600);
+	uart_init(500000);
 	led_init();
 	lcd_init();
 	init_timer_2();
@@ -75,6 +75,27 @@ int main(void)
 	list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1), 0));
 	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
+
+	while (1) {
+		if (update_flag & 1) {
+			bgcolor(0);
+			fgcolor(8);
+
+			listnode_t* current = enemies;
+			while (current != NULL) {
+				entity_t* current_entity = current->ptr;
+
+				if (current_entity->type == Enemy) {
+					enemy_move(current_entity, planet_heightmap);
+				}
+
+				current_entity->draw(current_entity);
+				current = current->next;
+			}
+			update_flag &= ~1;
+		}
+	}
+
 	//free(list_remove(&enemies, 1)); // This is the syntax to pop or remove items from a list
 
 	/*
