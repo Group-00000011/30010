@@ -69,7 +69,9 @@ static void draw_enemy(entity_t * self) {
 
 
 static void draw_bullet(entity_t * self) {
-	gotoxy(self->x>>14,self->y>>14);
+	gotoxy((self->last_x>>14)+1, (self->last_y>>14)+1);
+	printf(" ");
+	gotoxy((self->x>>14)+1, (self->y>>14)+1);
 	printf("b");
 
 }
@@ -143,6 +145,7 @@ entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t vel_x, fixp_t 
 	entity->y = entity->last_y = y;
 	entity->vel_x = vel_x;
 	entity->vel_y = vel_y;
+	entity->counter = 0;
 
 	switch (type) {
 	case Spaceship:
@@ -195,4 +198,8 @@ void enemy_move (entity_t* self, uint8_t* heightmap) {
 	self->update_position(self, new_x, new_y);
 }
 
-
+void entity_move (entity_t* self) {
+	self->update_position(self, self->x + self->vel_x, self->y+self->vel_y);
+	//self->x = self->x + self->vel_x;
+	//self->y = self->y + self->vel_y;
+}

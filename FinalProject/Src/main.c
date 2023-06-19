@@ -61,8 +61,10 @@ int main(void)
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1), 0));
+	//((entity_t*) (enemies->ptr))->counter = 9999;
 	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
+	listnode_t* bullets = NULL; // Initialise empty list of bullets
 
 
 
@@ -159,24 +161,47 @@ int main(void)
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
   			}
-  			if (update_flag & 1) {
-  						bgcolor(0);
-  						fgcolor(7);
+			bgcolor(0);
+  			fgcolor(7);
+  			if (update_flag & 1) {	// Update enemies and bullets
+				listnode_t* current_node = enemies;
+				while (current_node != NULL) { // Loop through enemies
+					entity_t* current = current_node->ptr;
 
-  						listnode_t* current = enemies;
-  						while (current != NULL) {
-  							entity_t* current_entity = current->ptr;
+					enemy_move(current, planet_heightmap);
 
-  							if (current_entity->type == Enemy) {
-  								enemy_move(current_entity, planet_heightmap);
-  							}
+					++current->counter;
+					if (current->counter == 25) { // If counter is ten, fire bullet
+						current->counter = 0;
 
-  							current_entity->draw(current_entity);
-  							current = current->next;
-  						}
-  						update_flag &= ~1;
-  					}
-	
+						fixp_t toplayer_x = player->x - current->x; // Vector from enemy to player
+						fixp_t toplayer_y = player->y - current->y;
+
+						fixp_t distance = fixp_sqrt(fixp_mult(toplayer_x, toplayer_x) + fixp_mult(toplayer_x, toplayer_y)); // Distance from enemy to player
+						toplayer_x = fixp_div(toplayer_x, distance); // Normalize vector
+						toplayer_y = fixp_div(toplayer_y, distance); // Normalize vector
+
+						list_push(&bullets, entity_init(Bullet, current->x, current->y, toplayer_x, toplayer_y));
+					}
+
+					current->draw(current);
+					current_node = current_node->next;
+				}
+				current_node = bullets;
+				while (current_node != NULL) { // Loop through bullets
+					entity_t* current = current_node->ptr;
+
+					entity_move(current);
+
+
+					current->draw(current);
+					current_node = current_node->next;
+				}
+				update_flag &= ~1;
+			}
+  			if (update_flag & 1<<1) { // Update player
+
+  			}
   			break;
 
 		// ------------------------------

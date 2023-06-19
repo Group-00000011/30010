@@ -99,6 +99,24 @@ fixp_t fixp_div (fixp_t n1, fixp_t n2) {
 	return ((int64_t) n1 << 14) / (int64_t) n2;
 }
 
+fixp_t fixp_sqrt(fixp_t val) { // This function removes decimals may (will) be inaccurate
+	val >>= 14;
+	uint32_t a, b;
+
+    if (val < 2) return val; /* avoid div/0 */
+    a = 1255;       /* starting point is relatively unimportant */
+    b = val / a; a = (a + b)>>1;
+    b = val / a; a = (a + b)>>1;
+    b = val / a; a = (a + b)>>1;
+    b = val / a; a = (a + b)>>1;
+    if (val < 20000) {
+        b = val / a; a = (a + b)>>1;    // < 17% error Max
+        b = val / a; a = (a + b)>>1;    // < 5%  error Max
+    }
+
+    return a <<= 14;
+}
+
 void fixp_print (fixp_t n) {
 	// Prints a signed 18.14 fixed point number
 	if ((n & 0x80000000) != 0) { // Handle negative numbers
@@ -108,3 +126,4 @@ void fixp_print (fixp_t n) {
 	printf("%ld.%04ld", n >> 14, 10000 * (uint32_t)(n & 0x3FFF) >> 14);
 	// Print a maximum of 4 decimal digits to avoid overflow
 }
+
