@@ -42,7 +42,7 @@ int main(void)
 	button_init();
 
 	// Initialise state machine
-	State state = MainMenu;
+	State state = Game;
 	State last_state = NullState;
 	State next_state = state;
 	uint8_t state_transition = 1; // Flag to set true when changing state, the flag can then be set false to run code only when entering state.
@@ -161,7 +161,7 @@ int main(void)
   			}
   			if (update_flag & 1) {
   						bgcolor(0);
-  						fgcolor(8);
+  						fgcolor(7);
 
   						listnode_t* current = enemies;
   						while (current != NULL) {
