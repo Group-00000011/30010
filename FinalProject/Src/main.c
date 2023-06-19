@@ -44,7 +44,7 @@ int main(void)
 	// Initialise state machine
 	State state = MainMenu;
 	State last_state = NullState;
-	State next_state = MainMenu;
+	State next_state = state;
 	uint8_t state_transition = 1; // Flag to set true when changing state, the flag can then be set false to run code only when entering state.
 	uint8_t menu_selection = 0;
 	uint8_t last_menu_sel = 0;
