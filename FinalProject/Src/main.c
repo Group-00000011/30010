@@ -14,7 +14,6 @@
 
 typedef enum State {NullState, MainMenu, HelpMenu, Game, DeathMenu, BossScreen} State;
 
-
 /*
 volatile uint8_t* punk_address = punk_long;
 uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
@@ -42,7 +41,7 @@ int main(void)
 	button_init();
 
 	// Initialise state machine
-	State state = MainMenu;
+	State state = Game;
 	State last_state = NullState;
 	State next_state = state;
 	State return_state = MainMenu;
@@ -58,6 +57,11 @@ int main(void)
 
 	uint8_t last_keypress;
 
+	uint8_t lives = 0;
+	uint8_t level = 0;
+	uint16_t kills = 0;
+	uint16_t score = 0;
+
 	uint8_t* planet_heightmap;
 
 	entity_t* player = entity_init(Spaceship, 100<<14, 20<<14, 0, 0);
@@ -66,6 +70,20 @@ int main(void)
 	list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1), 0));
 	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
+
+
+	uint8_t lcd_buffer[512];
+	memset(lcd_buffer, 0, 512);
+
+	lcd_text_t lcd_lives;
+	lcd_text_t lcd_level;
+	lcd_text_t lcd_score;
+	lcd_text_t lcd_kills;
+
+	lcd_init_text(&lcd_lives, "", 0, 0, 25);
+	lcd_init_text(&lcd_level, "", 0, 1, 25);
+	lcd_init_text(&lcd_score, "", 0, 2, 25);
+	lcd_init_text(&lcd_kills, "", 0, 3, 25);
 
 
 
@@ -234,6 +252,22 @@ int main(void)
   			break;
 
   		}
+
+  		sprintf(lcd_lives.content, "Lives: %d", lives);
+  		sprintf(lcd_level.content, "Level: %d", level);
+  		sprintf(lcd_score.content, "Score: %d", score);
+  		sprintf(lcd_kills.content, "Kills: %d", kills);
+
+
+  		lcd_write_line(lcd_buffer, &lcd_lives);
+  		lcd_write_line(lcd_buffer, &lcd_level);
+  		lcd_write_line(lcd_buffer, &lcd_score);
+  		lcd_write_line(lcd_buffer, &lcd_kills);
+
+
+  		lcd_push_buffer(lcd_buffer);
+
+
 
   		if (last_keypress == 'b' && state != BossScreen) {
 			next_state = BossScreen;
