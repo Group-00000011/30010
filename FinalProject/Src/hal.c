@@ -37,10 +37,6 @@ void init_timer_2 () { // Timer 2 is used for PWM for buzzer
 	//TIM2->CR1 |= 1;
 }
 
-void buzzer_set_pwm (uint8_t value) { // Sets the buzzer PWM pulse width to value/255
-	TIM2->CCR3 = value;
-}
-
 void init_timer_15() {
 	RCC->APB2ENR |= RCC_APB2Periph_TIM15;
 	TIM15->CR1 &= 0xF470;	// Configure and disable timer
@@ -50,6 +46,19 @@ void init_timer_15() {
 
 	NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 1); // Set priority of interrupt
 	NVIC_EnableIRQ(TIM1_BRK_TIM15_IRQn); 		// Enable the interrupt
+
+	//TIM15->CR1 |= 1;
+}
+
+void init_timer_16() {
+	RCC->APB2ENR |= RCC_APB2Periph_TIM16;
+	TIM16->CR1 &= 0xF470;	// Configure and disable timer
+	TIM16->ARR = 64000;		// Set auto reload value to 5Hz (original:64000)
+	TIM16->PSC = 199;		// Set prescaling to 1/(199+1) (original:199)
+	TIM16->DIER |= 1;		// Enable timer 15 interrupts
+
+	NVIC_SetPriority(TIM1_UP_TIM16_IRQn, 1); // Set priority of interrupt
+	NVIC_EnableIRQ(TIM1_UP_TIM16_IRQn); 		// Enable the interrupt
 
 	//TIM15->CR1 |= 1;
 }
@@ -68,6 +77,18 @@ void enable_timer_15 (uint8_t on) {
 	} else {
 		TIM15->CR1 &= ~1;
 	}
+}
+
+void enable_timer_16 (uint8_t on) {
+	if (on) {
+		TIM16->CR1 |= 1;
+	} else {
+		TIM16->CR1 &= ~1;
+	}
+}
+
+void buzzer_set_pwm (uint8_t value) { // Sets the buzzer PWM pulse width to value/255
+	TIM2->CCR3 = value;
 }
 
 uint16_t joystick_vert(){
