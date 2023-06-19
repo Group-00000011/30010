@@ -21,25 +21,35 @@ uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
 uint8_t* punk_begin = punk_long + 18500;
 */
 
-volatile uint8_t update_flag = 0; // [0]=update enemies; [1]=update player
+<<<<<<< HEAD
+uint8_t update_flag = 0; // [0]=update enemies; [1]=update player
 
 void spaceship_input();
 uint8_t rot;
+=======
+volatile uint8_t update_flag = 0; // [0]=update enemies; [1]=update player
 
+void spaceship_input();
+
+>>>>>>> origin/main
 
 
 int main(void)
 {
+
+
 	// Initialise hardware
 	uart_init(500000);
 	led_init();
 	lcd_init();
+
 	init_timer_2();
 	init_timer_15();
 	init_timer_16();
 	enable_timer_16(1);
 	joystick_conf();
 	button_init();
+<<<<<<< HEAD
 
 	// Initialise state machine
 	State state = MainMenu;
@@ -55,7 +65,53 @@ int main(void)
 	fixp_t js_vert;
 	fixp_t js_hori;
 
+	// Create spaceship
+	entity_t * spaceship;
+	spaceship = entity_init(Spaceship, fixp_fromint(9), fixp_fromint(10), 0);
+
 	uint8_t* planet_heightmap;
+
+	listnode_t* enemies = NULL; // Initialise empty list of enemies
+
+=======
+>>>>>>> origin/main
+
+
+	bgcolor(SPACE_COLOR);
+	clrscr();
+	gotoxy(1,1);
+	printf("Hello\n");
+
+<<<<<<< HEAD
+  	while (1) {
+=======
+	/*draw_menu_screen();
+	draw_menu_title("TITLTLTLTLTLEE");
+	draw_main_menu(1);
+	draw_help_menu();*/
+
+//
+//	printf("%c>\n\n",0xDC);
+//	printf("<%c\n\n",0xDC);
+//	printf("%c\nV\n\n",0xDC);
+//	printf("%c\nv\n\n",0xDC);
+//	printf("^\n%c\n\n",0xDC);
+//	printf("A\n%c\n\n",0xDC);
+	/*gotoxy(2,2);
+	printf("%c%c%c%c%c%c ", 0x5C,0xDB,0xDF,0xDF,0xDB,0x5C);
+	gotoxy(2,3);
+	printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
+
+	draw_menu_screen();
+	//draw_menu_title("Main Menu");
+	//draw_main_menu_opts(1);
+
+	draw_menu_title("Help Menu");
+	draw_help_menu();*/
+
+
+
+	uint8_t* planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
 
 	entity_t* player = entity_init(Spaceship, 100<<14, 20<<14, 0, 0);
 
@@ -64,18 +120,39 @@ int main(void)
 	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
 
+	while (1) {
+		if (update_flag & 1) {
+			bgcolor(0);
+			fgcolor(8);
 
+			listnode_t* current = enemies;
+			while (current != NULL) {
+				entity_t* current_entity = current->ptr;
 
-	bgcolor(SPACE_COLOR);
-	clrscr();
-	gotoxy(1,1);
-	printf("Hello\n");
+				if (current_entity->type == Enemy) {
+					enemy_move(current_entity, planet_heightmap);
+				}
 
-  	while (1) {
+				current_entity->draw(current_entity);
+				current = current->next;
+			}
+			update_flag &= ~1;
+		}
+	}
+
+	//free(list_remove(&enemies, 1)); // This is the syntax to pop or remove items from a list
+
+	/*
+	if(x > 0) rot = 1;
+	if(x < 0) rot = 3;
+	if(y > 0) rot = 2;
+	if(y < 0) rot = 0;
+>>>>>>> origin/main
 
   		red_btn = buttonRed();
   		gray_btn = buttonGray();
 
+<<<<<<< HEAD
   		js_vert = joystick_vert();
   		js_hori = joystick_hori();
 
@@ -158,25 +235,8 @@ int main(void)
   		case Game:
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
+  				list_push(&enemies, entity_init(Enemy, 7<<14, 10<<14, fixp_fromint(-1)));
   			}
-  			if (update_flag & 1) {
-  						bgcolor(0);
-  						fgcolor(8);
-
-  						listnode_t* current = enemies;
-  						while (current != NULL) {
-  							entity_t* current_entity = current->ptr;
-
-  							if (current_entity->type == Enemy) {
-  								enemy_move(current_entity, planet_heightmap);
-  							}
-
-  							current_entity->draw(current_entity);
-  							current = current->next;
-  						}
-  						update_flag &= ~1;
-  					}
-	
   			break;
 
 		// ------------------------------
@@ -211,6 +271,37 @@ int main(void)
   		state = next_state;
   	}
 }
+/*
+
+
+>>>>>>> origin/main
+void spaceship_input(){
+	fixp_t x = joystick_hori();
+	fixp_t y = joystick_vert();
+
+	int16_t red = buttonRed();
+	int16_t gray = buttonGray();
+
+	gotoxy(2,4);
+	printf("%d",red);
+	gotoxy(2,5);
+	printf("%d",gray);
+
+=======
+>>>>>>> origin/main
+	if(x != 0 && y != 0){
+		x = fixp_add((&spaceship)->x, x);
+		y = fixp_sub((&spaceship)->y, y);
+		spaceship.update_position(&spaceship, x, y);
+<<<<<<< HEAD
+	}
+}*/
+
+=======
+		spaceship.update_rotation(&spaceship, rot);
+	}*/
+}
+>>>>>>> origin/main
 
 void TIM1_BRK_TIM15_IRQHandler(void) {
 	/*TIM2->CCR3 = *punk_address;
