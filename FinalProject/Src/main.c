@@ -42,10 +42,10 @@ int main(void)
 	button_init();
 
 	// Initialise state machine
-	State state = DeathMenu;
+	State state = MainMenu;
 	State last_state = NullState;
 	State next_state = state;
-	State return_state = state;
+	State return_state = MainMenu;
 	uint8_t state_transition = 1; // Flag to set true when changing state, the flag can then be set false to run code only when entering state.
 	uint8_t menu_selection = 0;
 	uint8_t last_menu_sel = 0;
@@ -214,9 +214,15 @@ int main(void)
   		case BossScreen:
   			if (state_transition) {
 				draw_boss_screen();
+				enable_timer_2 (0);
+				enable_timer_15 (0);
+				enable_timer_16 (0);
   			}
 
   			if (last_keypress == 'b') {
+  				enable_timer_2 (1);
+				enable_timer_15 (1);
+				enable_timer_16 (1);
   				next_state = return_state;
   			}
 
