@@ -99,7 +99,20 @@ fixp_t joystick_vert(){
 	ADC_StartConversion(ADC1); // Start ADC read
 	while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0); // Wait for ADC read
 
-	return fixp_fromint(ADC_GetConversionValue(ADC1)); // Read the ADC value
+	fixp_t stick_y = fixp_fromint(ADC_GetConversionValue(ADC1));
+
+	if(stick_y > fixp_fromint(1400)){
+		stick_y = fixp_sub(stick_y, fixp_fromint(1400));
+		stick_y = fixp_div(stick_y, fixp_fromint(2600));
+		stick_y = fixp_add(stick_y, fixp_fromint(1));
+	}
+	else if (stick_y < fixp_fromint(1200))
+		stick_y = fixp_div(stick_y,fixp_fromint(1200));
+	else
+		stick_y = fixp_fromint(1);
+
+	return stick_y; // Read the ADC value
+
 }
 
 fixp_t joystick_hori(){
@@ -108,7 +121,24 @@ fixp_t joystick_hori(){
 	ADC_StartConversion(ADC1); // Start ADC read
 	while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0); // Wait for ADC read
 
-	return fixp_fromint(ADC_GetConversionValue(ADC1)); // Read the ADC value
+	fixp_t stick_x = fixp_fromint(ADC_GetConversionValue(ADC1));
+
+	if(stick_x > fixp_fromint(1350)){
+		stick_x = fixp_sub(stick_x, fixp_fromint(1350));
+		stick_x = fixp_div(stick_x,fixp_fromint(2650));
+		stick_x = fixp_add(stick_x, fixp_fromint(1));
+	}
+	else if(stick_x < fixp_fromint(1150))
+	{
+		stick_x = fixp_div(stick_x, fixp_fromint(1150));
+	}
+	else{
+		stick_x= fixp_fromint(1);
+	}
+
+
+
+	return stick_x; // Read the ADC value
 }
 
 void joystick_conf(){
