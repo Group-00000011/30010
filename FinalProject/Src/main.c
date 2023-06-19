@@ -22,13 +22,11 @@ entity_t spaceship;
 void spaceship_input();
 uint8_t rot;
 
-fixp_t x;
-fixp_t y;
 
 int main(void)
 {
 	// Initialise hardware
-	uart_init(500000);
+	uart_init(9600);
 	led_init();
 	lcd_init();
 	init_timer_2();
@@ -36,20 +34,20 @@ int main(void)
 	init_timer_16();
 	enable_timer_16(1);
 	joystick_conf();
-
+	button_init();
 	// Create spaceship
-  spaceship = entity init(&spaceship, Spaceship, fixp_fromint(9), fixp_fromint(10), 0);
+	spaceship = *entity_init(Spaceship, fixp_fromint(9), fixp_fromint(10), 0);
 
 
 	bgcolor(SPACE_COLOR);
 	clrscr();
 	printf("Hello\n");
-
+/*
 	draw_menu_screen();
 	draw_menu_title("TITLTLTLTLTLEE");
 	draw_main_menu(1);
 	draw_help_menu();
-
+*/
 //	gfx_draw_background();
 
   	while (1) {
@@ -62,34 +60,36 @@ int main(void)
 
 }
 
+
 void spaceship_input(){
-	x = fixp_sub(joystick_hori(), fixp_fromint(1252));
-	y = fixp_sub(joystick_vert(), fixp_fromint(1300));
+	fixp_t x = joystick_hori();
+	fixp_t y = joystick_vert();
 
+	int16_t red = buttonRed();
+	int16_t gray = buttonGray();
 
-	if(x > 0)
-		x = fixp_div(x, fixp_fromint(2750));
-	else
-		x = fixp_div(x, fixp_fromint(1250));
+	gotoxy(2,4);
+	printf("%d",red);
+	gotoxy(2,5);
+	printf("%d",gray);
 
-	if(y > 0 )
-		y = fixp_div(y, fixp_fromint(2590));
-	else
-		y = fixp_div(y, fixp_fromint(1280));
-
-
-	x &= 0xFFFFF000;
-
-	y &= 0xFFFFF000;
-
-	if( )
+	gotoxy(1,1);
+	fixp_print(x);
+	gotoxy(1,2);
+	fixp_print(y);
+/*
+	if(x > 0) rot = 1;
+	if(x < 0) rot = 3;
+	if(y > 0) rot = 2;
+	if(y < 0) rot = 0;
 
 
 	if(x != 0 && y != 0){
 		x = fixp_add((&spaceship)->x, x);
 		y = fixp_sub((&spaceship)->y, y);
 		spaceship.update_position(&spaceship, x, y);
-	}
+		spaceship.update_rotation(&spaceship, rot);
+	}*/
 }
 
 void TIM1_BRK_TIM15_IRQHandler(void) {

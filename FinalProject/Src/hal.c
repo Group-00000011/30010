@@ -92,6 +92,34 @@ void buzzer_set_pwm (uint8_t value) { // Sets the buzzer PWM pulse width to valu
 	TIM2->CCR3 = value;
 }
 
+void button_init(){
+	RCC->AHBENR |= RCC_AHBPeriph_GPIOA; // Enable clock for GPIO Port A
+
+	// Set pin PA6 to input
+	GPIOC->MODER &= ~(0x00000003 << (6 * 2)); // Clear mode register
+	GPIOC->MODER |= (0x00000000 << (6 * 2)); // Set mode register (0x00 –Input, 0x01 - Output, 0x02 - Alternate Function, 0x03 - Analog in/out)
+	GPIOC->PUPDR &= ~(0x00000003 << (6 * 2)); // Clear push/pull register
+	GPIOC->PUPDR |= (0x00000002 << (6 * 2)); // Set push/pull register (0x00 - 	No pull, 0x01 - Pull-up, 0x02 - Pull-down)
+
+	// Set pin PA7 to input
+	GPIOC->MODER &= ~(0x00000003 << (7 * 2)); // Clear mode register
+	GPIOC->MODER |= (0x00000000 << (7 * 2)); // Set mode register (0x00 –Input, 0x01 - Output, 0x02 - Alternate Function, 0x03 - Analog in/out)
+	GPIOC->PUPDR &= ~(0x00000003 << (7 * 2)); // Clear push/pull register
+	GPIOC->PUPDR |= (0x00000002 << (7 * 2)); // Set push/pull register (0x00 - 	No pull, 0x01 - Pull-up, 0x02 - Pull-down)
+}
+
+int16_t buttonRed(){
+	if((GPIOA->IDR & (0x0001 << 7)) == 0)
+		return 0;
+	else return 1;
+}
+int16_t buttonGray(){
+	if((GPIOA->IDR & (0x0001 << 6))==0)
+		return 0;
+	else return 1;
+}
+
+
 fixp_t joystick_vert(){
 
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 1, ADC_SampleTime_1Cycles5);
@@ -99,7 +127,20 @@ fixp_t joystick_vert(){
 	ADC_StartConversion(ADC1); // Start ADC read
 	while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0); // Wait for ADC read
 
-	return fixp_fromint(ADC_GetConversionValue(ADC1)); // Read the ADC value
+	fixp_t stick_y = fixp_fromint(ADC_GetConversionValue(ADC1));
+
+	if(stick_y > fixp_fromint(1400)){
+		stick_y = fixp_sub(stick_y, fixp_fromint(1400));
+		stick_y = fixp_div(stick_y, fixp_fromint(2600));
+		stick_y = fixp_add(stick_y, fixp_fromint(1));
+	}
+	else if (stick_y < fixp_fromint(1200))
+		stick_y = fixp_div(stick_y,fixp_fromint(1200));
+	else
+		stick_y = fixp_fromint(1);
+
+	return stick_y; // Read the ADC value
+
 }
 
 fixp_t joystick_hori(){
@@ -108,7 +149,24 @@ fixp_t joystick_hori(){
 	ADC_StartConversion(ADC1); // Start ADC read
 	while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0); // Wait for ADC read
 
-	return fixp_fromint(ADC_GetConversionValue(ADC1)); // Read the ADC value
+	fixp_t stick_x = fixp_fromint(ADC_GetConversionValue(ADC1));
+
+	if(stick_x > fixp_fromint(1350)){
+		stick_x = fixp_sub(stick_x, fixp_fromint(1350));
+		stick_x = fixp_div(stick_x,fixp_fromint(2650));
+		stick_x = fixp_add(stick_x, fixp_fromint(1));
+	}
+	else if(stick_x < fixp_fromint(1150))
+	{
+		stick_x = fixp_div(stick_x, fixp_fromint(1150));
+	}
+	else{
+		stick_x= fixp_fromint(1);
+	}
+
+
+
+	return stick_x; // Read the ADC value
 }
 
 void joystick_conf(){
