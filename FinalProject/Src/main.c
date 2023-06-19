@@ -68,28 +68,34 @@ void spaceship_input(){
 	int16_t red = buttonRed();
 	int16_t gray = buttonGray();
 
-	gotoxy(2,4);
-	printf("%d",red);
-	gotoxy(2,5);
-	printf("%d",gray);
+
+
+	x = fixp_sub(x,fixp_fromint(1));
+	y = fixp_sub(y,fixp_fromint(1));
 
 	gotoxy(1,1);
 	fixp_print(x);
 	gotoxy(1,2);
 	fixp_print(y);
-/*
+
 	if(x > 0) rot = 1;
 	if(x < 0) rot = 3;
-	if(y > 0) rot = 2;
-	if(y < 0) rot = 0;
+	if(y < 0) rot = 2;
+	if(y > 0) rot = 0;
 
 
-	if(x != 0 && y != 0){
+	if(x != 1 && y != 1){
 		x = fixp_add((&spaceship)->x, x);
 		y = fixp_sub((&spaceship)->y, y);
-		spaceship.update_position(&spaceship, x, y);
+		spaceship.update_position(&spaceship, x,y );
 		spaceship.update_rotation(&spaceship, rot);
-	}*/
+	}
+
+	gotoxy(1,4);
+	fixp_print(x);
+	gotoxy(1,5);
+	fixp_print(y);
+
 }
 
 void TIM1_BRK_TIM15_IRQHandler(void) {

@@ -28,27 +28,27 @@ switch (self->rotation){
 		printf("/%c%c%c", 0xDF,0xDF,0x5C);
 		break;
 	case 1:
-		gfx_clear_area(self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
-		gotoxy(self->x,self->y);
+		gfx_clear_area(fixp_toint(self->last_x),fixp_toint(self->last_y),fixp_toint(self->last_x)+6,fixp_toint(self->last_y)+3);
+		gotoxy(fixp_toint(self->x),fixp_toint(self->y));
 		printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDF,0xDF,0xDB,0x5C);
-		gotoxy(self->x,self->y+1);
+		gotoxy(fixp_toint(self->x),fixp_toint(self->y)+1);
 		printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
 		break;
 	case 2:
-		gfx_clear_area(self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
-			gotoxy(self->x,self->y);
+		gfx_clear_area(fixp_toint(self->last_x),fixp_toint(self->last_y),fixp_toint(self->last_x)+6,fixp_toint(self->last_y)+3);
+		gotoxy(fixp_toint(self->x),fixp_toint(self->y));
 			printf("%c%c%c/", 0x5C,0xDC,0xDC);
-			gotoxy(self->x,self->y+1);
+			gotoxy(fixp_toint(self->x),fixp_toint(self->y)+1);
 			printf("%c  %c", 0xDB,0xDB);
-			gotoxy(self->x,self->y+2);
+			gotoxy(fixp_toint(self->x),fixp_toint(self->y)+2);
 			printf("%c%c%c/", 0x5C, 0xDB,0xDB);
 			break;
 		break;
 	case 3:
-		gfx_clear_area(self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
-		gotoxy(self->x,self->y);
+		gfx_clear_area(fixp_toint(self->last_x),fixp_toint(self->last_y),fixp_toint(self->last_x)+6,fixp_toint(self->last_y)+3);
+		gotoxy(fixp_toint(self->x),fixp_toint(self->y));
 		printf("/%c%c%c%c/", 0xDB,0xDF,0xDF,0xDB);
-		gotoxy(self->x,self->y+1);
+		gotoxy(fixp_toint(self->x),fixp_toint(self->y)+1);
 		printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDC,0xDC,0xDB,0x5C);
 		break;
 	default:

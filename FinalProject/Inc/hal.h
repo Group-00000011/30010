@@ -3,6 +3,10 @@
  *
  *  Created on: 12 Jun 2023
  *      Author: asbjorn
+ *      shikoubox
+ *
+ *	Joystick VDD - VDD
+ *	Joystick GND - GND
  */
 
 #ifndef HAL_H_
@@ -17,12 +21,23 @@ void init_timer_2();
 void init_timer_15();
 void init_timer_16();
 
-//buttons
+/*
+ * Buttons
+ *
+ * Gray button - pin PA6
+ * Red button  - pin PA7
+*/
 void button_init();
 int16_t buttonRed();
 int16_t buttonGray();
 
-//Joystick
+/*
+ * Joystick
+ *
+ * Vertical   - pin PC0
+ * Horizontal - pin PC1
+*/
+
 void joystick_conf();
 fixp_t joystick_hori();
 fixp_t joystick_vert();
