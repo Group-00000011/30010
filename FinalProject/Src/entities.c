@@ -11,12 +11,51 @@
 
 
 static void draw_spaceship(entity_t * self) {
-	gfx_clear_area((self->last_x>>14)+1,(self->last_y>>14)+1,(self->last_x>>14)+3,(self->last_y>>14)+3);
-	gotoxy((self->x>>14)+1,(self->y>>14)+1);
 
-	//gotoxy(self->x>>14,self->y>>14);
+	if(fixp_toint(self->last_x) == fixp_toint(self->x)
+			&& fixp_toint(self->last_y) == fixp_toint(self->y)
+			&& self->last_rotation == self->rotation)
+		return;
 
-	printf("s");
+switch (self->rotation){
+	case 0:
+		gfx_clear_area(fixp_toint(self->last_x),fixp_toint(self->last_y),fixp_toint(self->last_x)+6,fixp_toint(self->last_y)+3);
+		gotoxy(fixp_toint(self->x),fixp_toint(self->y));
+		printf("/%c%c%c", 0xDB,0xDB,0x5C);
+		gotoxy(fixp_toint(self->x),fixp_toint(self->y)+1);
+		printf("%c  %c", 0xDB,0xDB);
+		gotoxy(fixp_toint(self->x),fixp_toint(self->y)+2);
+		printf("/%c%c%c", 0xDF,0xDF,0x5C);
+		break;
+	case 1:
+		gfx_clear_area(self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
+		gotoxy(self->x,self->y);
+		printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDF,0xDF,0xDB,0x5C);
+		gotoxy(self->x,self->y+1);
+		printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
+		break;
+	case 2:
+		gfx_clear_area(self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
+			gotoxy(self->x,self->y);
+			printf("%c%c%c/", 0x5C,0xDC,0xDC);
+			gotoxy(self->x,self->y+1);
+			printf("%c  %c", 0xDB,0xDB);
+			gotoxy(self->x,self->y+2);
+			printf("%c%c%c/", 0x5C, 0xDB,0xDB);
+			break;
+		break;
+	case 3:
+		gfx_clear_area(self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
+		gotoxy(self->x,self->y);
+		printf("/%c%c%c%c/", 0xDB,0xDF,0xDF,0xDB);
+		gotoxy(self->x,self->y+1);
+		printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDC,0xDC,0xDB,0x5C);
+		break;
+	default:
+		printf("ERROR");
+		break;
+}
+
 
 }
 
@@ -96,13 +135,14 @@ static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* height
 	return collision;
 }
 
-entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t rotation) {
+entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, uint8_t rotation) {
 	entity_t* entity = malloc(sizeof (entity_t));
 
 	entity->type = type;
 	entity->x = entity->last_x = x;
 	entity->y = entity->last_y = y;
 	entity->rotation = entity->last_rotation = rotation;
+	entity->vel_x = entity->vel_y = 0;
 
 	switch (type) {
 	case Spaceship:

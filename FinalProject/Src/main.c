@@ -12,6 +12,9 @@
 
 
 
+typedef enum State {NullState, MainMenu, HelpMenu, Game, DeathMenu, BossScreen} State;
+
+
 /*
 volatile uint8_t* punk_address = punk_long;
 uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
@@ -19,6 +22,10 @@ uint8_t* punk_begin = punk_long + 18500;
 */
 
 uint8_t update_flag = 0; // [0]=update enemies; [1]=update player
+
+void spaceship_input();
+uint8_t rot;
+
 
 int main(void)
 {
@@ -28,86 +35,145 @@ int main(void)
 	uart_init(500000);
 	led_init();
 	lcd_init();
-
 	init_timer_2();
 	init_timer_15();
 	init_timer_16();
 	enable_timer_16(1);
+	joystick_conf();
+	button_init();
 
-	//joystick_conf();
+	// Initialise state machine
+	State state = MainMenu;
+	State last_state = NullState;
+	State next_state = NullState;
+	uint8_t state_transition = 1; // Flag to set true when changing state, the flag can then be set false to run code only when entering state.
+	uint8_t menu_selection = 0;
 
 	// Create spaceship
-	//entity_t* spaceship = entity_init(Spaceship, 10<<14, 10<<14, 0);;
+	entity_t * spaceship;
+	spaceship = entity_init(Spaceship, fixp_fromint(9), fixp_fromint(10), 0);
+
+	uint8_t* planet_heightmap;
+
+	listnode_t* enemies = NULL; // Initialise empty list of enemies
+
+
 
 	bgcolor(SPACE_COLOR);
 	clrscr();
-	gotoxy(1,1);
-	printf("Hello\n");
 
-	draw_menu_screen();
-	draw_menu_title("TITLTLTLTLTLEE");
-	draw_main_menu(1);
-	draw_help_menu();
+  	while (1) {
 
-//
-//	printf("%c>\n\n",0xDC);
-//	printf("<%c\n\n",0xDC);
-//	printf("%c\nV\n\n",0xDC);
-//	printf("%c\nv\n\n",0xDC);
-//	printf("^\n%c\n\n",0xDC);
-//	printf("A\n%c\n\n",0xDC);
-	/*gotoxy(2,2);
-	printf("%c%c%c%c%c%c ", 0x5C,0xDB,0xDF,0xDF,0xDB,0x5C);
-	gotoxy(2,3);
-	printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
+  		// Handle user input from joystick/buttons
+  		if (state != last_state) {
+  			state_transition = 1;
+  		} else {
+  			state_transition = 0;
+  		}
 
-	draw_menu_screen();
-	//draw_menu_title("Main Menu");
-	//draw_main_menu_opts(1);
-
-	draw_menu_title("Help Menu");
-	draw_help_menu();*/
+  		switch (state) {
 
 
-/*
-	uint8_t* planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
+  		// ------------------------------
+  		// |  MAIN MENU STATE			|
+  		// ------------------------------
 
-	entity_t* player = entity_init(Spaceship, 100<<14, 20<<14, fixp_fromint(1));
+  		case MainMenu:
+  			if (state_transition) {
+  				if (!(last_state == HelpMenu || last_state == DeathMenu)) {
+  					draw_menu_screen();
+  				}
+  				draw_menu_title("Main Menu");
+  				draw_main_menu(menu_selection);
+  			}
 
-	listnode_t* enemies = NULL; // Initialise empty list of enemies
-	list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1)));
-	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1)));
-	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1)));
-	//free(list_remove(&enemies, 1)); // This is the syntax to pop or remove items from a list
-*/
-	while (1) {/*
-		if (update_flag & 1) {
-			bgcolor(0);
-			fgcolor(8);
+  			// Check if user input is select/move up/move down
+  			next_state = HelpMenu;
 
-			listnode_t* current = enemies;
-			while (current != NULL) {
-				entity_t* current_entity = current->ptr;
 
-				if (current_entity->type == Enemy) {
-					enemy_move(current_entity, planet_heightmap);
+  			break;
+
+		// ------------------------------
+		// |  HELP MENU STATE			|
+		// ------------------------------
+
+  		case HelpMenu:
+  			if (state_transition) {
+  				if (!(last_state == MainMenu || last_state == DeathMenu)) {
+					draw_menu_screen();
 				}
+  				draw_menu_title("Help");
+  				draw_help_menu();
+  			}
 
-				current_entity->draw(current_entity);
-				current = current->next;
-			}
+  			break;
 
-			//spaceship->draw(spaceship);
-			//spaceship.update_position(&spaceship, pos_x, 10);
-  			//TIM2->CCR3 = 255;
+		// ------------------------------
+		// |  GAME LOOP STATE			|
+		// ------------------------------
 
-      			printf("vert: %d    \n",joystick_vert());
-			printf("hori: %d    ",joystick_hori());
+  		case Game:
+  			if (state_transition) {
+  				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
+  				list_push(&enemies, entity_init(Enemy, 7<<14, 10<<14, fixp_fromint(-1)));
+  			}
+  			break;
 
-			update_flag &= ~1;
-		}*/
-	}
+		// ------------------------------
+		// |  DEATH MENU STATE			|
+		// ------------------------------
+  		case DeathMenu:
+
+  			break;
+
+		// ------------------------------
+		// |  DEATH MENU STATE			|
+		// ------------------------------
+
+  		case BossScreen:
+  			if (state_transition) {
+				if (last_state != MainMenu || last_state != HelpMenu) {
+					draw_menu_screen();
+				}
+  			}
+
+  			break;
+
+  		// DEFAULT TO MAIN MENU
+  		default:
+  			state = MainMenu;
+  			break;
+
+  		}
+
+
+  		last_state = state;
+  		state = next_state;
+  	}
 }
+/*
+
+
+>>>>>>> origin/main
+void spaceship_input(){
+	fixp_t x = joystick_hori();
+	fixp_t y = joystick_vert();
+
+	int16_t red = buttonRed();
+	int16_t gray = buttonGray();
+
+	gotoxy(2,4);
+	printf("%d",red);
+	gotoxy(2,5);
+	printf("%d",gray);
+
+	if(x != 0 && y != 0){
+		x = fixp_add((&spaceship)->x, x);
+		y = fixp_sub((&spaceship)->y, y);
+		spaceship.update_position(&spaceship, x, y);
+	}
+}*/
+
 
 void TIM1_BRK_TIM15_IRQHandler(void) {
 	/*TIM2->CCR3 = *punk_address;
