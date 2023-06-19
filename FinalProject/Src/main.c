@@ -42,9 +42,10 @@ int main(void)
 	button_init();
 
 	// Initialise state machine
-	State state = MainMenu;
+	State state = DeathMenu;
 	State last_state = NullState;
 	State next_state = state;
+	State return_state = state;
 	uint8_t state_transition = 1; // Flag to set true when changing state, the flag can then be set false to run code only when entering state.
 	uint8_t menu_selection = 0;
 	uint8_t last_menu_sel = 0;
@@ -54,6 +55,8 @@ int main(void)
 
 	fixp_t js_vert;
 	fixp_t js_hori;
+
+	uint8_t last_keypress;
 
 	uint8_t* planet_heightmap;
 
@@ -69,15 +72,19 @@ int main(void)
 	bgcolor(SPACE_COLOR);
 	clrscr();
 	gotoxy(1,1);
-	printf("Hello\n");
 
   	while (1) {
-
   		red_btn = buttonRed();
   		gray_btn = buttonGray();
 
   		js_vert = joystick_vert();
   		js_hori = joystick_hori();
+
+  		if (uart_get_count()) {
+  			last_keypress = uart_get_char();
+  		} else {
+  			last_keypress = 0;
+  		}
 
   		// Handle user input from joystick/buttons
   		if (state != last_state) {
@@ -192,9 +199,11 @@ int main(void)
 
   		case BossScreen:
   			if (state_transition) {
-				if (last_state != MainMenu || last_state != HelpMenu) {
-					draw_menu_screen();
-				}
+				draw_boss_screen();
+  			}
+
+  			if (last_keypress == 'b') {
+  				next_state = return_state;
   			}
 
   			break;
@@ -206,6 +215,11 @@ int main(void)
 
   		}
 
+  		if (last_keypress == 'b' && state != BossScreen) {
+			next_state = BossScreen;
+			return_state = state;
+			uart_clear();
+		}
 
   		last_state = state;
   		state = next_state;

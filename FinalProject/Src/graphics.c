@@ -262,9 +262,16 @@ void draw_help_menu() {
 	printf("BTN");
 	fgcolor(MENU_FG_COLOR);
 	printf(" to drop nuke");
-
-
 }
 
+
+
+void draw_boss_screen() {
+	bgcolor(0);
+	fgcolor(7);
+	clrscr();
+	gotoxy(1,1);
+	printf("Something productive");
+}
 
 
