@@ -91,18 +91,15 @@ static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* height
 		}
 	}
 
-
-
 	return collision;
 }
 
-entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t rotation) {
+entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t vel_x, fixp_t vel_y) {
 	entity_t* entity = malloc(sizeof (entity_t));
 
 	entity->type = type;
 	entity->x = entity->last_x = x;
 	entity->y = entity->last_y = y;
-	entity->rotation = entity->last_rotation = rotation;
 
 	switch (type) {
 	case Spaceship:
@@ -110,6 +107,7 @@ entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t rotation) {
 		break;
 	case Enemy:
 		entity->draw = &draw_enemy;
+		entity->rotation = vel_x < 0;
 		break;
 	case Bullet:
 		entity->draw = &draw_bullet;
@@ -135,9 +133,7 @@ entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t rotation) {
 }
 
 void enemy_move (entity_t* self, uint8_t* heightmap) {
-	fixp_t dir = self->rotation;
-	fixp_t new_x = self->x;
-	new_x += dir;
+	fixp_t new_x = self->x + self->vel_x;
 	fixp_t new_y = fixp_fromint(DISPLAY_HEIGHT-1-heightmap[fixp_toint(new_x)]);
 
 	uint8_t collisions = self->check_collision(new_x, new_y, 1, NULL); // Check collision with walls only
@@ -149,7 +145,8 @@ void enemy_move (entity_t* self, uint8_t* heightmap) {
 			new_x = fixp_fromint(DISPLAY_WIDTH-1);
 		}
 		new_y = fixp_fromint(DISPLAY_HEIGHT-1-heightmap[fixp_toint(new_x)]);
-		self->rotation = -dir;
+		self->vel_x = -self->vel_x;
+		self->rotation = self->vel_x > 0;
 	}
 
 	self->update_position(self, new_x, new_y);
