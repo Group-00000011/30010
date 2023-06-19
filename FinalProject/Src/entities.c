@@ -11,8 +11,8 @@
 
 
 static void draw_spaceship(entity_t * self) {
-	gfx_clear_area(self->last_x,self->last_y,(self->last_x)+2,(self->last_y)+2);
-	gotoxy(self->x,self->y);
+	gfx_clear_area((self->last_x>>14)+1,(self->last_y>>14)+1,(self->last_x>>14)+3,(self->last_y>>14)+3);
+	gotoxy((self->x>>14)+1,(self->y>>14)+1);
 
 	//gotoxy(self->x>>14,self->y>>14);
 

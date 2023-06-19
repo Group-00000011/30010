@@ -40,8 +40,8 @@ void init_timer_2 () { // Timer 2 is used for PWM for buzzer
 void init_timer_15() {
 	RCC->APB2ENR |= RCC_APB2Periph_TIM15;
 	TIM15->CR1 &= 0xF470;	// Configure and disable timer
-	TIM15->ARR = 16000;		// Set auto reload value to 100Hz (original:64000)
-	TIM15->PSC = 0;			// Set prescaling to 1/(9+1) (original:9)
+	TIM15->ARR = 64000;		// Set auto reload value to 100Hz (original:64000)
+	TIM15->PSC = 99;			// Set prescaling to 1/(9+1) (original:9)
 	TIM15->DIER |= 1;		// Enable timer 15 interrupts
 
 	NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 1); // Set priority of interrupt
@@ -53,8 +53,8 @@ void init_timer_15() {
 void init_timer_16() {
 	RCC->APB2ENR |= RCC_APB2Periph_TIM16;
 	TIM16->CR1 &= 0xF470;	// Configure and disable timer
-	TIM16->ARR = 64000;		// Set auto reload value to 5Hz (original:64000)
-	TIM16->PSC = 99;		// Set prescaling to 1/(199+1) (original:199)
+	TIM16->ARR = 64000;		// Set auto reload value (original:64000)
+	TIM16->PSC = 99;		// Set prescaling to 1/(199+1) (original:199) (10Hz)
 	TIM16->DIER |= 1;		// Enable timer 15 interrupts
 
 	NVIC_SetPriority(TIM1_UP_TIM16_IRQn, 1); // Set priority of interrupt
