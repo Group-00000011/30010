@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include "entities.h"
+#include "graphics.h"
 
 
 static void draw_spaceship(entity_t * self) {
@@ -69,13 +70,15 @@ static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* height
 	// [1] collision with right wall
 	// [2] collision with roof
 	// [3] collision with ground
+	// [4] collision with spaceship
+	// [5] collision with bomb
 
 	uint8_t collision = 0;
 
 	if (type & 1) { // Check collisions with sides
 		if (x < 0) { // Left wall
 			collision |= 1;
-		} else if (x > fixp_fromint(255)) { // Right wall
+		} else if (x > fixp_fromint(DISPLAY_WIDTH-1)) { // Right wall
 			collision |= 1<<1;
 		}
 	}
@@ -83,10 +86,12 @@ static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* height
 	if (type & 1<<1) { // Check collisions with ground/roof
 		if (y < 0) { // Roof
 			collision |= 1<<2;
-		} else if (y > fixp_fromint(63-heightmap[fixp_toint(x)])) { // Ground
+		} else if (y > fixp_fromint(DISPLAY_HEIGHT-1-heightmap[fixp_toint(x)])) { // Ground
 			collision |= 1<<3;
 		}
 	}
+
+
 
 	return collision;
 }
@@ -133,7 +138,7 @@ void enemy_move (entity_t* self, uint8_t* heightmap) {
 	fixp_t dir = self->rotation;
 	fixp_t new_x = self->x;
 	new_x += dir;
-	fixp_t new_y = fixp_fromint(63-heightmap[fixp_toint(new_x)]);
+	fixp_t new_y = fixp_fromint(DISPLAY_HEIGHT-1-heightmap[fixp_toint(new_x)]);
 
 	uint8_t collisions = self->check_collision(new_x, new_y, 1, NULL); // Check collision with walls only
 
@@ -141,9 +146,9 @@ void enemy_move (entity_t* self, uint8_t* heightmap) {
 		if (collisions & 1) {
 			new_x = 0;
 		} else if (collisions & 0b10) {
-			new_x = fixp_fromint(255);
+			new_x = fixp_fromint(DISPLAY_WIDTH-1);
 		}
-		new_y = fixp_fromint(63-heightmap[fixp_toint(new_x)]);
+		new_y = fixp_fromint(DISPLAY_HEIGHT-1-heightmap[fixp_toint(new_x)]);
 		self->rotation = -dir;
 	}
 

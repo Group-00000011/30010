@@ -14,6 +14,8 @@
 
 #define SPACE_COLOR 0
 #define PLANET_COLOR 7
+#define DISPLAY_WIDTH 256
+#define DISPLAY_HEIGHT 64
 
 
 uint8_t* gfx_draw_background();
@@ -25,6 +27,6 @@ void draw_help_menu();
 
 void gfx_clear_area(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
 
-extern uint8_t ground[256];
+extern uint8_t ground[DISPLAY_WIDTH];
 
 #endif /* GRAPHICS_H_ */
