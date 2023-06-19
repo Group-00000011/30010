@@ -267,4 +267,54 @@ void draw_help_menu() {
 }
 
 
+void draw_death_menu() {
+	clear_menu_content();
+	bgcolor(MENU_WINDOW_COLOR);
+	fgcolor(MENU_FG_COLOR);
+
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 40);
+	printf("You  Lost :(");
+
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 38);
+	printf("You got the following stats");
+
+	gotoxy((DISPLAY_WIDTH >> 1) - 15, DISPLAY_HEIGHT - 36);
+	printf("Level: ");
+
+	gotoxy((DISPLAY_WIDTH >> 1) - 15, DISPLAY_HEIGHT - 34);
+	printf("Score: ");
+
+	gotoxy((DISPLAY_WIDTH >> 1) - 15, DISPLAY_HEIGHT - 32);
+	printf("Enemies Killed: ");
+
+
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 20);
+	printf("                     ");
+
+	gotoxy((DISPLAY_WIDTH >> 1) - 13, DISPLAY_HEIGHT - 18);
+	printf("                              ");
+
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 18);
+	printf("--- MENU CONTROLS ---");
+
+
+
+	fgcolor(GRAY_BTN_FG_COLOR);
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 16);
+	printf("BTN");
+	fgcolor(0);
+	printf(" to play again");
+
+	fgcolor(RED_BTN_FG_COLOR);
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 14);
+	printf("BTN");
+	fgcolor(0);
+	printf(" to go to main menu");
+
+
+
+
+
+}
+
 
