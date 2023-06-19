@@ -11,7 +11,6 @@
 #include "data_structures.h"
 
 
-
 /*
 volatile uint8_t* punk_address = punk_long;
 uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
@@ -19,29 +18,29 @@ uint8_t* punk_begin = punk_long + 18500;
 */
 
 volatile uint8_t update_flag = 0; // [0]=update enemies; [1]=update player
+entity_t spaceship;
+void spaceship_input();
+uint8_t rot;
+
 
 int main(void)
 {
-
-
 	// Initialise hardware
-	uart_init(500000);
+	uart_init(9600);
 	led_init();
 	lcd_init();
-
 	init_timer_2();
 	init_timer_15();
 	init_timer_16();
 	enable_timer_16(1);
-
-	//joystick_conf();
-
+	joystick_conf();
+	button_init();
 	// Create spaceship
-	//entity_t* spaceship = entity_init(Spaceship, 10<<14, 10<<14, 0);;
+	spaceship = *entity_init(Spaceship, fixp_fromint(9), fixp_fromint(10), 0);
+
 
 	bgcolor(SPACE_COLOR);
 	clrscr();
-	gotoxy(1,1);
 	printf("Hello\n");
 
 	/*draw_menu_screen();
@@ -80,33 +79,29 @@ int main(void)
 	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
 	//free(list_remove(&enemies, 1)); // This is the syntax to pop or remove items from a list
 
-	while (1) {
-		if (update_flag & 1) {
-			bgcolor(0);
-			fgcolor(8);
+	gotoxy(2,4);
+	printf("%d",red);
+	gotoxy(2,5);
+	printf("%d",gray);
 
-			listnode_t* current = enemies;
-			while (current != NULL) {
-				entity_t* current_entity = current->ptr;
+	gotoxy(1,1);
+	fixp_print(x);
+	gotoxy(1,2);
+	fixp_print(y);
+/*
+	if(x > 0) rot = 1;
+	if(x < 0) rot = 3;
+	if(y > 0) rot = 2;
+	if(y < 0) rot = 0;
 
-				if (current_entity->type == Enemy) {
-					enemy_move(current_entity, planet_heightmap);
-				}
+  		spaceship.draw(&spaceship);
 
-				current_entity->draw(current_entity);
-				current = current->next;
-			}
-
-			//spaceship->draw(spaceship);
-			//spaceship.update_position(&spaceship, pos_x, 10);
-  			//TIM2->CCR3 = 255;
-
-      		//printf("vert: %d    \n",joystick_vert());
-			//printf("hori: %d    ",joystick_hori());
-
-			//update_flag &= ~1;
-		}
-	}
+	if(x != 0 && y != 0){
+		x = fixp_add((&spaceship)->x, x);
+		y = fixp_sub((&spaceship)->y, y);
+		spaceship.update_position(&spaceship, x, y);
+		spaceship.update_rotation(&spaceship, rot);
+	}*/
 }
 
 void TIM1_BRK_TIM15_IRQHandler(void) {
