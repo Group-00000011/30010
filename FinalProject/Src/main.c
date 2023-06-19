@@ -52,8 +52,6 @@ int main(void)
 }
 
 void spaceship_input(){
-
-
 	x = fixp_sub(joystick_hori(), fixp_fromint(1252));
 	y = fixp_sub(joystick_vert(), fixp_fromint(1300));
 
@@ -69,21 +67,12 @@ void spaceship_input(){
 		y = fixp_div(y, fixp_fromint(1280));
 
 
-	if ((x & 0x80000000) != 0)
-		x |= 0x00000FFF;
-	else
-		x &= 0xFFFFF000;
+	x &= 0xFFFFF000;
 
-	if ((y & 0x80000000) != 0)
-		y |= 0x00000FFF;
-	else
-		y &= 0xFFFFF000;
+	y &= 0xFFFFF000;
 
+	if( )
 
-	gotoxy(10,1);
-	fixp_print((&spaceship)->x);
-	gotoxy(10,2);
-	fixp_print((&spaceship)->y);
 
 	if(x != 0 && y != 0){
 		x = fixp_add((&spaceship)->x, x);
