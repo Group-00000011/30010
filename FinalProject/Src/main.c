@@ -16,7 +16,7 @@ uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
 uint8_t* punk_begin = punk_long + 18500;
 */
 
-uint8_t update_enemy_flag = 0;
+uint8_t update_flag = 0; // [0] = update enemies
 
 int main(void)
 {
@@ -45,7 +45,7 @@ int main(void)
 	//free(list_remove(&enemies, 1)); // This is the syntax to pop or remove items from a list
 
 	while (1) {
-		if (update_enemy_flag) {
+		if (update_flag & 1) {
 			bgcolor(0);
 			fgcolor(8);
 
@@ -58,11 +58,10 @@ int main(void)
 				}
 
 				current_entity->draw(current_entity);
-
 				current = current->next;
 			}
 
-			update_enemy_flag = 0;
+			update_flag &= ~1;
 		}
 	}
 }
@@ -77,6 +76,6 @@ void TIM1_BRK_TIM15_IRQHandler(void) {
 }
 
 void TIM1_UP_TIM16_IRQHandler(void) {
-	update_enemy_flag = 1;
+	update_flag |= 1;
 	TIM16->SR &= ~0x0001;
 }
