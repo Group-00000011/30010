@@ -135,13 +135,14 @@ static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* height
 	return collision;
 }
 
-entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t rotation) {
+entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, uint8_t rotation) {
 	entity_t* entity = malloc(sizeof (entity_t));
 
 	entity->type = type;
 	entity->x = entity->last_x = x;
 	entity->y = entity->last_y = y;
 	entity->rotation = entity->last_rotation = rotation;
+	entity->vel_x = entity->vel_y = 0;
 
 	switch (type) {
 	case Spaceship:
