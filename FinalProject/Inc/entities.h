@@ -18,7 +18,8 @@ typedef enum EntityType {Spaceship, Enemy, Bullet, Bomb, Nuke, Powerup} EntityTy
 
 typedef struct entity {
 	EntityType type;
-	fixp_t x, y, rotation, last_x, last_y, last_rotation;
+	fixp_t x, y, vel_x, vel_y, last_x, last_y;
+	uint8_t rotation, last_rotation;
 	void (*draw)(struct entity* self);
 	void (*update_position)(struct entity* self, fixp_t x, fixp_t y);
 	void (*update_rotation)(struct entity* self, fixp_t rotation);

@@ -18,7 +18,7 @@ uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
 uint8_t* punk_begin = punk_long + 18500;
 */
 
-uint8_t update_flag = 0; // [0] = update enemies
+uint8_t update_flag = 0; // [0]=update enemies; [1]=update player
 
 int main(void)
 {
@@ -66,6 +66,8 @@ int main(void)
 
 	uint8_t* planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
 
+	entity_t* player = entity_init(Spaceship, 100<<14, 20<<14, fixp_fromint(1));
+
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1)));
 	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1)));
@@ -73,7 +75,7 @@ int main(void)
 	//free(list_remove(&enemies, 1)); // This is the syntax to pop or remove items from a list
 
 	while (1) {
-		if (update_flag & 1) {
+		if (update_flag & 1) { // Update enemies
 			bgcolor(0);
 			fgcolor(8);
 
@@ -98,6 +100,10 @@ int main(void)
 
 			update_flag &= ~1;
 		}
+
+		if (update_flag && 1<<1) { // Update the player
+			player->draw(player);
+		}
 	}
 }
 
@@ -107,6 +113,7 @@ void TIM1_BRK_TIM15_IRQHandler(void) {
 	if (punk_address == punk_end)
 		punk_address = punk_begin;*/
 
+	update_flag |= 1<<1;
 	TIM15->SR &= ~0x0001;
 }
 
