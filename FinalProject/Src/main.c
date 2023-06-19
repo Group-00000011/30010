@@ -22,8 +22,6 @@ entity_t spaceship;
 void spaceship_input();
 uint8_t rot;
 
-fixp_t x;
-fixp_t y;
 
 int main(void)
 {
@@ -36,7 +34,7 @@ int main(void)
 	init_timer_16();
 	enable_timer_16(1);
 	joystick_conf();
-
+	button_init();
 	// Create spaceship
 	spaceship = *entity_init(Spaceship, fixp_fromint(9), fixp_fromint(10), 0);
 
@@ -62,9 +60,18 @@ int main(void)
 
 }
 
+
 void spaceship_input(){
-	x = joystick_hori();
-	y = joystick_vert();
+	fixp_t x = joystick_hori();
+	fixp_t y = joystick_vert();
+
+	int16_t red = buttonRed();
+	int16_t gray = buttonGray();
+
+	gotoxy(2,4);
+	printf("%d",red);
+	gotoxy(2,5);
+	printf("%d",gray);
 
 	gotoxy(1,1);
 	fixp_print(x);

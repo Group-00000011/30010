@@ -92,6 +92,34 @@ void buzzer_set_pwm (uint8_t value) { // Sets the buzzer PWM pulse width to valu
 	TIM2->CCR3 = value;
 }
 
+void button_init(){
+	RCC->AHBENR |= RCC_AHBPeriph_GPIOA; // Enable clock for GPIO Port A
+
+	// Set pin PA6 to input
+	GPIOC->MODER &= ~(0x00000003 << (6 * 2)); // Clear mode register
+	GPIOC->MODER |= (0x00000000 << (6 * 2)); // Set mode register (0x00 –Input, 0x01 - Output, 0x02 - Alternate Function, 0x03 - Analog in/out)
+	GPIOC->PUPDR &= ~(0x00000003 << (6 * 2)); // Clear push/pull register
+	GPIOC->PUPDR |= (0x00000002 << (6 * 2)); // Set push/pull register (0x00 - 	No pull, 0x01 - Pull-up, 0x02 - Pull-down)
+
+	// Set pin PA7 to input
+	GPIOC->MODER &= ~(0x00000003 << (7 * 2)); // Clear mode register
+	GPIOC->MODER |= (0x00000000 << (7 * 2)); // Set mode register (0x00 –Input, 0x01 - Output, 0x02 - Alternate Function, 0x03 - Analog in/out)
+	GPIOC->PUPDR &= ~(0x00000003 << (7 * 2)); // Clear push/pull register
+	GPIOC->PUPDR |= (0x00000002 << (7 * 2)); // Set push/pull register (0x00 - 	No pull, 0x01 - Pull-up, 0x02 - Pull-down)
+}
+
+int16_t buttonRed(){
+	if((GPIOA->IDR & (0x0001 << 7)) == 0)
+		return 0;
+	else return 1;
+}
+int16_t buttonGray(){
+	if((GPIOA->IDR & (0x0001 << 6))==0)
+		return 0;
+	else return 1;
+}
+
+
 fixp_t joystick_vert(){
 
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 1, ADC_SampleTime_1Cycles5);
