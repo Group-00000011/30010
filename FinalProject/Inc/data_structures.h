@@ -19,10 +19,10 @@ typedef struct listnode {
 
 
 void list_push(listnode_t** head, void* elem);
-void list_pop(listnode_t** head);
+void* list_pop(listnode_t** head);
 void list_add();
 void list_append();
-void list_remove(listnode_t** head, uint16_t idx);
+void* list_remove(listnode_t** head, uint16_t idx);
 listnode_t* list_getnode(listnode_t* head, uint16_t idx);
 uint16_t list_length(listnode_t* head);
 
