@@ -35,6 +35,7 @@ int main(void)
 	uart_init(500000);
 	led_init();
 	lcd_init();
+
 	init_timer_2();
 	init_timer_15();
 	init_timer_16();
@@ -61,6 +62,8 @@ int main(void)
 
 	bgcolor(SPACE_COLOR);
 	clrscr();
+	gotoxy(1,1);
+	printf("Hello\n");
 
   	while (1) {
 
@@ -73,6 +76,8 @@ int main(void)
 
   		switch (state) {
 
+	draw_menu_title("Help Menu");
+	draw_help_menu();*/
 
   		// ------------------------------
   		// |  MAIN MENU STATE			|
@@ -90,6 +95,16 @@ int main(void)
   			// Check if user input is select/move up/move down
   			next_state = HelpMenu;
 
+	listnode_t* enemies = NULL; // Initialise empty list of enemies
+	list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1)));
+	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1)));
+	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1)));
+	//free(list_remove(&enemies, 1)); // This is the syntax to pop or remove items from a list
+*/
+	while (1) {/*
+		if (update_flag & 1) {
+			bgcolor(0);
+			fgcolor(8);
 
   			break;
 

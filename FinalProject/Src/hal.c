@@ -79,7 +79,6 @@ void enable_timer_15 (uint8_t on) {
 	}
 }
 
-
 void enable_timer_16 (uint8_t on) {
 	if (on) {
 		TIM16->CR1 |= 1;
