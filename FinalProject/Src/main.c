@@ -18,9 +18,9 @@ uint8_t* punk_begin = punk_long + 18500;
 */
 
 volatile uint8_t update_flag = 0; // [0]=update enemies; [1]=update player
-entity_t spaceship;
+
 void spaceship_input();
-uint8_t rot;
+
 
 
 int main(void)
@@ -35,8 +35,6 @@ int main(void)
 	enable_timer_16(1);
 	joystick_conf();
 	button_init();
-	// Create spaceship
-	spaceship = *entity_init(Spaceship, fixp_fromint(9), fixp_fromint(10), 0);
 
 
 	bgcolor(SPACE_COLOR);
@@ -79,16 +77,7 @@ int main(void)
 	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
 	//free(list_remove(&enemies, 1)); // This is the syntax to pop or remove items from a list
 
-	gotoxy(2,4);
-	printf("%d",red);
-	gotoxy(2,5);
-	printf("%d",gray);
-
-	gotoxy(1,1);
-	fixp_print(x);
-	gotoxy(1,2);
-	fixp_print(y);
-/*
+	/*
 	if(x > 0) rot = 1;
 	if(x < 0) rot = 3;
 	if(y > 0) rot = 2;
