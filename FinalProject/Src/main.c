@@ -190,6 +190,20 @@ int main(void)
 		// |  DEATH MENU STATE			|
 		// ------------------------------
   		case DeathMenu:
+  			if(state_transition) {
+  				if (!(last_state == MainMenu || last_state == HelpMenu)) {
+					draw_menu_screen();
+				}
+  				draw_menu_title("You Lost :(");
+  	  			draw_death_menu();
+  			}
+
+  			if (gray_btn) {
+  				next_state = Game;
+  			} else if (red_btn) {
+  				next_state = MainMenu;
+  			}
+
 
   			break;
 

@@ -12,23 +12,33 @@
 #include "ansi.h"
 #include <string.h>
 
-<<<<<<< HEAD
 
-void gfx_draw_background();
+#define SPACE_COLOR 0
+#define PLANET_COLOR 7
+#define MENU_BG_COLOR 6
+#define MENU_WINDOW_COLOR 7
+#define MENU_SHADOW_COLOR 0
+#define MENU_FG_COLOR 0
+#define RED_BTN_FG_COLOR 1
+#define GRAY_BTN_FG_COLOR 8
+#define DISPLAY_WIDTH 256
+#define DISPLAY_HEIGHT 64
+
+
+uint8_t* gfx_draw_background();
 void gfx_clear_area(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
 void draw_menu_screen();
 void draw_menu_title(char title[]);
 void draw_main_menu(uint8_t sel);
 void draw_help_menu();
+<<<<<<< HEAD
+void draw_boss_screen();
 =======
-#define SPACE_COLOR 0
-#define PLANET_COLOR 7
+void draw_death_menu();
+>>>>>>> 8e09595cb2adba1d30ffb1e88c0b028c820e2c07
 
-uint8_t* gfx_draw_background();
 void gfx_clear_area(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
 
-extern uint8_t ground[256];
-
->>>>>>> ground
+extern uint8_t ground[DISPLAY_WIDTH];
 
 #endif /* GRAPHICS_H_ */
