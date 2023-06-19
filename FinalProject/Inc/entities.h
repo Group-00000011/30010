@@ -22,10 +22,13 @@ typedef struct entity {
 	void (*draw)(struct entity* self);
 	void (*update_position)(struct entity* self, fixp_t x, fixp_t y);
 	void (*update_rotation)(struct entity* self, fixp_t rotation);
+	uint8_t (*check_collision)(fixp_t x, fixp_t y, uint8_t type, uint8_t* heightmap);
 } entity_t;
 
 
-void initialise_entity(entity_t * entity, EntityType type, fixp_t x, fixp_t y, fixp_t rotation);
+entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t rotation);
+
+void enemy_move(entity_t* self, uint8_t* heightmap);
 
 
 #endif /* ENTITIES_H_ */

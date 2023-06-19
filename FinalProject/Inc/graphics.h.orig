@@ -12,19 +12,23 @@
 #include "ansi.h"
 #include <string.h>
 
-#define SPACE_COLOR 0
-#define PLANET_COLOR 7
+<<<<<<< HEAD
 
-
-uint8_t* gfx_draw_background();
+void gfx_draw_background();
 void gfx_clear_area(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
 void draw_menu_screen();
 void draw_menu_title(char title[]);
 void draw_main_menu(uint8_t sel);
 void draw_help_menu();
+=======
+#define SPACE_COLOR 0
+#define PLANET_COLOR 7
 
+uint8_t* gfx_draw_background();
 void gfx_clear_area(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
 
 extern uint8_t ground[256];
+
+>>>>>>> ground
 
 #endif /* GRAPHICS_H_ */

@@ -12,8 +12,9 @@
 
 void led_init();
 void set_led(uint8_t color);
-void init_timer_15();
 void init_timer_2();
+void init_timer_15();
+void init_timer_16();
 
 void joystick_conf();
 uint16_t joystick_hori();
@@ -21,6 +22,7 @@ uint16_t joystick_vert();
 
 void enable_timer_2 (uint8_t on);
 void enable_timer_15 (uint8_t on);
+void enable_timer_16 (uint8_t on);
 
 //Shouldnt we remove or outcomment it then?
 void buzzer_set_pwm(uint8_t value); // Don't use this it is too slow. Write to the register directly.

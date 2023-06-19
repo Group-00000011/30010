@@ -10,6 +10,15 @@
 #include "daftpunk8bit.h"
 #include "data_structures.h"
 
+<<<<<<< HEAD
+//volatile uint8_t* punk_address = punk_long;
+//uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
+//uint8_t* punk_begin = punk_long + 18500;
+
+	entity_t spaceship;
+
+	uint8_t pos_x;
+=======
 /*
 volatile uint8_t* punk_address = punk_long;
 uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
@@ -17,6 +26,7 @@ uint8_t* punk_begin = punk_long + 18500;
 */
 
 uint8_t update_flag = 0; // [0] = update enemies
+>>>>>>> ground
 
 int main(void)
 {
@@ -26,18 +36,23 @@ int main(void)
 	uart_init(500000);
 	led_init();
 	lcd_init();
-
 	init_timer_2();
 	init_timer_15();
+<<<<<<< HEAD
+	//joystick_conf();
+
+	// Create spaceship
+	pos_x=10;
+	initialise_entity(&spaceship, Spaceship, pos_x, 10,0);
+
+
+=======
 	init_timer_16();
 	enable_timer_16(1);
 
 	//joystick_conf();
-
-	// Create spaceship
-	//entity_t* spaceship = entity_init(Spaceship, 10<<14, 10<<14, 0);;
-
 	bgcolor(SPACE_COLOR);
+>>>>>>> ground
 	clrscr();
 	gotoxy(1,1);
 	printf("Hello\n");
@@ -48,7 +63,7 @@ int main(void)
 //	printf("%c\nv\n\n",0xDC);
 //	printf("^\n%c\n\n",0xDC);
 //	printf("A\n%c\n\n",0xDC);
-	/*gotoxy(2,2);
+	gotoxy(2,2);
 	printf("%c%c%c%c%c%c ", 0x5C,0xDB,0xDF,0xDF,0xDB,0x5C);
 	gotoxy(2,3);
 	printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
@@ -58,11 +73,13 @@ int main(void)
 	//draw_main_menu_opts(1);
 
 	draw_menu_title("Help Menu");
-	draw_help_menu();*/
+	draw_help_menu();
 
 
-
+<<<<<<< HEAD
+=======
 	uint8_t* planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
+>>>>>>> ground
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1)));
@@ -70,6 +87,26 @@ int main(void)
 	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1)));
 	//free(list_remove(&enemies, 1)); // This is the syntax to pop or remove items from a list
 
+<<<<<<< HEAD
+	//init_timer_2();
+	//init_timer_15();
+	//enable_timer_2(1);
+	//enable_timer_15(1);
+  	while (1) {
+
+
+    }
+
+//  		spaceship.draw(&spaceship);
+//  		spaceship.update_position(&spaceship, pos_x, 10);
+  		//TIM2->CCR3 = 255;
+		/*buzzer_set_pwm(0);
+		buzzer_set_pwm(255);*/
+
+      /*		printf("vert: %d    \n",joystick_vert());
+		printf("hori: %d    ",joystick_hori());
+*/
+=======
 	while (1) {
 		if (update_flag & 1) {
 			bgcolor(0);
@@ -78,6 +115,7 @@ int main(void)
 			listnode_t* current = enemies;
 			while (current != NULL) {
 				entity_t* current_entity = current->ptr;
+>>>>>>> ground
 
 				if (current_entity->type == Enemy) {
 					enemy_move(current_entity, planet_heightmap);
@@ -86,13 +124,6 @@ int main(void)
 				current_entity->draw(current_entity);
 				current = current->next;
 			}
-
-			//spaceship->draw(spaceship);
-			//spaceship.update_position(&spaceship, pos_x, 10);
-  			//TIM2->CCR3 = 255;
-
-      			/*printf("vert: %d    \n",joystick_vert());
-			printf("hori: %d    ",joystick_hori());*/
 
 			update_flag &= ~1;
 		}
