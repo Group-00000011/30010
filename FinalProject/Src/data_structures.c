@@ -22,9 +22,12 @@ void list_push(listnode_t** head, void* elem) { // Add node to the beginning of 
 }
 
 void* list_pop(listnode_t** head) { // Remove node from the beginning of list [O(1)]
-	listnode_t* old_head = *head;
-	*head = (*head)->next;
-	return old_head->ptr;
+	if (*head) {
+		listnode_t* old_head = *head;
+		*head = (*head)->next;
+		return old_head->ptr;
+	}
+	return NULL;
 }
 
 void list_add() { // Add node to specific place in list
@@ -51,9 +54,12 @@ void* list_remove(listnode_t** head, uint16_t idx) { // Remove node from specifi
 }
 
 void* list_remove_next(listnode_t* head) { // Remove node next to head in list [O(1)]
-	void* to_remove = head->next->ptr;
-	head->next = head->next->next;
-	return to_remove;
+	if (head->next) {
+		void* to_remove = head->next->ptr;
+		head->next = head->next->next;
+		return to_remove;
+	}
+	return NULL;
 }
 
 listnode_t* list_getnode(listnode_t* head, uint16_t idx) { // Return pointer to node at idx [O(n)]
