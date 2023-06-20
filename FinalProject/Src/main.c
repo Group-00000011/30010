@@ -62,8 +62,8 @@ int main(void)
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1), 0));
 	//((entity_t*) (enemies->ptr))->counter = 9999;
-	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
-	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
+	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
+	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
 	listnode_t* bullets = NULL; // Initialise empty list of bullets
 
 
@@ -174,12 +174,14 @@ int main(void)
 					if (current->counter == 25) { // If counter is ten, fire bullet
 						current->counter = 0;
 
-						fixp_t toplayer_x = player->x - current->x; // Vector from enemy to player
-						fixp_t toplayer_y = player->y - current->y;
+						fixp_t toplayer_x = fixp_div(player->x - current->x, fixp_fromint(300)); // Vector from enemy to player
+						fixp_t toplayer_y = fixp_div(player->y - current->y, fixp_fromint(300));
 
-						fixp_t distance = fixp_sqrt(fixp_mult(toplayer_x, toplayer_x) + fixp_mult(toplayer_x, toplayer_y)); // Distance from enemy to player
-						toplayer_x = fixp_div(toplayer_x, distance); // Normalize vector
-						toplayer_y = fixp_div(toplayer_y, distance); // Normalize vector
+
+
+//						fixp_t distance = fixp_sqrt(fixp_mult(toplayer_x, toplayer_x) + fixp_mult(toplayer_x, toplayer_y)); // Distance from enemy to player
+//						toplayer_x = fixp_div(toplayer_x, distance); // Normalize vector
+//						toplayer_y = fixp_div(toplayer_y, distance); // Normalize vector
 
 						list_push(&bullets, entity_init(Bullet, current->x, current->y, toplayer_x, toplayer_y));
 					}
@@ -193,10 +195,19 @@ int main(void)
 
 					entity_move(current);
 
+					uint8_t collisions = current->check_collision(current->x, current->y, 0b00001011, NULL, player); // Check collision with walls/roof/player
+
+					if (collisions & 1<<4) { // Collision with spaceship
+						// Kill the player
+					} else if (collisions) { // Collision but not with spaceship
+						// Kill the bullet
+					} // TODO remove bullet on collision using list_remove_next()
+
 
 					current->draw(current);
 					current_node = current_node->next;
 				}
+				player->draw(player);
 				update_flag &= ~1;
 			}
   			if (update_flag & 1<<1) { // Update player
