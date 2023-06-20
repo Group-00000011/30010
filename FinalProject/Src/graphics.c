@@ -70,20 +70,54 @@ uint8_t* gfx_draw_background() {
 }
 
 
-void gfx_clear_area(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
-	char blankline[x2 - x1 + 1];
-	memset(blankline, ' ', x2 - x1);
-	blankline[x2 - x1] = '\0';
-	bgcolor(0);
+void gfx_clear_area(uint8_t * ground, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
+	gotoxy(x1, y1);
+	bgcolor(SPACE_COLOR);
+	fgcolor(0);
 
-	for (int i = 0; i < y2 - y1; i++) {
-		gotoxy(x1, y1 + i);
-		if (y1 + i > 50) {
-			bgcolor(7);
+	uint8_t is_drawing_space = 1;
+	char hline[x2 - x1 + 2 + 5*8];
+
+	for (uint8_t pixel_y = y1; pixel_y <= y2; pixel_y++) {
+		uint16_t pixel_x = x1;
+		uint16_t char_x = 0;
+
+		while (pixel_x <= x2) {
+			if (pixel_y > DISPLAY_HEIGHT-ground[pixel_x - 1]) { // Check if below surface
+				if (is_drawing_space) { // We are below surface, check if drawing space
+					// Set background color to ground
+					sprintf(hline+char_x, "%c[%dm", ESC, PLANET_COLOR+40);
+					is_drawing_space = 0;
+					char_x += 5;
+
+				}
+				if (pixel_y == DISPLAY_HEIGHT-ground[pixel_x]) {
+					hline[char_x] = '*';
+				} else {
+					hline[char_x] = ' ';
+				}
+				++char_x;
+				++pixel_x;
+			} else { // We are above surface
+				if (!is_drawing_space) {  // Check if drawing ground
+					//	 Set background color to space
+					sprintf(hline+char_x, "%c[%dm", ESC, SPACE_COLOR+40);
+					is_drawing_space = 1;
+					char_x += 5;
+				}
+				hline[char_x] = ' ';
+				++char_x;
+				++pixel_x;
+			}
 		}
-		printf("%s", blankline);
+		if (pixel_y < DISPLAY_HEIGHT-1) {
+			gotoxy(x1, pixel_y);
+		}
+
+		hline[char_x] = '\0';
+
+		printf(hline);
 	}
-	bgcolor(0);
 }
 
 
@@ -262,9 +296,63 @@ void draw_help_menu() {
 	printf("BTN");
 	fgcolor(MENU_FG_COLOR);
 	printf(" to drop nuke");
+}
+
+
+void draw_death_menu() {
+	clear_menu_content();
+	bgcolor(MENU_WINDOW_COLOR);
+	fgcolor(MENU_FG_COLOR);
+
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 40);
+	printf("You  Lost :(");
+
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 38);
+	printf("You got the following stats");
+
+	gotoxy((DISPLAY_WIDTH >> 1) - 15, DISPLAY_HEIGHT - 36);
+	printf("Level: ");
+
+	gotoxy((DISPLAY_WIDTH >> 1) - 15, DISPLAY_HEIGHT - 34);
+	printf("Score: ");
+
+	gotoxy((DISPLAY_WIDTH >> 1) - 15, DISPLAY_HEIGHT - 32);
+	printf("Enemies Killed: ");
+
+
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 20);
+	printf("                     ");
+
+	gotoxy((DISPLAY_WIDTH >> 1) - 13, DISPLAY_HEIGHT - 18);
+	printf("                              ");
+
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 18);
+	printf("--- MENU CONTROLS ---");
+
+
+
+	fgcolor(GRAY_BTN_FG_COLOR);
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 16);
+	printf("BTN");
+	fgcolor(0);
+	printf(" to play again");
+
+	fgcolor(RED_BTN_FG_COLOR);
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 14);
+	printf("BTN");
+	fgcolor(0);
+	printf(" to go to main menu");
 
 
 }
 
+
+void draw_boss_screen() {
+	bgcolor(0);
+	fgcolor(7);
+	clrscr();
+	gotoxy(1,1);
+	printf("Something productive");
+}
 
 

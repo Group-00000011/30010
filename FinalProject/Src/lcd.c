@@ -64,7 +64,7 @@ void lcd_write_string(uint8_t* fb, lcd_text_t* t) {
 
 void lcd_init_text(lcd_text_t* text, char* content, uint8_t column, uint8_t row, uint16_t text_width) {
     text->scroll_offset = 0;
-    text->content = content;
+    text->content = malloc(26);
     text->column = column;
     text->row = row;
     text->text_width = text_width;

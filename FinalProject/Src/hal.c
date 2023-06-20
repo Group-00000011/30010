@@ -54,7 +54,7 @@ void init_timer_16() {
 	RCC->APB2ENR |= RCC_APB2Periph_TIM16;
 	TIM16->CR1 &= 0xF470;	// Configure and disable timer
 	TIM16->ARR = 64000;		// Set auto reload value (original:64000)
-	TIM16->PSC = 99;		// Set prescaling to 1/(199+1) (original:199) (10Hz)
+	TIM16->PSC = 24;		// Set prescaling to 1/(199+1) (original:199) (10Hz)
 	TIM16->DIER |= 1;		// Enable timer 16 interrupts
 
 	NVIC_SetPriority(TIM1_UP_TIM16_IRQn, 1); // Set priority of interrupt

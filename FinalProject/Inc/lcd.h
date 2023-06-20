@@ -11,6 +11,7 @@
 #include "charset.h"
 #include "string.h"
 #include <stdint.h>
+#include <stdlib.h>
 
 typedef struct {
     char* content;

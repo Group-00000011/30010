@@ -26,6 +26,10 @@ volatile uint8_t update_flag = 0; // [0]=update enemies; [1]=update player
 void spaceship_input();
 uint8_t rot;
 
+uint16_t total_bullets = 0;
+uint16_t bullets_removed = 0;
+uint16_t bullets_popped = 0;
+
 
 int main(void)
 {
@@ -44,7 +48,8 @@ int main(void)
 	// Initialise state machine
 	State state = Game;
 	State last_state = NullState;
-	State next_state = Game;
+	State next_state = state;
+	State return_state = MainMenu;
 	uint8_t state_transition = 1; // Flag to set true when changing state, the flag can then be set false to run code only when entering state.
 	uint8_t menu_selection = 0;
 	uint8_t last_menu_sel = 0;
@@ -55,14 +60,37 @@ int main(void)
 	fixp_t js_vert;
 	fixp_t js_hori;
 
+	uint8_t last_keypress;
+
+	uint8_t lives = 0;
+	uint8_t level = 0;
+	uint16_t kills = 0;
+	uint16_t score = 0;
+
 	uint8_t* planet_heightmap;
 
-	entity_t* player = entity_init(Spaceship, 100<<14, 20<<14, 0, 0);
+	entity_t* player = entity_init(Spaceship, 128<<14, 30<<14, 0, 0);
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1), 0));
 	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
+
+	listnode_t* bullets = NULL;
+
+
+	uint8_t lcd_buffer[512];
+	memset(lcd_buffer, 0, 512);
+
+	lcd_text_t lcd_lives;
+	lcd_text_t lcd_level;
+	lcd_text_t lcd_score;
+	lcd_text_t lcd_kills;
+
+	lcd_init_text(&lcd_lives, "", 0, 0, 25);
+	lcd_init_text(&lcd_level, "", 0, 1, 25);
+	lcd_init_text(&lcd_score, "", 0, 2, 25);
+	lcd_init_text(&lcd_kills, "", 0, 3, 25);
 
 
 
@@ -70,13 +98,6 @@ int main(void)
 	clrscr();
 	gotoxy(1,1);
 	printf("Hello\n");
-/*
-	draw_menu_screen();
-	draw_menu_title("TITLTLTLTLTLEE");
-	draw_main_menu(1);
-	draw_help_menu();
-*/
-//	gfx_draw_background();
 
   	while (1) {
 
@@ -85,6 +106,12 @@ int main(void)
 
   		js_vert = joystick_vert();
   		js_hori = joystick_hori();
+
+  		if (uart_get_count()) {
+  			last_keypress = uart_get_char();
+  		} else {
+  			last_keypress = 0;
+  		}
 
   		// Handle user input from joystick/buttons
   		if (state != last_state) {
@@ -166,6 +193,14 @@ int main(void)
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
   			}
+			bgcolor(0);
+  			fgcolor(7);
+  			if (update_flag & 1) {	// Update enemies and bullets
+				listnode_t* current_node = enemies;
+				while (current_node != NULL) { // Loop through enemies
+					entity_t* current = current_node->ptr;
+
+					enemy_move(current, planet_heightmap);
 
   			if (update_flag & (1 << 1)){
 
@@ -233,28 +268,90 @@ int main(void)
   			}
 
 
-			if (update_flag & 1) {
+			
+  			if (update_flag & 1) {	// Update enemies and bullets
+				listnode_t* current_node = enemies;
+				while (current_node != NULL) { // Loop through enemies
+					entity_t* current = current_node->ptr;
 
-  						listnode_t* current = enemies;
-  						while (current != NULL) {
-  							entity_t* current_entity = current->ptr;
+					entity_move(current);
 
-  							if (current_entity->type == Enemy) {
-  								enemy_move(current_entity, planet_heightmap);
-  							}
+						++current->counter;
+					if (current->counter == 25) { // If counter is ten, fire bullet
+						current->counter = 0;
 
-  							current_entity->draw(current_entity);
-  							current = current->next;
-  						}
-  						update_flag &= ~1;
-  					}
-	
+						fixp_t toplayer_x = fixp_div(player->x - current->x, fixp_fromint(300)); // Vector from enemy to player
+						fixp_t toplayer_y = fixp_div(player->y - current->y, fixp_fromint(300));
+
+//						fixp_t distance = fixp_sqrt(fixp_mult(toplayer_x, toplayer_x) + fixp_mult(toplayer_x, toplayer_y)); // Distance from enemy to player
+//						toplayer_x = fixp_div(toplayer_x, distance); // Normalize vector
+//						toplayer_y = fixp_div(toplayer_y, distance); // Normalize vector
+
+						list_push(&bullets, entity_init(Bullet, current->x, current->y, toplayer_x, toplayer_y));
+						++total_bullets;
+					}
+
+					current->draw(current, planet_heightmap, 1);
+					current_node = current_node->next;
+				}
+				current_node = bullets;
+				listnode_t* prev_node = NULL;
+				while (current_node != NULL) { // Loop through bullets
+					entity_t* current = current_node->ptr;
+
+					entity_move(current);
+
+					uint8_t collisions = current->check_collision(current->x, current->y, 0b00001011, NULL, player); // Check collision with walls/roof/player
+
+					if (collisions) { // Collision with wall/roof/player
+						// Kill the bullet
+						current->draw(current, planet_heightmap, 0); // Erase bullet
+						if (prev_node) {
+							free(list_remove_next(prev_node));
+							++bullets_removed;
+						} else {
+							free(list_pop(&bullets));
+							++bullets_popped;
+						}
+						if (collisions & 1<<4) { // Collision with player
+							// Also kill the player
+						}
+						current_node = prev_node->next;
+
+					} else {
+						current->draw(current, planet_heightmap, 1);
+						prev_node = current_node;
+						current_node = current_node->next;
+					}
+				}
+				gotoxy(1,1);
+				printf("atm: %d\ntotal: %d\npopped: %d\nremoved: %d\nremain: %d\n", list_length(bullets), total_bullets, bullets_popped, bullets_removed, total_bullets-(bullets_popped+bullets_removed));
+				//player->draw(player, planet_heightmap, 1);
+				update_flag &= ~1;
+			}
+  			if (update_flag & 1<<1) { // Update player
+
+  			}
   			break;
 
 		// ------------------------------
 		// |  DEATH MENU STATE			|
 		// ------------------------------
   		case DeathMenu:
+  			if(state_transition) {
+  				if (!(last_state == MainMenu || last_state == HelpMenu)) {
+					draw_menu_screen();
+				}
+  				draw_menu_title("You Lost :(");
+  	  			draw_death_menu();
+  			}
+
+  			if (gray_btn) {
+  				next_state = Game;
+  			} else if (red_btn) {
+  				next_state = MainMenu;
+  			}
+
 
   			break;
 
@@ -264,9 +361,17 @@ int main(void)
 
   		case BossScreen:
   			if (state_transition) {
-				if (last_state != MainMenu || last_state != HelpMenu) {
-					draw_menu_screen();
-				}
+				draw_boss_screen();
+				enable_timer_2 (0);
+				enable_timer_15 (0);
+				enable_timer_16 (0);
+  			}
+
+  			if (last_keypress == 'b') {
+  				enable_timer_2 (1);
+				enable_timer_15 (1);
+				enable_timer_16 (1);
+  				next_state = return_state;
   			}
 
   			break;
@@ -278,6 +383,27 @@ int main(void)
 
   		}
 
+  		sprintf(lcd_lives.content, "Lives: %d", lives);
+  		sprintf(lcd_level.content, "Level: %d", level);
+  		sprintf(lcd_score.content, "Score: %d", score);
+  		sprintf(lcd_kills.content, "Kills: %d", kills);
+
+
+  		lcd_write_line(lcd_buffer, &lcd_lives);
+  		lcd_write_line(lcd_buffer, &lcd_level);
+  		lcd_write_line(lcd_buffer, &lcd_score);
+  		lcd_write_line(lcd_buffer, &lcd_kills);
+
+
+  		lcd_push_buffer(lcd_buffer);
+
+
+
+  		if (last_keypress == 'b' && state != BossScreen) {
+			next_state = BossScreen;
+			return_state = state;
+			uart_clear();
+		}
 
   		last_state = state;
   		state = next_state;

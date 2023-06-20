@@ -20,18 +20,17 @@ typedef struct entity {
 	EntityType type;
 	fixp_t x, y, vel_x, vel_y, last_x, last_y;
 	uint8_t rotation, last_rotation;
-	void (*draw)(struct entity* self);
+	uint16_t counter;
+	void (*draw)(struct entity* self, uint8_t * ground, uint8_t redraw);
 	void (*update_position)(struct entity* self, fixp_t x, fixp_t y);
 	void (*update_rotation)(struct entity* self, fixp_t rotation);
-	void (*update_velocity)(struct entity* self, fixp_t vel_x, fixp_t vel_y);
-
-	uint8_t (*check_collision)(fixp_t x, fixp_t y, uint8_t type, uint8_t* heightmap);
+	uint8_t (*check_collision)(fixp_t x, fixp_t y, uint8_t type, uint8_t* heightmap, struct entity* player);
 } entity_t;
 
 
 entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t vel_x, fixp_t vel_y);
 
 void enemy_move(entity_t* self, uint8_t* heightmap);
-
+void entity_move (entity_t* self);
 
 #endif /* ENTITIES_H_ */

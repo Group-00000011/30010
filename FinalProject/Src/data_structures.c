@@ -22,9 +22,12 @@ void list_push(listnode_t** head, void* elem) { // Add node to the beginning of 
 }
 
 void* list_pop(listnode_t** head) { // Remove node from the beginning of list [O(1)]
-	listnode_t* old_head = *head;
-	*head = (*head)->next;
-	return old_head->ptr;
+	if (*head) {
+		listnode_t* old_head = *head;
+		*head = (*head)->next;
+		return old_head->ptr;
+	}
+	return NULL;
 }
 
 void list_add() { // Add node to specific place in list
@@ -48,6 +51,15 @@ void* list_remove(listnode_t** head, uint16_t idx) { // Remove node from specifi
 	listnode_t* node_to_remove = current->next;
 	current->next = current->next->next;
 	return node_to_remove->ptr;
+}
+
+void* list_remove_next(listnode_t* head) { // Remove node next to head in list [O(1)]
+	if (head->next) {
+		void* to_remove = head->next->ptr;
+		head->next = head->next->next;
+		return to_remove;
+	}
+	return NULL;
 }
 
 listnode_t* list_getnode(listnode_t* head, uint16_t idx) { // Return pointer to node at idx [O(n)]
@@ -99,6 +111,24 @@ fixp_t fixp_div (fixp_t n1, fixp_t n2) {
 	return ((int64_t) n1 << 14) / (int64_t) n2;
 }
 
+fixp_t fixp_sqrt(fixp_t val) { // This function removes decimals may (will) be inaccurate
+	val >>= 14;
+	uint32_t a, b;
+
+    if (val < 2) return val; /* avoid div/0 */
+    a = 1255;       /* starting point is relatively unimportant */
+    b = val / a; a = (a + b)>>1;
+    b = val / a; a = (a + b)>>1;
+    b = val / a; a = (a + b)>>1;
+    b = val / a; a = (a + b)>>1;
+    if (val < 20000) {
+        b = val / a; a = (a + b)>>1;    // < 17% error Max
+        b = val / a; a = (a + b)>>1;    // < 5%  error Max
+    }
+
+    return a <<= 14;
+}
+
 void fixp_print (fixp_t n) {
 	// Prints a signed 18.14 fixed point number
 	if ((n & 0x80000000) != 0) { // Handle negative numbers
@@ -108,3 +138,4 @@ void fixp_print (fixp_t n) {
 	printf("%ld.%04ld", n >> 14, 10000 * (uint32_t)(n & 0x3FFF) >> 14);
 	// Print a maximum of 4 decimal digits to avoid overflow
 }
+
