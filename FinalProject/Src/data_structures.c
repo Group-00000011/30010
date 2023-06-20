@@ -50,14 +50,10 @@ void* list_remove(listnode_t** head, uint16_t idx) { // Remove node from specifi
 	return node_to_remove->ptr;
 }
 
-listnode_t* list_remove_next(listnode_t* head) { // Remove node next to head in list [O(1)]
-	listnode_t* to_remove = head->next;
-	head->next = head->next->next;r
+void* list_remove_next(listnode_t* head) { // Remove node next to head in list [O(1)]
+	void* to_remove = head->next->ptr;
+	head->next = head->next->next;
 	return to_remove;
-
-	listnode_t* node_to_remove = current->next;
-	current->next = current->next->next;
-	return node_to_remove->ptr;
 }
 
 listnode_t* list_getnode(listnode_t* head, uint16_t idx) { // Return pointer to node at idx [O(n)]

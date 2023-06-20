@@ -190,6 +190,7 @@ int main(void)
 					current_node = current_node->next;
 				}
 				current_node = bullets;
+				listnode_t* prev_node = NULL;
 				while (current_node != NULL) { // Loop through bullets
 					entity_t* current = current_node->ptr;
 
@@ -197,16 +198,26 @@ int main(void)
 
 					uint8_t collisions = current->check_collision(current->x, current->y, 0b00001011, NULL, player); // Check collision with walls/roof/player
 
-					if (collisions & 1<<4) { // Collision with spaceship
-						// Kill the player
-					} else if (collisions) { // Collision but not with spaceship
+					if (collisions) { // Collision with wall/roof/player
 						// Kill the bullet
-					} // TODO remove bullet on collision using list_remove_next()
+						if (prev_node) {
+							free(list_remove_next(prev_node));
+						} else {
+							free(list_pop(&bullets));
+						}
+						if (collisions & 1<<4) { // Collision with player
+							// Also kill the player
+						}
+						current_node = prev_node->next;
 
-
-					current->draw(current);
-					current_node = current_node->next;
+					} else {
+						current->draw(current);
+						prev_node = current_node;
+						current_node = current_node->next;
+					}
 				}
+				gotoxy(1,1);
+				printf("%d", list_length(bullets));
 				player->draw(player);
 				update_flag &= ~1;
 			}

@@ -184,7 +184,7 @@ void enemy_move (entity_t* self, uint8_t* heightmap) {
 	fixp_t new_x = self->x + self->vel_x;
 	fixp_t new_y = fixp_fromint(DISPLAY_HEIGHT-1-heightmap[fixp_toint(new_x)]);
 
-	uint8_t collisions = self->check_collision(new_x, new_y, 1, NULL); // Check collision with walls only
+	uint8_t collisions = self->check_collision(new_x, new_y, 1, NULL, NULL); // Check collision with walls only
 
 	if (collisions) {
 		if (collisions & 1) {
