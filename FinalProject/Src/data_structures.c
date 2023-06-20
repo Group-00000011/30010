@@ -25,8 +25,9 @@ void* list_pop(listnode_t** head) { // Remove node from the beginning of list [O
 	if (*head) {
 		listnode_t* old_head = *head;
 		*head = (*head)->next;
-		free(old_head->ptr);
-		return old_head;
+		void* to_return = old_head->ptr;
+		free(old_head);
+		return to_return;
 	}
 	return NULL;
 }
@@ -59,8 +60,9 @@ void* list_remove_next(listnode_t* head) { // Remove node next to head in list [
 	if (head->next) {
 		listnode_t* to_remove = head->next;
 		head->next = head->next->next;
-		free(to_remove->ptr);
-		return to_remove;
+		void* ptr_to_entity = to_remove->ptr;
+		free(to_remove); // Free the node
+		return ptr_to_entity; // Return the struct pointed to by the node, to be freed elsewhere
 	}
 	return NULL;
 }
