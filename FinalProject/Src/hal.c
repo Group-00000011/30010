@@ -1,4 +1,5 @@
 #include "hal.h"
+#include "data_structures.h"
 
 #define AUDIO_BIT_DEPTH 0xff
 
@@ -138,7 +139,7 @@ fixp_t joystick_vert(){
 	else
 		stick_y = fixp_fromint(1);
 
-	return stick_y; // Read the ADC value
+	return stick_y;
 
 }
 
@@ -166,6 +167,24 @@ fixp_t joystick_hori(){
 
 
 	return stick_x; // Read the ADC value
+}
+
+void read_joystick (fixp_t* arr) {
+
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 1, ADC_SampleTime_1Cycles5); // Horizontal
+	ADC_StartConversion(ADC1); // Start ADC read
+	while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0);
+	int16_t v1 = ADC_GetConversionValue(ADC1)-1220; // Very hardware specific, probably different for other joystick
+
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 1, ADC_SampleTime_1Cycles5); // Vertical
+	ADC_StartConversion(ADC1); // Start ADC read
+	while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0);
+	int16_t v2 = ADC_GetConversionValue(ADC1)-1300; // Very hardware specific, probably different for other joystick
+
+	int16_t mag = int_sqrt(v1*v1 + v2*v2); // This is expensive!!! Dunno if it can get better though
+
+	arr[0] = (v1<<14)/mag;
+	arr[1] = (v2<<14)/mag;
 }
 
 void joystick_conf(){

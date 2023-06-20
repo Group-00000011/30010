@@ -54,6 +54,7 @@ int main(void)
 
 	fixp_t js_vert;
 	fixp_t js_hori;
+	fixp_t js[2];
 
 	uint8_t last_keypress;
 
@@ -98,8 +99,9 @@ int main(void)
   		uint8_t red_btn = buttonRed();
   		uint8_t gray_btn = buttonGray();
 
-  		js_vert = (2<<14)-joystick_vert();
-  		js_hori = joystick_hori();
+  		js_vert = 1<<14;//(2<<14)-joystick_vert();
+  		js_hori = 1<<14;//joystick_hori();
+  		read_joystick(js);
 
   		if (uart_get_count()) {
   			last_keypress = uart_get_char();
@@ -237,7 +239,7 @@ int main(void)
 					}
 				}
 				gotoxy(1,1);
-				player->draw(player, planet_heightmap, 1);
+				//player->draw(player, planet_heightmap, 1); // <-- Hopefully a mistake, should probably just delete
 				update_flag &= ~1;
 			}
 
@@ -260,8 +262,8 @@ int main(void)
   					bomb->draw(bomb, NULL, 1);
   					current = current->next;
   				}
-  				gotoxy(1,1);
-  				printf("red: %d\ngray: %d\n#bombs: %d", red_btn, gray_btn, list_length(bombs));
+  				//gotoxy(1,1);
+  				//printf("red: %d\ngray: %d\n#bombs: %d", red_btn, gray_btn, list_length(bombs));
 
   				if (gray_btn_rising) { // Fire bomb? TODO Fix bombs dropping in the wrong direction
   					// Fire bomb!
@@ -297,6 +299,13 @@ int main(void)
 						player->update_rotation(player, 0);
 					}
 				}
+
+				gotoxy(1,1);
+				printf("jsx: ");
+				fixp_print(js[0]);
+				printf("\njsy: ");
+				fixp_print(js[1]);
+				printf("\n");
 
 				// Update position of player
 				uint8_t collisions = player_move(player, planet_heightmap); // Returns collision from check_collision()

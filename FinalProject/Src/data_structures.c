@@ -134,6 +134,23 @@ fixp_t fixp_sqrt(fixp_t val) { // This function removes decimals may (will) be i
     return a <<= 14;
 }
 
+uint16_t int_sqrt(int16_t val) { // This function removes decimals may (will) be inaccurate
+	uint16_t a, b;
+
+    if (val < 2) return val; /* avoid div/0 */
+    a = 1255;       /* starting point is relatively unimportant */
+    b = val / a; a = (a + b)>>1;
+    b = val / a; a = (a + b)>>1;
+    b = val / a; a = (a + b)>>1;
+    b = val / a; a = (a + b)>>1;
+    if (val < 20000) {
+        b = val / a; a = (a + b)>>1;    // < 17% error Max
+        b = val / a; a = (a + b)>>1;    // < 5%  error Max
+    }
+
+    return a;
+}
+
 void fixp_print (fixp_t n) {
 	// Prints a signed 18.14 fixed point number
 	if ((n & 0x80000000) != 0) { // Handle negative numbers
