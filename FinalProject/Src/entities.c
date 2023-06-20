@@ -19,8 +19,8 @@ static void draw_spaceship(entity_t* self, uint8_t* ground, uint8_t redraw) {
 	fixp_t x = (self->x) >> 14;
 	fixp_t y = (self->y) >> 14;
 
-	bgcolor(0);
-	fgcolor(7);
+	bgcolor(1);
+	fgcolor(2);
 
 switch (self->rotation){
 	case 0:
@@ -29,6 +29,7 @@ switch (self->rotation){
 		printf("/%c%c%c", 0xDB,0xDB,0x5C);
 		gotoxy(x, y+1);
 		printf("%c  %c", 0xDB,0xDB);
+		printf("...");
 		gotoxy(x, y+2);
 		printf("/%c%c%c", 0xDF,0xDF,0x5C);
 		break;
@@ -49,7 +50,7 @@ switch (self->rotation){
 		printf("%c%c%c/", 0x5C, 0xDB,0xDB);
 		break;
 	case 3:
-		gfx_clear_area(ground, self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
+		gfx_clear_area(ground, last_x,last_y,last_x+6,last_y+3);
 		gotoxy(self->x,self->y);
 		printf("/%c%c%c%c/", 0xDB,0xDF,0xDF,0xDB);
 		gotoxy(self->x,self->y+1);
@@ -58,6 +59,7 @@ switch (self->rotation){
 	default:
 		printf("ERROR");
 		break;
+}
 }
 
 static void draw_enemy(entity_t * self, uint8_t  * ground, uint8_t redraw) {

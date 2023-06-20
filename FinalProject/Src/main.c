@@ -69,7 +69,7 @@ int main(void)
 
 	uint8_t* planet_heightmap;
 
-	entity_t* player = entity_init(Spaceship, 128<<14, 30<<14, 0, 0);
+	entity_t* player = entity_init(Spaceship, 100<<14, 30<<14, 0, 0);
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1), 0));
@@ -193,19 +193,11 @@ int main(void)
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
   			}
-			bgcolor(0);
-  			fgcolor(7);
-  			if (update_flag & 1) {	// Update enemies and bullets
-				listnode_t* current_node = enemies;
-				while (current_node != NULL) { // Loop through enemies
-					entity_t* current = current_node->ptr;
 
-					enemy_move(current, planet_heightmap);
 
   			if (update_flag & (1 << 1)){
 
-  				// Update velocity
-
+  			// Update velocity
   				if(js_hori != fixp_fromint(1) && js_vert != fixp_fromint(1)){
 
 					if(js_hori > fixp_fromint(1)) player->update_velocity(player, fixp_fromint(1), player->vel_y);
@@ -238,7 +230,7 @@ int main(void)
 						player->update_rotation(player, 2);
 					}
   				}
-
+/*
 				gotoxy(2,2);
 				printf("js_hori: ");
 				fixp_print(js_hori);
@@ -255,7 +247,7 @@ int main(void)
 				fixp_print(player->x);
 				gotoxy(30,3);
 				fixp_print(player->y);
-
+*/
 
 				// Update position with velocity
 				fixp_t new_x = fixp_add(player->x, fixp_div(player->vel_x, fixp_fromint(50)));
@@ -264,7 +256,7 @@ int main(void)
 				player->update_position(player, new_x, new_y);
 
 
-				player->draw(player);
+				player->draw(player, planet_heightmap, 1);
   			}
 
 
@@ -274,7 +266,7 @@ int main(void)
 				while (current_node != NULL) { // Loop through enemies
 					entity_t* current = current_node->ptr;
 
-					entity_move(current);
+					enemy_move(current, planet_heightmap);
 
 						++current->counter;
 					if (current->counter == 25) { // If counter is ten, fire bullet
@@ -325,13 +317,10 @@ int main(void)
 					}
 				}
 				gotoxy(1,1);
-				printf("atm: %d\ntotal: %d\npopped: %d\nremoved: %d\nremain: %d\n", list_length(bullets), total_bullets, bullets_popped, bullets_removed, total_bullets-(bullets_popped+bullets_removed));
-				//player->draw(player, planet_heightmap, 1);
+				//printf("atm: %d\ntotal: %d\npopped: %d\nremoved: %d\nremain: %d\n", list_length(bullets), total_bullets, bullets_popped, bullets_removed, total_bullets-(bullets_popped+bullets_removed));
+				player->draw(player, planet_heightmap, 1);
 				update_flag &= ~1;
 			}
-  			if (update_flag & 1<<1) { // Update player
-
-  			}
   			break;
 
 		// ------------------------------
