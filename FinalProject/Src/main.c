@@ -98,7 +98,7 @@ int main(void)
   		uint8_t red_btn = buttonRed();
   		uint8_t gray_btn = buttonGray();
 
-  		js_vert = joystick_vert();
+  		js_vert = (2<<14)-joystick_vert();
   		js_hori = joystick_hori();
 
   		if (uart_get_count()) {
@@ -299,21 +299,11 @@ int main(void)
 				}
 
 				// Update position of player
-				fixp_t new_x = fixp_add(player->x, fixp_div(player->vel_x, fixp_fromint(1)));
-				fixp_t new_y = fixp_add(player->y, fixp_div(player->vel_y, fixp_fromint(2)));
-				if (new_x < fixp_fromint(1)) {
-					new_x = fixp_fromint(1);
-				} else if (new_x > fixp_fromint(DISPLAY_WIDTH - 6)) {
-					new_x = fixp_fromint(DISPLAY_WIDTH - 6);
-				}
+				uint8_t collisions = player_move(player, planet_heightmap); // Returns collision from check_collision()
 
-				if (new_y < fixp_fromint(1)) {
-					new_y = fixp_fromint(1);
-				} else if (new_y > fixp_fromint(DISPLAY_HEIGHT - 15)) {
-					new_y = fixp_fromint(DISPLAY_HEIGHT - 15);
+				if (collisions & 0b1000) {
+					// Player has hit ground, game over.
 				}
-
-				player->update_position(player, new_x, new_y);
 
 				// Draw player
 				player->draw(player, planet_heightmap, 1);
