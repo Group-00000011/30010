@@ -187,6 +187,10 @@ int main(void)
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
   			}
+
+  			if (enemies == NULL) {
+  				level_setup(&enemies, level, planet_heightmap);
+  			}
 			
   			if (update_flag & 1) {	// Update enemies and bullets
 				listnode_t* current_node = enemies;
@@ -259,8 +263,6 @@ int main(void)
   					bomb->draw(bomb, NULL, 1);
   					current = current->next;
   				}
-  				gotoxy(1,1);
-  				printf("red: %d\ngray: %d\n#bombs: %d", red_btn, gray_btn, list_length(bombs));
 
   				if (gray_btn_rising) { // Fire bomb? TODO Fix bombs dropping in the wrong direction
   					// Fire bomb!
