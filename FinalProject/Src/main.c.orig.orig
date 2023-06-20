@@ -21,40 +21,38 @@ uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
 uint8_t* punk_begin = punk_long + 18500;
 */
 
-<<<<<<< HEAD
-uint8_t update_flag = 0; // [0]=update enemies; [1]=update player
-
-void spaceship_input();
-uint8_t rot;
-=======
 volatile uint8_t update_flag = 0; // [0]=update enemies; [1]=update player
 
 void spaceship_input();
+uint8_t rot;
 
->>>>>>> origin/main
-
+uint16_t total_bullets = 0;
+uint16_t bullets_removed = 0;
+uint16_t bullets_popped = 0;
 
 int main(void)
 {
-
-
 	// Initialise hardware
 	uart_init(500000);
 	led_init();
 	lcd_init();
-
 	init_timer_2();
 	init_timer_15();
+	enable_timer_15(1);
 	init_timer_16();
 	enable_timer_16(1);
 	joystick_conf();
 	button_init();
-<<<<<<< HEAD
 
 	// Initialise state machine
-	State state = MainMenu;
+	State state = Game;
 	State last_state = NullState;
-	State next_state = MainMenu;
+<<<<<<< HEAD
+	State next_state = Game;
+=======
+	State next_state = state;
+	State return_state = MainMenu;
+>>>>>>> 29ce7d4a8a8ea77c424402717f3653aa064fc68f
 	uint8_t state_transition = 1; // Flag to set true when changing state, the flag can then be set false to run code only when entering state.
 	uint8_t menu_selection = 0;
 	uint8_t last_menu_sel = 0;
@@ -65,96 +63,65 @@ int main(void)
 	fixp_t js_vert;
 	fixp_t js_hori;
 
-	// Create spaceship
-	entity_t * spaceship;
-	spaceship = entity_init(Spaceship, fixp_fromint(9), fixp_fromint(10), 0);
+	uint8_t last_keypress;
+
+	uint8_t lives = 0;
+	uint8_t level = 0;
+	uint16_t kills = 0;
+	uint16_t score = 0;
 
 	uint8_t* planet_heightmap;
 
-	listnode_t* enemies = NULL; // Initialise empty list of enemies
-
-=======
->>>>>>> origin/main
-
-
-	bgcolor(SPACE_COLOR);
-	clrscr();
-	gotoxy(1,1);
-	printf("Hello\n");
-
-<<<<<<< HEAD
-  	while (1) {
-=======
-	/*draw_menu_screen();
-	draw_menu_title("TITLTLTLTLTLEE");
-	draw_main_menu(1);
-	draw_help_menu();*/
-
-//
-//	printf("%c>\n\n",0xDC);
-//	printf("<%c\n\n",0xDC);
-//	printf("%c\nV\n\n",0xDC);
-//	printf("%c\nv\n\n",0xDC);
-//	printf("^\n%c\n\n",0xDC);
-//	printf("A\n%c\n\n",0xDC);
-	/*gotoxy(2,2);
-	printf("%c%c%c%c%c%c ", 0x5C,0xDB,0xDF,0xDF,0xDB,0x5C);
-	gotoxy(2,3);
-	printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
-
-	draw_menu_screen();
-	//draw_menu_title("Main Menu");
-	//draw_main_menu_opts(1);
-
-	draw_menu_title("Help Menu");
-	draw_help_menu();*/
-
-
-
-	uint8_t* planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
-
-	entity_t* player = entity_init(Spaceship, 100<<14, 20<<14, 0, 0);
+	entity_t* player = entity_init(Spaceship, 128<<14, 30<<14, 0, 0);
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1), 0));
 	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
 
-	while (1) {
-		if (update_flag & 1) {
-			bgcolor(0);
-			fgcolor(8);
+	listnode_t* bullets = NULL;
 
-			listnode_t* current = enemies;
-			while (current != NULL) {
-				entity_t* current_entity = current->ptr;
 
-				if (current_entity->type == Enemy) {
-					enemy_move(current_entity, planet_heightmap);
-				}
+	uint8_t lcd_buffer[512];
+	memset(lcd_buffer, 0, 512);
 
-				current_entity->draw(current_entity);
-				current = current->next;
-			}
-			update_flag &= ~1;
-		}
-	}
+	lcd_text_t lcd_lives;
+	lcd_text_t lcd_level;
+	lcd_text_t lcd_score;
+	lcd_text_t lcd_kills;
 
-	//free(list_remove(&enemies, 1)); // This is the syntax to pop or remove items from a list
+	lcd_init_text(&lcd_lives, "", 0, 0, 25);
+	lcd_init_text(&lcd_level, "", 0, 1, 25);
+	lcd_init_text(&lcd_score, "", 0, 2, 25);
+	lcd_init_text(&lcd_kills, "", 0, 3, 25);
 
-	/*
-	if(x > 0) rot = 1;
-	if(x < 0) rot = 3;
-	if(y > 0) rot = 2;
-	if(y < 0) rot = 0;
->>>>>>> origin/main
+
+
+	bgcolor(SPACE_COLOR);
+	clrscr();
+	gotoxy(1,1);
+	printf("Hello\n");
+/*
+	draw_menu_screen();
+	draw_menu_title("TITLTLTLTLTLEE");
+	draw_main_menu(1);
+	draw_help_menu();
+*/
+//	gfx_draw_background();
+
+  	while (1) {
 
   		red_btn = buttonRed();
   		gray_btn = buttonGray();
 
-<<<<<<< HEAD
   		js_vert = joystick_vert();
   		js_hori = joystick_hori();
+
+  		if (uart_get_count()) {
+  			last_keypress = uart_get_char();
+  		} else {
+  			last_keypress = 0;
+  		}
 
   		// Handle user input from joystick/buttons
   		if (state != last_state) {
@@ -235,7 +202,142 @@ int main(void)
   		case Game:
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
-  				list_push(&enemies, entity_init(Enemy, 7<<14, 10<<14, fixp_fromint(-1)));
+  			}
+<<<<<<< HEAD
+
+  			if (update_flag & (1 << 1)){
+
+  				// Update velocity
+
+  				if(js_hori != fixp_fromint(1) && js_vert != fixp_fromint(1)){
+
+					if(js_hori > fixp_fromint(1)) player->update_velocity(player, fixp_fromint(1), player->vel_y);
+					else player->update_velocity(player, fixp_fromint(-1), player->vel_y);
+
+					if(js_vert > fixp_fromint(1)) player->update_velocity(player, player->vel_x, fixp_fromint(1));
+					else player->update_velocity(player, player->vel_x, fixp_fromint(-1));
+
+
+  				}
+
+  				else if(js_hori != fixp_fromint(1) && js_vert == fixp_fromint(1))
+  				{
+					if(js_hori>fixp_fromint(1)){
+						player->update_velocity(player, fixp_fromint(1), fixp_fromint(0));
+						player->update_rotation(player, 1);
+					}
+					else {
+						player->update_velocity(player, fixp_fromint(-1), fixp_fromint(0));
+						player->update_rotation(player, 3);
+					}
+  				}
+  				else if(js_hori == fixp_fromint(1) && js_vert != fixp_fromint(1)){
+  					if(js_vert>fixp_fromint(1)){
+  						player->update_velocity(player, fixp_fromint(0), fixp_fromint(1));
+  						player->update_rotation(player, 0);
+  					}
+					else{
+						player->update_velocity(player, fixp_fromint(0), fixp_fromint(-1));
+						player->update_rotation(player, 2);
+					}
+  				}
+
+				gotoxy(2,2);
+				printf("js_hori: ");
+				fixp_print(js_hori);
+				gotoxy(2,5);
+				printf("veloc_x: ");
+				fixp_print(player->vel_x);
+				gotoxy(2,3);
+				printf("js_vert: ");
+				fixp_print(js_vert);
+				gotoxy(2,6);
+				printf("veloc_y: ");
+				fixp_print(player->vel_y);
+				gotoxy(30,2);
+				fixp_print(player->x);
+				gotoxy(30,3);
+				fixp_print(player->y);
+
+
+				// Update position with velocity
+				fixp_t new_x = fixp_add(player->x, fixp_div(player->vel_x, fixp_fromint(50)));
+				fixp_t new_y = fixp_sub(player->y, fixp_div(player->vel_y, fixp_fromint(50)));
+
+				player->update_position(player, new_x, new_y);
+
+
+				player->draw(player);
+  			}
+
+
+			if (update_flag & 1) {
+=======
+			bgcolor(0);
+  			fgcolor(7);
+  			if (update_flag & 1) {	// Update enemies and bullets
+				listnode_t* current_node = enemies;
+				while (current_node != NULL) { // Loop through enemies
+					entity_t* current = current_node->ptr;
+>>>>>>> 29ce7d4a8a8ea77c424402717f3653aa064fc68f
+
+					enemy_move(current, planet_heightmap);
+
+					++current->counter;
+					if (current->counter == 25) { // If counter is ten, fire bullet
+						current->counter = 0;
+
+						fixp_t toplayer_x = fixp_div(player->x - current->x, fixp_fromint(300)); // Vector from enemy to player
+						fixp_t toplayer_y = fixp_div(player->y - current->y, fixp_fromint(300));
+
+//						fixp_t distance = fixp_sqrt(fixp_mult(toplayer_x, toplayer_x) + fixp_mult(toplayer_x, toplayer_y)); // Distance from enemy to player
+//						toplayer_x = fixp_div(toplayer_x, distance); // Normalize vector
+//						toplayer_y = fixp_div(toplayer_y, distance); // Normalize vector
+
+						list_push(&bullets, entity_init(Bullet, current->x, current->y, toplayer_x, toplayer_y));
+						++total_bullets;
+					}
+
+					current->draw(current, planet_heightmap, 1);
+					current_node = current_node->next;
+				}
+				current_node = bullets;
+				listnode_t* prev_node = NULL;
+				while (current_node != NULL) { // Loop through bullets
+					entity_t* current = current_node->ptr;
+
+					entity_move(current);
+
+					uint8_t collisions = current->check_collision(current->x, current->y, 0b00001011, NULL, player); // Check collision with walls/roof/player
+
+					if (collisions) { // Collision with wall/roof/player
+						// Kill the bullet
+						current->draw(current, planet_heightmap, 0); // Erase bullet
+						if (prev_node) {
+							free(list_remove_next(prev_node));
+							++bullets_removed;
+						} else {
+							free(list_pop(&bullets));
+							++bullets_popped;
+						}
+						if (collisions & 1<<4) { // Collision with player
+							// Also kill the player
+						}
+						current_node = prev_node->next;
+
+					} else {
+						current->draw(current, planet_heightmap, 1);
+						prev_node = current_node;
+						current_node = current_node->next;
+					}
+				}
+				gotoxy(1,1);
+				printf("atm: %d\ntotal: %d\npopped: %d\nremoved: %d\nremain: %d\n", list_length(bullets), total_bullets, bullets_popped, bullets_removed, total_bullets-(bullets_popped+bullets_removed));
+				//player->draw(player, planet_heightmap, 1);
+				update_flag &= ~1;
+			}
+  			if (update_flag & 1<<1) { // Update player
+
   			}
   			break;
 
@@ -243,6 +345,20 @@ int main(void)
 		// |  DEATH MENU STATE			|
 		// ------------------------------
   		case DeathMenu:
+  			if(state_transition) {
+  				if (!(last_state == MainMenu || last_state == HelpMenu)) {
+					draw_menu_screen();
+				}
+  				draw_menu_title("You Lost :(");
+  	  			draw_death_menu();
+  			}
+
+  			if (gray_btn) {
+  				next_state = Game;
+  			} else if (red_btn) {
+  				next_state = MainMenu;
+  			}
+
 
   			break;
 
@@ -252,9 +368,17 @@ int main(void)
 
   		case BossScreen:
   			if (state_transition) {
-				if (last_state != MainMenu || last_state != HelpMenu) {
-					draw_menu_screen();
-				}
+				draw_boss_screen();
+				enable_timer_2 (0);
+				enable_timer_15 (0);
+				enable_timer_16 (0);
+  			}
+
+  			if (last_keypress == 'b') {
+  				enable_timer_2 (1);
+				enable_timer_15 (1);
+				enable_timer_16 (1);
+  				next_state = return_state;
   			}
 
   			break;
@@ -266,42 +390,32 @@ int main(void)
 
   		}
 
+  		sprintf(lcd_lives.content, "Lives: %d", lives);
+  		sprintf(lcd_level.content, "Level: %d", level);
+  		sprintf(lcd_score.content, "Score: %d", score);
+  		sprintf(lcd_kills.content, "Kills: %d", kills);
+
+
+  		lcd_write_line(lcd_buffer, &lcd_lives);
+  		lcd_write_line(lcd_buffer, &lcd_level);
+  		lcd_write_line(lcd_buffer, &lcd_score);
+  		lcd_write_line(lcd_buffer, &lcd_kills);
+
+
+  		lcd_push_buffer(lcd_buffer);
+
+
+
+  		if (last_keypress == 'b' && state != BossScreen) {
+			next_state = BossScreen;
+			return_state = state;
+			uart_clear();
+		}
 
   		last_state = state;
   		state = next_state;
   	}
 }
-/*
-
-
->>>>>>> origin/main
-void spaceship_input(){
-	fixp_t x = joystick_hori();
-	fixp_t y = joystick_vert();
-
-	int16_t red = buttonRed();
-	int16_t gray = buttonGray();
-
-	gotoxy(2,4);
-	printf("%d",red);
-	gotoxy(2,5);
-	printf("%d",gray);
-
-=======
->>>>>>> origin/main
-	if(x != 0 && y != 0){
-		x = fixp_add((&spaceship)->x, x);
-		y = fixp_sub((&spaceship)->y, y);
-		spaceship.update_position(&spaceship, x, y);
-<<<<<<< HEAD
-	}
-}*/
-
-=======
-		spaceship.update_rotation(&spaceship, rot);
-	}*/
-}
->>>>>>> origin/main
 
 void TIM1_BRK_TIM15_IRQHandler(void) {
 	/*TIM2->CCR3 = *punk_address;

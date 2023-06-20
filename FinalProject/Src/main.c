@@ -39,6 +39,7 @@ int main(void)
 	lcd_init();
 	init_timer_2();
 	init_timer_15();
+	enable_timer_15(1);
 	init_timer_16();
 	enable_timer_16(1);
 	joystick_conf();
@@ -68,12 +69,12 @@ int main(void)
 
 	uint8_t* planet_heightmap;
 
-	entity_t* player = entity_init(Spaceship, 100<<14, 20<<14, 0, 0);
+	entity_t* player = entity_init(Spaceship, 100<<14, 30<<14, 0, 0);
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
-	list_push(&enemies, entity_init(Enemy, 230<<14, 10<<14, fixp_fromint(1), 0));
-	list_push(&enemies, entity_init(Enemy, 50<<14, 10<<14, fixp_fromint(-1), 0));
-	list_push(&enemies, entity_init(Enemy, 10<<14, 35<<14, fixp_fromint(1), 0));
+	list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1), 0));
+	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
+	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
 
 	listnode_t* bullets = NULL;
 
@@ -192,8 +193,74 @@ int main(void)
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
   			}
-			bgcolor(0);
-  			fgcolor(7);
+
+
+  			if (update_flag & (1 << 1)){
+
+  			// Update velocity
+  				if(js_hori != fixp_fromint(1) && js_vert != fixp_fromint(1)){
+
+					if(js_hori > fixp_fromint(1)) player->update_velocity(player, fixp_fromint(1), player->vel_y);
+					else player->update_velocity(player, fixp_fromint(-1), player->vel_y);
+
+					if(js_vert > fixp_fromint(1)) player->update_velocity(player, player->vel_x, fixp_fromint(1));
+					else player->update_velocity(player, player->vel_x, fixp_fromint(-1));
+
+
+  				}
+
+  				else if(js_hori != fixp_fromint(1) && js_vert == fixp_fromint(1))
+  				{
+					if(js_hori>fixp_fromint(1)){
+						player->update_velocity(player, fixp_fromint(1), fixp_fromint(0));
+						player->update_rotation(player, 1);
+					}
+					else {
+						player->update_velocity(player, fixp_fromint(-1), fixp_fromint(0));
+						player->update_rotation(player, 3);
+					}
+  				}
+  				else if(js_hori == fixp_fromint(1) && js_vert != fixp_fromint(1)){
+  					if(js_vert>fixp_fromint(1)){
+  						player->update_velocity(player, fixp_fromint(0), fixp_fromint(1));
+  						player->update_rotation(player, 0);
+  					}
+					else{
+						player->update_velocity(player, fixp_fromint(0), fixp_fromint(-1));
+						player->update_rotation(player, 2);
+					}
+  				}
+/*
+				gotoxy(2,2);
+				printf("js_hori: ");
+				fixp_print(js_hori);
+				gotoxy(2,5);
+				printf("veloc_x: ");
+				fixp_print(player->vel_x);
+				gotoxy(2,3);
+				printf("js_vert: ");
+				fixp_print(js_vert);
+				gotoxy(2,6);
+				printf("veloc_y: ");
+				fixp_print(player->vel_y);
+				gotoxy(30,2);
+				fixp_print(player->x);
+				gotoxy(30,3);
+				fixp_print(player->y);
+*/
+
+				// Update position with velocity
+				fixp_t new_x = fixp_add(player->x, fixp_div(player->vel_x, fixp_fromint(10)));
+				fixp_t new_y = fixp_sub(player->y, fixp_div(player->vel_y, fixp_fromint(10)));
+
+				player->update_position(player, new_x, new_y);
+
+
+				player->draw(player, planet_heightmap, 1);
+  			}
+
+
+			
   			if (update_flag & 1) {	// Update enemies and bullets
 				listnode_t* current_node = enemies;
 				while (current_node != NULL) { // Loop through enemies
@@ -201,7 +268,7 @@ int main(void)
 
 					enemy_move(current, planet_heightmap);
 
-					++current->counter;
+						++current->counter;
 					if (current->counter == 25) { // If counter is ten, fire bullet
 						current->counter = 0;
 
@@ -250,13 +317,11 @@ int main(void)
 					}
 				}
 				gotoxy(1,1);
-				printf("atm: %d\ntotal: %d\npopped: %d\nremoved: %d\nremain: %d\n", list_length(bullets), total_bullets, bullets_popped, bullets_removed, total_bullets-(bullets_popped+bullets_removed));
-				//player->draw(player, planet_heightmap, 1);
+				//printf("atm: %d\ntotal: %d\npopped: %d\nremoved: %d\nremain: %d\n", list_length(bullets), total_bullets, bullets_popped, bullets_removed, total_bullets-(bullets_popped+bullets_removed));
+				player->draw(player, planet_heightmap, 1);
 				update_flag &= ~1;
 			}
-  			if (update_flag & 1<<1) { // Update player
 
-  			}
   			break;
 
 		// ------------------------------
