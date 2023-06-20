@@ -10,7 +10,7 @@
 #include "graphics.h"
 
 
-static void draw_spaceship(entity_t * self, uint8_t  * ground) {
+static void draw_spaceship(entity_t * self) {
 
 	if(fixp_toint(self->last_x) == fixp_toint(self->x)
 			&& fixp_toint(self->last_y) == fixp_toint(self->y)
@@ -60,7 +60,7 @@ switch (self->rotation){
 }
 
 
-static void draw_enemy(entity_t * self, uint8_t  * ground) {
+static void draw_enemy(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 	if ((self->last_x>>14) > 254) {
 		gfx_clear_area(ground, (self->last_x>>14) - 1, (self->last_y>>14) - 1, self->last_x>>14, (self->last_y>>14));
 	} else {
@@ -77,25 +77,29 @@ static void draw_enemy(entity_t * self, uint8_t  * ground) {
 }
 
 
-static void draw_bullet(entity_t * self, uint8_t  * ground) {
-	gotoxy(self->x>>14,self->y>>14);
-	printf("b");
+static void draw_bullet(entity_t * self, uint8_t  * ground, uint8_t redraw) {
+	gotoxy((self->last_x>>14)+1, (self->last_y>>14)+1);
+	printf(" ");
+	if (redraw) {
+		gotoxy((self->x>>14)+1, (self->y>>14)+1);
+		printf("b");
+	}
 
 }
 
-static void draw_bomb(entity_t * self, uint8_t  * ground) {
+static void draw_bomb(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 	gotoxy(self->x>>14,self->y>>14);
 	printf("B");
 }
 
 
-static void draw_nuke(entity_t * self, uint8_t  * ground) {
+static void draw_nuke(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 	gotoxy(self->x>>14,self->y>>14);
 	printf("n");
 }
 
 
-static void draw_powerup(entity_t * self, uint8_t  * ground) {
+static void draw_powerup(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 	gotoxy(self->x>>14,self->y>>14);
 	printf("p");
 }
@@ -113,7 +117,7 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 	self->rotation = rotation;
 }
 
-static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* heightmap) {
+static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* heightmap, entity_t* player) { // [0]=walls, [1]=roof, [2]=ground, [3]=player
 	// [0] collision with left wall
 	// [1] collision with right wall
 	// [2] collision with roof
@@ -134,12 +138,14 @@ static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* height
 	if (type & 1<<1) { // Check collisions with ground/roof
 		if (y < 0) { // Roof
 			collision |= 1<<2;
-		} else if (y > fixp_fromint(DISPLAY_HEIGHT-1-heightmap[fixp_toint(x)])) { // Ground
+		} else if (type & 1<<2 && y > fixp_fromint(DISPLAY_HEIGHT-1-heightmap[fixp_toint(x)])) { // Ground
 			collision |= 1<<3;
 		}
 	}
 
-
+	if (type && 1<<3) {
+		// Check collision with player
+	}
 
 	return collision;
 }
@@ -152,6 +158,7 @@ entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t vel_x, fixp_t 
 	entity->y = entity->last_y = y;
 	entity->vel_x = vel_x;
 	entity->vel_y = vel_y;
+	entity->counter = 0;
 
 	switch (type) {
 	case Spaceship:
@@ -188,7 +195,7 @@ void enemy_move (entity_t* self, uint8_t* heightmap) {
 	fixp_t new_x = self->x + self->vel_x;
 	fixp_t new_y = fixp_fromint(DISPLAY_HEIGHT-1-heightmap[fixp_toint(new_x)]);
 
-	uint8_t collisions = self->check_collision(new_x, new_y, 1, NULL); // Check collision with walls only
+	uint8_t collisions = self->check_collision(new_x, new_y, 1, NULL, NULL); // Check collision with walls only
 
 	if (collisions) {
 		if (collisions & 1) {
@@ -204,4 +211,8 @@ void enemy_move (entity_t* self, uint8_t* heightmap) {
 	self->update_position(self, new_x, new_y);
 }
 
-
+void entity_move (entity_t* self) {
+	self->update_position(self, self->x + self->vel_x, self->y+self->vel_y);
+	//self->x = self->x + self->vel_x;
+	//self->y = self->y + self->vel_y;
+}

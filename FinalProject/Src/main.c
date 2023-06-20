@@ -14,6 +14,7 @@
 
 typedef enum State {NullState, MainMenu, HelpMenu, Game, DeathMenu, BossScreen} State;
 
+
 /*
 volatile uint8_t* punk_address = punk_long;
 uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
@@ -64,7 +65,7 @@ int main(void)
 
 	uint8_t* planet_heightmap;
 
-	entity_t* player = entity_init(Spaceship, 100<<14, 20<<14, 0, 0);
+	entity_t* player = entity_init(Spaceship, 230<<14, 30<<14, 0, 0);
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1), 0));
@@ -90,8 +91,10 @@ int main(void)
 	bgcolor(SPACE_COLOR);
 	clrscr();
 	gotoxy(1,1);
+	printf("Hello\n");
 
   	while (1) {
+
   		red_btn = buttonRed();
   		gray_btn = buttonGray();
 
@@ -184,24 +187,70 @@ int main(void)
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
   			}
-  			if (update_flag & 1) {
-  						bgcolor(0);
-  						fgcolor(8);
+			bgcolor(0);
+  			fgcolor(7);
+  			if (update_flag & 1) {	// Update enemies and bullets
+				listnode_t* current_node = enemies;
+				while (current_node != NULL) { // Loop through enemies
+					entity_t* current = current_node->ptr;
 
-  						listnode_t* current = enemies;
-  						while (current != NULL) {
-  							entity_t* current_entity = current->ptr;
+					enemy_move(current, planet_heightmap);
 
-  							if (current_entity->type == Enemy) {
-  								enemy_move(current_entity, planet_heightmap);
-  							}
+					++current->counter;
+					if (current->counter == 25) { // If counter is ten, fire bullet
+						current->counter = 0;
 
-  							current_entity->draw(current_entity, planet_heightmap);
-  							current = current->next;
-  						}
-  						update_flag &= ~1;
-  					}
-	
+						fixp_t toplayer_x = fixp_div(player->x - current->x, fixp_fromint(300)); // Vector from enemy to player
+						fixp_t toplayer_y = fixp_div(player->y - current->y, fixp_fromint(300));
+
+
+
+//						fixp_t distance = fixp_sqrt(fixp_mult(toplayer_x, toplayer_x) + fixp_mult(toplayer_x, toplayer_y)); // Distance from enemy to player
+//						toplayer_x = fixp_div(toplayer_x, distance); // Normalize vector
+//						toplayer_y = fixp_div(toplayer_y, distance); // Normalize vector
+
+						list_push(&bullets, entity_init(Bullet, current->x, current->y, toplayer_x, toplayer_y));
+					}
+
+					current->draw(current, 1);
+					current_node = current_node->next;
+				}
+				current_node = bullets;
+				listnode_t* prev_node = NULL;
+				while (current_node != NULL) { // Loop through bullets
+					entity_t* current = current_node->ptr;
+
+					entity_move(current);
+
+					uint8_t collisions = current->check_collision(current->x, current->y, 0b00001011, NULL, player); // Check collision with walls/roof/player
+
+					if (collisions) { // Collision with wall/roof/player
+						// Kill the bullet
+						current->draw(current, 0); // Erase bullet
+						if (prev_node) {
+							free(list_remove_next(prev_node));
+						} else {
+							free(list_pop(&bullets));
+						}
+						if (collisions & 1<<4) { // Collision with player
+							// Also kill the player
+						}
+						current_node = prev_node->next;
+
+					} else {
+						current->draw(current, 1);
+						prev_node = current_node;
+						current_node = current_node->next;
+					}
+				}
+				gotoxy(1,1);
+				printf("%d", list_length(bullets));
+				player->draw(player, 1);
+				update_flag &= ~1;
+			}
+  			if (update_flag & 1<<1) { // Update player
+
+  			}
   			break;
 
 		// ------------------------------
