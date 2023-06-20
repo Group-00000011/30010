@@ -9,6 +9,7 @@
 #include "graphics.h"
 #include "daftpunk8bit.h"
 #include "data_structures.h"
+#include "levels.h"
 
 
 
@@ -58,18 +59,18 @@ int main(void)
 	uint8_t last_keypress;
 
 	uint8_t lives = 3;
-	uint8_t level = 1;
+	uint8_t level = 14;
 	uint16_t kills = 0;
 	uint16_t score = 0;
 
 	uint8_t* planet_heightmap;
 
-	entity_t* player = entity_init(Spaceship, 100<<14, 30<<14, 0, 0);
+	entity_t* player = entity_init(Spaceship, 1<<14, 30<<14, 0, 0);
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
-	list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1), 0));
-	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
-	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
+	//list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1), 0));
+	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
+	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
 
 	listnode_t* bullets = NULL;
 
@@ -236,8 +237,6 @@ int main(void)
 						current_node = current_node->next;
 					}
 				}
-				gotoxy(1,1);
-				player->draw(player, planet_heightmap, 1);
 				update_flag &= ~1;
 			}
 
@@ -298,6 +297,10 @@ int main(void)
 				player->draw(player, planet_heightmap, 1);
 				update_flag &= ~(1<<1);
 			}
+
+  			if (!list_length(enemies)) {
+  				level_setup(&enemies, level, planet_heightmap);
+  			}
 
   			break;
 

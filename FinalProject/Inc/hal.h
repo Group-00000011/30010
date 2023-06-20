@@ -46,6 +46,7 @@ fixp_t joystick_vert();
 void enable_timer_2 (uint8_t on);
 void enable_timer_15 (uint8_t on);
 void enable_timer_16 (uint8_t on);
+void set_timer_15_speed(uint16_t speed);
 
 //Shouldnt we remove or outcomment it then?
 void buzzer_set_pwm(uint8_t value); // Don't use this it is too slow. Write to the register directly.
