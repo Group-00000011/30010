@@ -64,14 +64,14 @@ int main(void)
 
 	uint8_t* planet_heightmap;
 
-	entity_t* player = entity_init(Spaceship, 100<<14, 30<<14, 0, 0);
+	entity_t* player = entity_init(Spaceship, 100<<14, 5<<14, 0, 0);
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	listnode_t* bullets = NULL;
 	listnode_t* bombs = NULL;
-	list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1), 0));
-	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
-	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
+	list_push(&enemies, entity_init(Enemy, 220<<14, 10<<14, fixp_fromint(1), 0));
+	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
+	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
 
 
 
@@ -195,8 +195,8 @@ int main(void)
 
 					enemy_move(current, planet_heightmap);
 
-						++current->counter;
-					if (current->counter == 200) { // If counter is ten, fire bullet
+					++current->counter;
+					if (current->counter == 100) { // If counter is ten, fire bullet
 						current->counter = 0;
 
 						fixp_t toplayer_x = fixp_div(player->x - current->x, fixp_fromint(150)); // Vector from enemy to player
@@ -220,6 +220,7 @@ int main(void)
 					if (collisions) { // Collision with wall/roof/player
 						// Kill the bullet
 						current->draw(current, planet_heightmap, 0); // Erase bullet
+						current_node = current_node->next;
 						if (prev_node) {
 							free(list_remove_next(prev_node));
 						} else {
@@ -228,7 +229,6 @@ int main(void)
 						if (collisions & 1<<4) { // Collision with player
 							// Also kill the player
 						}
-						current_node = prev_node->next;
 
 					} else {
 						current->draw(current, planet_heightmap, 1);
@@ -400,11 +400,11 @@ void TIM1_BRK_TIM15_IRQHandler(void) {
 	if (punk_address == punk_end)
 		punk_address = punk_begin;*/
 
-	update_flag |= 1<<1;
+	update_flag |= 1<<1; // Set player/bomb flag high
 	TIM15->SR &= ~0x0001;
 }
 
 void TIM1_UP_TIM16_IRQHandler(void) {
-	update_flag |= 1;
+	update_flag |= 1; // Set enemy/bullet flag high
 	TIM16->SR &= ~0x0001;
 }
