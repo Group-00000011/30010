@@ -19,12 +19,15 @@ static void draw_spaceship(entity_t* self, uint8_t* ground, uint8_t redraw) {
 	fixp_t x = fixp_toint(self->x);
 	fixp_t y = fixp_toint(self->y);
 
+	// Clears last spaceship and sets spaceship colour to white.
+	gfx_clear_area(ground, last_x, last_y,last_x+5,last_y+2);
+	bgcolor(0);
+	fgcolor(7);
 
+	//Switches through possible rotations and draws spaceship accordingly
+	//0 = up, 1 = right, 2 = down, 3 = left
 switch (self->rotation){
 	case 0:
-		gfx_clear_area(ground, last_x, last_y,last_x+5,last_y+2);
-		bgcolor(0);
-		fgcolor(7);
 		gotoxy(x, y);
 		printf("/%c%c%c", 0xDB,0xDB,0x5C);
 		gotoxy(x, y+1);
@@ -33,18 +36,12 @@ switch (self->rotation){
 		printf("/%c%c%c", 0xDF,0xDF,0x5C);
 		break;
 	case 1:
-		gfx_clear_area(ground, last_x, last_y,last_x+5,last_y+2);
-		bgcolor(0);
-		fgcolor(7);
 		gotoxy(x, y);
 		printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDF,0xDF,0xDB,0x5C);
 		gotoxy(x, y+1);
 		printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
 		break;
 	case 2:
-		gfx_clear_area(ground, last_x, last_y,last_x+5,last_y+2);
-		bgcolor(0);
-		fgcolor(7);
 		gotoxy(x, y);
 		printf("%c%c%c/", 0x5C,0xDC,0xDC);
 		gotoxy(x, y+1);
@@ -53,9 +50,6 @@ switch (self->rotation){
 		printf("%c%c%c/", 0x5C, 0xDB,0xDB);
 		break;
 	case 3:
-		gfx_clear_area(ground, last_x,last_y,last_x+5,last_y+2);
-		bgcolor(0);
-		fgcolor(7);
 		gotoxy(x,y);
 		printf("/%c%c%c%c/", 0xDB,0xDF,0xDF,0xDB);
 		gotoxy(x,y+1);
@@ -68,48 +62,69 @@ switch (self->rotation){
 }
 
 static void draw_enemy(entity_t * self, uint8_t  * ground, uint8_t redraw) {
-	if ((self->last_x>>14) > 254) {
-		gfx_clear_area(ground, (self->last_x>>14) - 1, (self->last_y>>14) - 1, self->last_x>>14, (self->last_y>>14));
-	} else {
-		gfx_clear_area(ground, self->last_x>>14, self->last_y>>14, (self->last_x>>14) + 1, (self->last_y>>14) + 1);
+
+	fixp_t last_x = (self->last_x) >> 14;
+	fixp_t last_y = (self->last_y) >> 14;
+	fixp_t x = (self->x) >> 14;
+	fixp_t y = (self->y) >> 14;
+
+	// Doesnt draw if at border to avoid overflows
+	if (x<2||x>254) redraw=0;
+
+	// Clear background at last position.
+	if( last_x < 255 && last_x > 1) gfx_clear_area(ground, last_x - 1, last_y, last_x + 1, last_y + 1);
+	// If at right border dont clear to avoid overflow
+	else if (last_x > 254) {
+		gfx_clear_area(ground, last_x - 1, last_y, last_x, last_y + 1);
+		redraw = 0 ;
 	}
+	// If at left border dont clear to avoid overflow
+	else if(last_x < 2) gfx_clear_area(ground, last_x , last_y, last_x + 1, last_y + 1);
 
+	// Draw enemy
+	if(redraw){
+		bgcolor(0);
+		fgcolor(2); //Green
 
-	bgcolor(0);
-	fgcolor(2);
-
-	gotoxy((self->x>>14), (self->y>>14));
-	printf("ee");
-	gotoxy((self->x>>14), (self->y>>14)+1);
-	printf("ee");
+		gotoxy(x-1, y);
+		printf("/%c%c",0xCA,0x5C);
+		gotoxy(x-1, y+1);
+		printf("000");
+		}
 }
 
 
 static void draw_bullet(entity_t * self, uint8_t  * ground, uint8_t redraw) {
+	// Clear last bullet
 	gotoxy((self->last_x>>14)+1, (self->last_y>>14)+1);
 	printf(" ");
+	// Draw bullet
 	if (redraw) {
+		bgcolor(0);
+		fgcolor((self->counter)++);//Cycle through every colour
+		if((self->counter) == 7) self->counter = 1;
 		gotoxy((self->x>>14)+1, (self->y>>14)+1);
-		printf("b");
+		printf("%c", 0xDF);
+
 	}
 
 }
 
 static void draw_bomb(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 	gotoxy(self->x>>14,self->y>>14);
-	printf("B");
+	printf("%c",0xBE);
 }
 
 
 static void draw_nuke(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 	gotoxy(self->x>>14,self->y>>14);
-	printf("n");
+	printf("%c",0xDB);
 }
 
 
 static void draw_powerup(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 	gotoxy(self->x>>14,self->y>>14);
-	printf("p");
+	printf("%c", 0x24);
 }
 
 static void update_position(entity_t * self, fixp_t x, fixp_t y) {
