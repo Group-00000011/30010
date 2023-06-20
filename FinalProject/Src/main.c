@@ -46,7 +46,7 @@ int main(void)
 	button_init();
 
 	// Initialise state machine
-	State state = Game;
+	State state = MainMenu;
 	State last_state = NullState;
 	State next_state = state;
 	State return_state = MainMenu;
@@ -250,8 +250,8 @@ int main(void)
 */
 
 				// Update position with velocity
-				fixp_t new_x = fixp_add(player->x, fixp_div(player->vel_x, fixp_fromint(50)));
-				fixp_t new_y = fixp_sub(player->y, fixp_div(player->vel_y, fixp_fromint(50)));
+				fixp_t new_x = fixp_add(player->x, fixp_div(player->vel_x, fixp_fromint(10)));
+				fixp_t new_y = fixp_sub(player->y, fixp_div(player->vel_y, fixp_fromint(10)));
 
 				player->update_position(player, new_x, new_y);
 

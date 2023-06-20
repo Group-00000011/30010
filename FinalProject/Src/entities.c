@@ -13,18 +13,18 @@
 
 static void draw_spaceship(entity_t* self, uint8_t* ground, uint8_t redraw) {
 
-	fixp_t last_x = (self->last_x) >> 14;
-	fixp_t last_y = (self->last_y) >> 14;
+	fixp_t last_x = fixp_toint(self->last_x);
+	fixp_t last_y = fixp_toint(self->last_y);
 
-	fixp_t x = (self->x) >> 14;
-	fixp_t y = (self->y) >> 14;
+	fixp_t x = fixp_toint(self->x);
+	fixp_t y = fixp_toint(self->y);
 
-	bgcolor(1);
-	fgcolor(2);
 
 switch (self->rotation){
 	case 0:
 		gfx_clear_area(ground, last_x, last_y,last_x+6,last_y+3);
+		bgcolor(0);
+		fgcolor(7);
 		gotoxy(x, y);
 		printf("/%c%c%c", 0xDB,0xDB,0x5C);
 		gotoxy(x, y+1);
@@ -35,6 +35,8 @@ switch (self->rotation){
 		break;
 	case 1:
 		gfx_clear_area(ground, last_x, last_y,last_x+6,last_y+3);
+		bgcolor(0);
+		fgcolor(7);
 		gotoxy(x, y);
 		printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDF,0xDF,0xDB,0x5C);
 		gotoxy(x, y+1);
@@ -42,6 +44,8 @@ switch (self->rotation){
 		break;
 	case 2:
 		gfx_clear_area(ground, last_x, last_y,last_x+6,last_y+3);
+		bgcolor(0);
+		fgcolor(7);
 		gotoxy(x, y);
 		printf("%c%c%c/", 0x5C,0xDC,0xDC);
 		gotoxy(x, y+1);
@@ -51,9 +55,11 @@ switch (self->rotation){
 		break;
 	case 3:
 		gfx_clear_area(ground, last_x,last_y,last_x+6,last_y+3);
-		gotoxy(self->x,self->y);
+		bgcolor(0);
+		fgcolor(7);
+		gotoxy(x,y);
 		printf("/%c%c%c%c/", 0xDB,0xDF,0xDF,0xDB);
-		gotoxy(self->x,self->y+1);
+		gotoxy(x,y+1);
 		printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDC,0xDC,0xDB,0x5C);
 		break;
 	default:
@@ -167,7 +173,7 @@ entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t vel_x, fixp_t 
 	entity->vel_x = vel_x;
 	entity->vel_y = vel_y;
 	entity->counter = 0;
-
+	entity->rotation = 0;
 	switch (type) {
 	case Spaceship:
 		entity->draw = &draw_spaceship;
