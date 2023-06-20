@@ -128,13 +128,13 @@ fixp_t joystick_vert(){
 
 	fixp_t stick_y = fixp_fromint(ADC_GetConversionValue(ADC1));
 
-	if(stick_y > fixp_fromint(1400)){
-		stick_y = fixp_sub(stick_y, fixp_fromint(1400));
-		stick_y = fixp_div(stick_y, fixp_fromint(2600));
+	if(stick_y > fixp_fromint(1850)){
+		stick_y = fixp_sub(stick_y, fixp_fromint(1850));
+		stick_y = fixp_div(stick_y, fixp_fromint(2150));
 		stick_y = fixp_add(stick_y, fixp_fromint(1));
 	}
-	else if (stick_y < fixp_fromint(1200))
-		stick_y = fixp_div(stick_y,fixp_fromint(1200));
+	else if (stick_y < fixp_fromint(600))
+		stick_y = fixp_div(stick_y,fixp_fromint(600));
 	else
 		stick_y = fixp_fromint(1);
 
@@ -150,14 +150,14 @@ fixp_t joystick_hori(){
 
 	fixp_t stick_x = fixp_fromint(ADC_GetConversionValue(ADC1));
 
-	if(stick_x > fixp_fromint(1350)){
-		stick_x = fixp_sub(stick_x, fixp_fromint(1350));
-		stick_x = fixp_div(stick_x,fixp_fromint(2650));
+	if(stick_x > fixp_fromint(1950)){
+		stick_x = fixp_sub(stick_x, fixp_fromint(1950));
+		stick_x = fixp_div(stick_x,fixp_fromint(2050));
 		stick_x = fixp_add(stick_x, fixp_fromint(1));
 	}
-	else if(stick_x < fixp_fromint(1150))
+	else if(stick_x < fixp_fromint(750))
 	{
-		stick_x = fixp_div(stick_x, fixp_fromint(1150));
+		stick_x = fixp_div(stick_x, fixp_fromint(750));
 	}
 	else{
 		stick_x= fixp_fromint(1);

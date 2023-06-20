@@ -12,43 +12,46 @@
 
 static void draw_spaceship(entity_t * self) {
 
-	if(fixp_toint(self->last_x) == fixp_toint(self->x)
-			&& fixp_toint(self->last_y) == fixp_toint(self->y)
-			&& self->last_rotation == self->rotation)
-		return;
+	fixp_t last_x = (self->last_x) >> 14;
+	fixp_t last_y = (self->last_y) >> 14;
+
+	fixp_t x = (self->x) >> 14;
+	fixp_t y = (self->y) >> 14;
+
+	bgcolor(0);
+	fgcolor(7);
 
 switch (self->rotation){
 	case 0:
-		gfx_clear_area(fixp_toint(self->last_x),fixp_toint(self->last_y),fixp_toint(self->last_x)+6,fixp_toint(self->last_y)+3);
-		gotoxy(fixp_toint(self->x),fixp_toint(self->y));
+		gfx_clear_area(last_x, last_y,last_x+6,last_y+3);
+		gotoxy(x, y);
 		printf("/%c%c%c", 0xDB,0xDB,0x5C);
-		gotoxy(fixp_toint(self->x),fixp_toint(self->y)+1);
+		gotoxy(x, y+1);
 		printf("%c  %c", 0xDB,0xDB);
-		gotoxy(fixp_toint(self->x),fixp_toint(self->y)+2);
+		gotoxy(x, y+2);
 		printf("/%c%c%c", 0xDF,0xDF,0x5C);
 		break;
 	case 1:
-		gfx_clear_area(fixp_toint(self->last_x),fixp_toint(self->last_y),fixp_toint(self->last_x)+6,fixp_toint(self->last_y)+3);
-		gotoxy(fixp_toint(self->x),fixp_toint(self->y));
+		gfx_clear_area(last_x, last_y,last_x+6,last_y+3);
+		gotoxy(x, y);
 		printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDF,0xDF,0xDB,0x5C);
-		gotoxy(fixp_toint(self->x),fixp_toint(self->y)+1);
+		gotoxy(x, y+1);
 		printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
 		break;
 	case 2:
-		gfx_clear_area(fixp_toint(self->last_x),fixp_toint(self->last_y),fixp_toint(self->last_x)+6,fixp_toint(self->last_y)+3);
-		gotoxy(fixp_toint(self->x),fixp_toint(self->y));
-			printf("%c%c%c/", 0x5C,0xDC,0xDC);
-			gotoxy(fixp_toint(self->x),fixp_toint(self->y)+1);
-			printf("%c  %c", 0xDB,0xDB);
-			gotoxy(fixp_toint(self->x),fixp_toint(self->y)+2);
-			printf("%c%c%c/", 0x5C, 0xDB,0xDB);
-			break;
+		gfx_clear_area(last_x, last_y,last_x+6,last_y+3);
+		gotoxy(x, y);
+		printf("%c%c%c/", 0x5C,0xDC,0xDC);
+		gotoxy(x, y+1);
+		printf("%c  %c", 0xDB,0xDB);
+		gotoxy(x, y+2);
+		printf("%c%c%c/", 0x5C, 0xDB,0xDB);
 		break;
 	case 3:
-		gfx_clear_area(fixp_toint(self->last_x),fixp_toint(self->last_y),fixp_toint(self->last_x)+6,fixp_toint(self->last_y)+3);
-		gotoxy(fixp_toint(self->x),fixp_toint(self->y));
+		gfx_clear_area(last_x, last_y,last_x+6,last_y+3);
+		gotoxy(x, y);
 		printf("/%c%c%c%c/", 0xDB,0xDF,0xDF,0xDB);
-		gotoxy(fixp_toint(self->x),fixp_toint(self->y)+1);
+		gotoxy(x, y+1);
 		printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDC,0xDC,0xDB,0x5C);
 		break;
 	default:
@@ -61,10 +64,18 @@ switch (self->rotation){
 
 
 static void draw_enemy(entity_t * self) {
+	bgcolor(0);
+	fgcolor(2);
+
+	fixp_t x = (self->x)>>14;
+	fixp_t y = (self->y)>>14;
+
 	gotoxy((self->last_x>>14)+1, (self->last_y>>14)+1);
-	printf(" ");
-	gotoxy((self->x>>14)+1, (self->y>>14)+1);
-	printf("e");
+	printf("   ");
+	gotoxy((x>>14)+1, (y>>14)+1);
+	printf("OOO");
+
+
 }
 
 
@@ -91,12 +102,18 @@ static void draw_powerup(entity_t * self) {
 	printf("p");
 }
 
+
 static void update_position(entity_t * self, fixp_t x, fixp_t y) {
 	self->last_x = self->x;
 	self->last_y = self->y;
 
 	self->x = x;
 	self->y = y;
+}
+
+static void update_velocity(entity_t * self, fixp_t vel_x, fixp_t vel_y) {
+	self->vel_x = vel_x;
+	self->vel_y = vel_y;
 }
 
 static void update_rotation(entity_t * self, fixp_t rotation) {
@@ -170,6 +187,7 @@ entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t vel_x, fixp_t 
 
 	entity->update_position = &update_position;
 	entity->update_rotation = &update_rotation;
+	entity->update_velocity = &update_velocity;
 	entity->check_collision = &check_collision;
 
 	return entity;

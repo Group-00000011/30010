@@ -35,15 +35,16 @@ int main(void)
 	lcd_init();
 	init_timer_2();
 	init_timer_15();
+	enable_timer_15(1);
 	init_timer_16();
 	enable_timer_16(1);
 	joystick_conf();
 	button_init();
 
 	// Initialise state machine
-	State state = MainMenu;
+	State state = Game;
 	State last_state = NullState;
-	State next_state = MainMenu;
+	State next_state = Game;
 	uint8_t state_transition = 1; // Flag to set true when changing state, the flag can then be set false to run code only when entering state.
 	uint8_t menu_selection = 0;
 	uint8_t last_menu_sel = 0;
@@ -165,9 +166,74 @@ int main(void)
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
   			}
-  			if (update_flag & 1) {
-  						bgcolor(0);
-  						fgcolor(8);
+
+  			if (update_flag & (1 << 1)){
+
+  				// Update velocity
+
+  				if(js_hori != fixp_fromint(1) && js_vert != fixp_fromint(1)){
+
+					if(js_hori > fixp_fromint(1)) player->update_velocity(player, fixp_fromint(1), player->vel_y);
+					else player->update_velocity(player, fixp_fromint(-1), player->vel_y);
+
+					if(js_vert > fixp_fromint(1)) player->update_velocity(player, player->vel_x, fixp_fromint(1));
+					else player->update_velocity(player, player->vel_x, fixp_fromint(-1));
+
+
+  				}
+
+  				else if(js_hori != fixp_fromint(1) && js_vert == fixp_fromint(1))
+  				{
+					if(js_hori>fixp_fromint(1)){
+						player->update_velocity(player, fixp_fromint(1), fixp_fromint(0));
+						player->update_rotation(player, 1);
+					}
+					else {
+						player->update_velocity(player, fixp_fromint(-1), fixp_fromint(0));
+						player->update_rotation(player, 3);
+					}
+  				}
+  				else if(js_hori == fixp_fromint(1) && js_vert != fixp_fromint(1)){
+  					if(js_vert>fixp_fromint(1)){
+  						player->update_velocity(player, fixp_fromint(0), fixp_fromint(1));
+  						player->update_rotation(player, 0);
+  					}
+					else{
+						player->update_velocity(player, fixp_fromint(0), fixp_fromint(-1));
+						player->update_rotation(player, 2);
+					}
+  				}
+
+				gotoxy(2,2);
+				printf("js_hori: ");
+				fixp_print(js_hori);
+				gotoxy(2,5);
+				printf("veloc_x: ");
+				fixp_print(player->vel_x);
+				gotoxy(2,3);
+				printf("js_vert: ");
+				fixp_print(js_vert);
+				gotoxy(2,6);
+				printf("veloc_y: ");
+				fixp_print(player->vel_y);
+				gotoxy(30,2);
+				fixp_print(player->x);
+				gotoxy(30,3);
+				fixp_print(player->y);
+
+
+				// Update position with velocity
+				fixp_t new_x = fixp_add(player->x, fixp_div(player->vel_x, fixp_fromint(50)));
+				fixp_t new_y = fixp_sub(player->y, fixp_div(player->vel_y, fixp_fromint(50)));
+
+				player->update_position(player, new_x, new_y);
+
+
+				player->draw(player);
+  			}
+
+
+			if (update_flag & 1) {
 
   						listnode_t* current = enemies;
   						while (current != NULL) {

@@ -23,6 +23,8 @@ typedef struct entity {
 	void (*draw)(struct entity* self);
 	void (*update_position)(struct entity* self, fixp_t x, fixp_t y);
 	void (*update_rotation)(struct entity* self, fixp_t rotation);
+	void (*update_velocity)(struct entity* self, fixp_t vel_x, fixp_t vel_y);
+
 	uint8_t (*check_collision)(fixp_t x, fixp_t y, uint8_t type, uint8_t* heightmap);
 } entity_t;
 
