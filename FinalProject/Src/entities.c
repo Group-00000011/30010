@@ -10,7 +10,7 @@
 #include "graphics.h"
 
 
-static void draw_spaceship(entity_t * self) {
+static void draw_spaceship(entity_t * self, uint8_t  * ground) {
 
 	if(fixp_toint(self->last_x) == fixp_toint(self->x)
 			&& fixp_toint(self->last_y) == fixp_toint(self->y)
@@ -19,7 +19,7 @@ static void draw_spaceship(entity_t * self) {
 
 switch (self->rotation){
 	case 0:
-		gfx_clear_area(fixp_toint(self->last_x),fixp_toint(self->last_y),fixp_toint(self->last_x)+6,fixp_toint(self->last_y)+3);
+		gfx_clear_area(ground, fixp_toint(self->last_x),fixp_toint(self->last_y),fixp_toint(self->last_x)+6,fixp_toint(self->last_y)+3);
 		gotoxy(fixp_toint(self->x),fixp_toint(self->y));
 		printf("/%c%c%c", 0xDB,0xDB,0x5C);
 		gotoxy(fixp_toint(self->x),fixp_toint(self->y)+1);
@@ -28,14 +28,14 @@ switch (self->rotation){
 		printf("/%c%c%c", 0xDF,0xDF,0x5C);
 		break;
 	case 1:
-		gfx_clear_area(self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
+		gfx_clear_area(ground, self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
 		gotoxy(self->x,self->y);
 		printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDF,0xDF,0xDB,0x5C);
 		gotoxy(self->x,self->y+1);
 		printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
 		break;
 	case 2:
-		gfx_clear_area(self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
+		gfx_clear_area(ground, self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
 			gotoxy(self->x,self->y);
 			printf("%c%c%c/", 0x5C,0xDC,0xDC);
 			gotoxy(self->x,self->y+1);
@@ -45,7 +45,7 @@ switch (self->rotation){
 			break;
 		break;
 	case 3:
-		gfx_clear_area(self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
+		gfx_clear_area(ground, self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
 		gotoxy(self->x,self->y);
 		printf("/%c%c%c%c/", 0xDB,0xDF,0xDF,0xDB);
 		gotoxy(self->x,self->y+1);
@@ -60,33 +60,42 @@ switch (self->rotation){
 }
 
 
-static void draw_enemy(entity_t * self) {
-	gotoxy((self->last_x>>14)+1, (self->last_y>>14)+1);
-	printf(" ");
-	gotoxy((self->x>>14)+1, (self->y>>14)+1);
-	printf("e");
+static void draw_enemy(entity_t * self, uint8_t  * ground) {
+	if ((self->last_x>>14) > 254) {
+		gfx_clear_area(ground, (self->last_x>>14) - 1, (self->last_y>>14) - 1, self->last_x>>14, (self->last_y>>14));
+	} else {
+		gfx_clear_area(ground, self->last_x>>14, self->last_y>>14, (self->last_x>>14) + 1, (self->last_y>>14) + 1);
+	}
+
+	fgcolor(7);
+	bgcolor(0);
+
+	gotoxy((self->x>>14), (self->y>>14));
+	printf("ee");
+	gotoxy((self->x>>14), (self->y>>14)+1);
+	printf("ee");
 }
 
 
-static void draw_bullet(entity_t * self) {
+static void draw_bullet(entity_t * self, uint8_t  * ground) {
 	gotoxy(self->x>>14,self->y>>14);
 	printf("b");
 
 }
 
-static void draw_bomb(entity_t * self) {
+static void draw_bomb(entity_t * self, uint8_t  * ground) {
 	gotoxy(self->x>>14,self->y>>14);
 	printf("B");
 }
 
 
-static void draw_nuke(entity_t * self) {
+static void draw_nuke(entity_t * self, uint8_t  * ground) {
 	gotoxy(self->x>>14,self->y>>14);
 	printf("n");
 }
 
 
-static void draw_powerup(entity_t * self) {
+static void draw_powerup(entity_t * self, uint8_t  * ground) {
 	gotoxy(self->x>>14,self->y>>14);
 	printf("p");
 }

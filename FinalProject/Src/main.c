@@ -196,7 +196,7 @@ int main(void)
   								enemy_move(current_entity, planet_heightmap);
   							}
 
-  							current_entity->draw(current_entity);
+  							current_entity->draw(current_entity, planet_heightmap);
   							current = current->next;
   						}
   						update_flag &= ~1;
