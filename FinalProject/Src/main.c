@@ -24,11 +24,6 @@ uint8_t* punk_begin = punk_long + 18500;
 volatile uint8_t update_flag = 0; // [0]=update enemies; [1]=update player
 
 void spaceship_input();
-uint8_t rot;
-
-uint16_t total_bullets = 0;
-uint16_t bullets_removed = 0;
-uint16_t bullets_popped = 0;
 
 
 int main(void)
@@ -62,8 +57,8 @@ int main(void)
 
 	uint8_t last_keypress;
 
-	uint8_t lives = 0;
-	uint8_t level = 0;
+	uint8_t lives = 3;
+	uint8_t level = 1;
 	uint16_t kills = 0;
 	uint16_t score = 0;
 
@@ -97,7 +92,6 @@ int main(void)
 	bgcolor(SPACE_COLOR);
 	clrscr();
 	gotoxy(1,1);
-	printf("Hello\n");
 
   	while (1) {
 
@@ -193,73 +187,6 @@ int main(void)
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
   			}
-
-
-  			if (update_flag & (1 << 1)){
-
-  			// Update velocity
-  				if(js_hori != fixp_fromint(1) && js_vert != fixp_fromint(1)){
-
-					if(js_hori > fixp_fromint(1)) player->update_velocity(player, fixp_fromint(1), player->vel_y);
-					else player->update_velocity(player, fixp_fromint(-1), player->vel_y);
-
-					if(js_vert > fixp_fromint(1)) player->update_velocity(player, player->vel_x, fixp_fromint(1));
-					else player->update_velocity(player, player->vel_x, fixp_fromint(-1));
-
-
-  				}
-
-  				else if(js_hori != fixp_fromint(1) && js_vert == fixp_fromint(1))
-  				{
-					if(js_hori>fixp_fromint(1)){
-						player->update_velocity(player, fixp_fromint(1), fixp_fromint(0));
-						player->update_rotation(player, 1);
-					}
-					else {
-						player->update_velocity(player, fixp_fromint(-1), fixp_fromint(0));
-						player->update_rotation(player, 3);
-					}
-  				}
-  				else if(js_hori == fixp_fromint(1) && js_vert != fixp_fromint(1)){
-  					if(js_vert>fixp_fromint(1)){
-  						player->update_velocity(player, fixp_fromint(0), fixp_fromint(1));
-  						player->update_rotation(player, 0);
-  					}
-					else{
-						player->update_velocity(player, fixp_fromint(0), fixp_fromint(-1));
-						player->update_rotation(player, 2);
-					}
-  				}
-/*
-				gotoxy(2,2);
-				printf("js_hori: ");
-				fixp_print(js_hori);
-				gotoxy(2,5);
-				printf("veloc_x: ");
-				fixp_print(player->vel_x);
-				gotoxy(2,3);
-				printf("js_vert: ");
-				fixp_print(js_vert);
-				gotoxy(2,6);
-				printf("veloc_y: ");
-				fixp_print(player->vel_y);
-				gotoxy(30,2);
-				fixp_print(player->x);
-				gotoxy(30,3);
-				fixp_print(player->y);
-*/
-
-				// Update position with velocity
-				fixp_t new_x = fixp_add(player->x, fixp_div(player->vel_x, fixp_fromint(10)));
-				fixp_t new_y = fixp_sub(player->y, fixp_div(player->vel_y, fixp_fromint(10)));
-
-				player->update_position(player, new_x, new_y);
-
-
-				player->draw(player, planet_heightmap, 1);
-  			}
-
-
 			
   			if (update_flag & 1) {	// Update enemies and bullets
 				listnode_t* current_node = enemies;
@@ -275,12 +202,7 @@ int main(void)
 						fixp_t toplayer_x = fixp_div(player->x - current->x, fixp_fromint(300)); // Vector from enemy to player
 						fixp_t toplayer_y = fixp_div(player->y - current->y, fixp_fromint(300));
 
-//						fixp_t distance = fixp_sqrt(fixp_mult(toplayer_x, toplayer_x) + fixp_mult(toplayer_x, toplayer_y)); // Distance from enemy to player
-//						toplayer_x = fixp_div(toplayer_x, distance); // Normalize vector
-//						toplayer_y = fixp_div(toplayer_y, distance); // Normalize vector
-
 						list_push(&bullets, entity_init(Bullet, current->x, current->y, toplayer_x, toplayer_y));
-						++total_bullets;
 					}
 
 					current->draw(current, planet_heightmap, 1);
@@ -300,10 +222,8 @@ int main(void)
 						current->draw(current, planet_heightmap, 0); // Erase bullet
 						if (prev_node) {
 							free(list_remove_next(prev_node));
-							++bullets_removed;
 						} else {
 							free(list_pop(&bullets));
-							++bullets_popped;
 						}
 						if (collisions & 1<<4) { // Collision with player
 							// Also kill the player
@@ -317,9 +237,66 @@ int main(void)
 					}
 				}
 				gotoxy(1,1);
-				//printf("atm: %d\ntotal: %d\npopped: %d\nremoved: %d\nremain: %d\n", list_length(bullets), total_bullets, bullets_popped, bullets_removed, total_bullets-(bullets_popped+bullets_removed));
 				player->draw(player, planet_heightmap, 1);
 				update_flag &= ~1;
+			}
+
+
+  			if (update_flag & (1 << 1)){
+
+			// Update velocity
+				if(js_hori != fixp_fromint(1) && js_vert != fixp_fromint(1)){
+
+					if(js_hori > fixp_fromint(1)) player->update_velocity(player, fixp_fromint(1), player->vel_y);
+					else player->update_velocity(player, fixp_fromint(-1), player->vel_y);
+
+					if(js_vert > fixp_fromint(1)) player->update_velocity(player, player->vel_x, fixp_fromint(1));
+					else player->update_velocity(player, player->vel_x, fixp_fromint(-1));
+
+
+				}
+
+				else if(js_hori != fixp_fromint(1) && js_vert == fixp_fromint(1))
+				{
+					if(js_hori>fixp_fromint(1)){
+						player->update_velocity(player, fixp_fromint(1), fixp_fromint(0));
+						player->update_rotation(player, 1);
+					}
+					else {
+						player->update_velocity(player, fixp_fromint(-1), fixp_fromint(0));
+						player->update_rotation(player, 3);
+					}
+				}
+				else if(js_hori == fixp_fromint(1) && js_vert != fixp_fromint(1)){
+					if(js_vert>fixp_fromint(1)){
+						player->update_velocity(player, fixp_fromint(0), fixp_fromint(1));
+						player->update_rotation(player, 0);
+					}
+					else{
+						player->update_velocity(player, fixp_fromint(0), fixp_fromint(-1));
+						player->update_rotation(player, 2);
+					}
+				}
+
+				fixp_t new_x = fixp_add(player->x, fixp_div(player->vel_x, fixp_fromint(1)));
+				fixp_t new_y = fixp_sub(player->y, fixp_div(player->vel_y, fixp_fromint(2)));
+				if (new_x < fixp_fromint(1)) {
+					new_x = fixp_fromint(1);
+				} else if (new_x > fixp_fromint(DISPLAY_WIDTH - 6)) {
+					new_x = fixp_fromint(DISPLAY_WIDTH - 6);
+				}
+
+				if (new_y < fixp_fromint(1)) {
+					new_y = fixp_fromint(1);
+				} else if (new_y > fixp_fromint(DISPLAY_HEIGHT - 15)) {
+					new_y = fixp_fromint(DISPLAY_HEIGHT - 15);
+				}
+
+				player->update_position(player, new_x, new_y);
+
+
+				player->draw(player, planet_heightmap, 1);
+				update_flag &= ~(1<<1);
 			}
 
   			break;
