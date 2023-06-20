@@ -11,7 +11,7 @@
 #include "data_structures.h"
 #include "levels.h"
 
-
+#define GRAVITY 0x0400
 
 typedef enum State {NullState, MainMenu, HelpMenu, Game, DeathMenu, BossScreen} State;
 
@@ -50,8 +50,8 @@ int main(void)
 	uint8_t menu_selection = 0;
 	uint8_t last_menu_sel = 0;
 
-	uint8_t red_btn;
-	uint8_t gray_btn;
+	uint8_t prev_red_btn;
+	uint8_t prev_gray_btn;
 
 	fixp_t js_vert;
 	fixp_t js_hori;
@@ -59,20 +59,20 @@ int main(void)
 	uint8_t last_keypress;
 
 	uint8_t lives = 3;
-	uint8_t level = 14;
+	uint8_t level = 1;
 	uint16_t kills = 0;
 	uint16_t score = 0;
 
 	uint8_t* planet_heightmap;
 
-	entity_t* player = entity_init(Spaceship, 1<<14, 30<<14, 0, 0);
+	entity_t* player = entity_init(Spaceship, 100<<14, 30<<14, 0, 0);
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
-	//list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1), 0));
+	listnode_t* bullets = NULL;
+	listnode_t* bombs = NULL;
+	//list_push(&enemies, entity_init(Enemy, 220<<14, 10<<14, fixp_fromint(1), 0));
 	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
-
-	listnode_t* bullets = NULL;
 
 
 	uint8_t lcd_buffer[512];
@@ -95,11 +95,10 @@ int main(void)
 	gotoxy(1,1);
 
   	while (1) {
+  		uint8_t red_btn = buttonRed();
+  		uint8_t gray_btn = buttonGray();
 
-  		red_btn = buttonRed();
-  		gray_btn = buttonGray();
-
-  		js_vert = joystick_vert();
+  		js_vert = (2<<14)-joystick_vert();
   		js_hori = joystick_hori();
 
   		if (uart_get_count()) {
@@ -196,12 +195,12 @@ int main(void)
 
 					enemy_move(current, planet_heightmap);
 
-						++current->counter;
-					if (current->counter == 25) { // If counter is ten, fire bullet
+					++current->counter;
+					if (current->counter == 100) { // If counter is ten, fire bullet
 						current->counter = 0;
 
-						fixp_t toplayer_x = fixp_div(player->x - current->x, fixp_fromint(300)); // Vector from enemy to player
-						fixp_t toplayer_y = fixp_div(player->y - current->y, fixp_fromint(300));
+						fixp_t toplayer_x = fixp_div(player->x - current->x, fixp_fromint(150)); // Vector from enemy to player
+						fixp_t toplayer_y = fixp_div(player->y - current->y, fixp_fromint(150));
 
 						list_push(&bullets, entity_init(Bullet, current->x, current->y, toplayer_x, toplayer_y));
 					}
@@ -221,6 +220,7 @@ int main(void)
 					if (collisions) { // Collision with wall/roof/player
 						// Kill the bullet
 						current->draw(current, planet_heightmap, 0); // Erase bullet
+						current_node = current_node->next;
 						if (prev_node) {
 							free(list_remove_next(prev_node));
 						} else {
@@ -229,7 +229,6 @@ int main(void)
 						if (collisions & 1<<4) { // Collision with player
 							// Also kill the player
 						}
-						current_node = prev_node->next;
 
 					} else {
 						current->draw(current, planet_heightmap, 1);
@@ -237,70 +236,84 @@ int main(void)
 						current_node = current_node->next;
 					}
 				}
+				
 				update_flag &= ~1;
 			}
 
 
-  			if (update_flag & (1 << 1)){
+  			if (update_flag & (1 << 1)){ // Update player and bombs
+  				// Rising edge detection of input buttons
+  		  		uint8_t red_btn_rising = red_btn && !prev_red_btn;
+  		  		uint8_t gray_btn_rising = gray_btn && !prev_gray_btn;
 
-			// Update velocity
-				if(js_hori != fixp_fromint(1) && js_vert != fixp_fromint(1)){
+  				// Update list of bombs
+  				listnode_t* current = bombs;
+  				while (current != NULL) {
+  					// TODO Check collision somehow
+  					gravity_move(current->ptr, GRAVITY);
+  					current = current->next;
+  				}
+  				current = bombs;
+  				while (current != NULL) {
+  					entity_t* bomb = current->ptr;
+  					bomb->draw(bomb, NULL, 1);
+  					current = current->next;
+  				}
+  				gotoxy(1,1);
+  				printf("red: %d\ngray: %d\n#bombs: %d", red_btn, gray_btn, list_length(bombs));
 
-					if(js_hori > fixp_fromint(1)) player->update_velocity(player, fixp_fromint(1), player->vel_y);
+  				if (gray_btn_rising) { // Fire bomb? TODO Fix bombs dropping in the wrong direction
+  					// Fire bomb!
+  					list_push(&bombs, entity_init(Bomb, player->x, player->y, player->vel_x, player->vel_y));
+  				}
+
+  				if (red_btn_rising) { // Fire nuke?
+  					// Fire nuke!
+  					list_push(&bombs, entity_init(Nuke, player->x, player->y, player->vel_x, player->vel_y));
+  				}
+
+  				// Update velocity of player
+				if (js_hori != fixp_fromint(1) && js_vert != fixp_fromint(1)) {
+					if (js_hori > fixp_fromint(1)) player->update_velocity(player, fixp_fromint(1), player->vel_y);
 					else player->update_velocity(player, fixp_fromint(-1), player->vel_y);
 
-					if(js_vert > fixp_fromint(1)) player->update_velocity(player, player->vel_x, fixp_fromint(1));
+					if (js_vert > fixp_fromint(1)) player->update_velocity(player, player->vel_x, fixp_fromint(1));
 					else player->update_velocity(player, player->vel_x, fixp_fromint(-1));
-
-
-				}
-
-				else if(js_hori != fixp_fromint(1) && js_vert == fixp_fromint(1))
-				{
-					if(js_hori>fixp_fromint(1)){
+				} else if (js_hori != fixp_fromint(1) && js_vert == fixp_fromint(1)) {
+					if (js_hori > fixp_fromint(1)) {
 						player->update_velocity(player, fixp_fromint(1), fixp_fromint(0));
 						player->update_rotation(player, 1);
-					}
-					else {
+					} else {
 						player->update_velocity(player, fixp_fromint(-1), fixp_fromint(0));
 						player->update_rotation(player, 3);
 					}
-				}
-				else if(js_hori == fixp_fromint(1) && js_vert != fixp_fromint(1)){
-					if(js_vert>fixp_fromint(1)){
+				} else if (js_hori == fixp_fromint(1) && js_vert != fixp_fromint(1)) {
+					if (js_vert > fixp_fromint(1)) {
 						player->update_velocity(player, fixp_fromint(0), fixp_fromint(1));
+						player->update_rotation(player, 2);
+					} else {
+						player->update_velocity(player, fixp_fromint(0), fixp_fromint(-1));
 						player->update_rotation(player, 0);
 					}
-					else{
-						player->update_velocity(player, fixp_fromint(0), fixp_fromint(-1));
-						player->update_rotation(player, 2);
-					}
 				}
 
-				fixp_t new_x = fixp_add(player->x, fixp_div(player->vel_x, fixp_fromint(1)));
-				fixp_t new_y = fixp_sub(player->y, fixp_div(player->vel_y, fixp_fromint(2)));
-				if (new_x < fixp_fromint(1)) {
-					new_x = fixp_fromint(1);
-				} else if (new_x > fixp_fromint(DISPLAY_WIDTH - 6)) {
-					new_x = fixp_fromint(DISPLAY_WIDTH - 6);
+				// Update position of player
+				uint8_t collisions = player_move(player, planet_heightmap); // Returns collision from check_collision()
+
+				if (collisions & 0b1000) {
+					// Player has hit ground, game over.
 				}
 
-				if (new_y < fixp_fromint(1)) {
-					new_y = fixp_fromint(1);
-				} else if (new_y > fixp_fromint(DISPLAY_HEIGHT - 15)) {
-					new_y = fixp_fromint(DISPLAY_HEIGHT - 15);
-				}
+				// Draw player
+				player->draw(player, planet_heightmap, 1);
 
-				player->update_position(player, new_x, new_y);
-
+				// Rising edge detection of input buttons
+				prev_red_btn = red_btn;
+				prev_gray_btn = gray_btn;
 
 				player->draw(player, planet_heightmap, 1);
 				update_flag &= ~(1<<1);
 			}
-
-  			if (!list_length(enemies)) {
-  				level_setup(&enemies, level, planet_heightmap);
-  			}
 
   			break;
 
@@ -353,6 +366,7 @@ int main(void)
 
   		}
 
+  		// LCD information:
   		sprintf(lcd_lives.content, "Lives: %d", lives);
   		sprintf(lcd_level.content, "Level: %d", level);
   		sprintf(lcd_score.content, "Score: %d", score);
@@ -368,7 +382,7 @@ int main(void)
   		lcd_push_buffer(lcd_buffer);
 
 
-
+  		// State transitions:
   		if (last_keypress == 'b' && state != BossScreen) {
 			next_state = BossScreen;
 			return_state = state;
@@ -386,11 +400,11 @@ void TIM1_BRK_TIM15_IRQHandler(void) {
 	if (punk_address == punk_end)
 		punk_address = punk_begin;*/
 
-	update_flag |= 1<<1;
+	update_flag |= 1<<1; // Set player/bomb flag high
 	TIM15->SR &= ~0x0001;
 }
 
 void TIM1_UP_TIM16_IRQHandler(void) {
-	update_flag |= 1;
+	update_flag |= 1; // Set enemy/bullet flag high
 	TIM16->SR &= ~0x0001;
 }

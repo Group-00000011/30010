@@ -131,6 +131,7 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 }
 
 static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* heightmap, entity_t* player) { // [0]=walls, [1]=roof, [2]=ground, [3]=player
+	// Bits of return value:
 	// [0] collision with left wall
 	// [1] collision with right wall
 	// [2] collision with roof
@@ -229,4 +230,33 @@ void entity_move (entity_t* self) {
 	self->update_position(self, self->x + self->vel_x, self->y+self->vel_y);
 	//self->x = self->x + self->vel_x;
 	//self->y = self->y + self->vel_y;
+}
+
+void gravity_move (entity_t* self, fixp_t g) {
+	self->vel_y += g;
+	self->update_position(self, self->x + self->vel_x, self->y+self->vel_y);
+}
+
+uint8_t player_move (entity_t* self, uint8_t* heightmap) {
+	fixp_t new_x = self->x + self->vel_x*2;
+	fixp_t new_y = self->y + self->vel_y;
+
+	uint8_t collisions = self->check_collision(new_x, new_y, 0b0111, heightmap, NULL); // Check collision with walls only
+
+	if (collisions) {
+		if (collisions & 1) { // Collision with left wall
+			new_x = fixp_fromint(DISPLAY_WIDTH-1);
+		} else if (collisions & 0b10) { // Right wall
+			new_x = 0;
+		}
+		if (collisions & 0b100) { // Ceiling
+			self->vel_y = -self->vel_y;
+			new_y = 0;
+		} /*else if (collisions & 0b1000) { // Ground
+
+		}*/
+	}
+
+	self->update_position(self, new_x, new_y);
+	return collisions;
 }
