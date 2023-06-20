@@ -25,7 +25,8 @@ void* list_pop(listnode_t** head) { // Remove node from the beginning of list [O
 	if (*head) {
 		listnode_t* old_head = *head;
 		*head = (*head)->next;
-		return old_head->ptr;
+		free(old_head->ptr);
+		return old_head;
 	}
 	return NULL;
 }
@@ -50,13 +51,15 @@ void* list_remove(listnode_t** head, uint16_t idx) { // Remove node from specifi
 	}
 	listnode_t* node_to_remove = current->next;
 	current->next = current->next->next;
-	return node_to_remove->ptr;
+	free(node_to_remove->ptr);
+	return node_to_remove;
 }
 
 void* list_remove_next(listnode_t* head) { // Remove node next to head in list [O(1)]
 	if (head->next) {
-		void* to_remove = head->next->ptr;
+		listnode_t* to_remove = head->next;
 		head->next = head->next->next;
+		free(to_remove->ptr);
 		return to_remove;
 	}
 	return NULL;
