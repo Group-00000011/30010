@@ -26,6 +26,9 @@ volatile uint8_t update_flag = 0; // [0]=update enemies; [1]=update player
 void spaceship_input();
 uint8_t rot;
 
+uint16_t total_bullets = 0;
+uint16_t bullets_removed = 0;
+uint16_t bullets_popped = 0;
 
 
 int main(void)
@@ -65,7 +68,7 @@ int main(void)
 
 	uint8_t* planet_heightmap;
 
-	entity_t* player = entity_init(Spaceship, 230<<14, 30<<14, 0, 0);
+	entity_t* player = entity_init(Spaceship, 128<<14, 30<<14, 0, 0);
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1), 0));
@@ -210,6 +213,7 @@ int main(void)
 //						toplayer_y = fixp_div(toplayer_y, distance); // Normalize vector
 
 						list_push(&bullets, entity_init(Bullet, current->x, current->y, toplayer_x, toplayer_y));
+						++total_bullets;
 					}
 
 					current->draw(current, planet_heightmap, 1);
@@ -229,8 +233,10 @@ int main(void)
 						current->draw(current, planet_heightmap, 0); // Erase bullet
 						if (prev_node) {
 							free(list_remove_next(prev_node));
+							++bullets_removed;
 						} else {
 							free(list_pop(&bullets));
+							++bullets_popped;
 						}
 						if (collisions & 1<<4) { // Collision with player
 							// Also kill the player
@@ -244,8 +250,8 @@ int main(void)
 					}
 				}
 				gotoxy(1,1);
-				printf("%d", list_length(bullets));
-				player->draw(player, planet_heightmap, 1);
+				printf("atm: %d\ntotal: %d\npopped: %d\nremoved: %d\nremain: %d\n", list_length(bullets), total_bullets, bullets_popped, bullets_removed, total_bullets-(bullets_popped+bullets_removed));
+				//player->draw(player, planet_heightmap, 1);
 				update_flag &= ~1;
 			}
   			if (update_flag & 1<<1) { // Update player
