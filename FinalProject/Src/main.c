@@ -10,7 +10,7 @@
 #include "daftpunk8bit.h"
 #include "data_structures.h"
 
-
+#define GRAVITY 0x0400
 
 typedef enum State {NullState, MainMenu, HelpMenu, Game, DeathMenu, BossScreen} State;
 
@@ -49,8 +49,8 @@ int main(void)
 	uint8_t menu_selection = 0;
 	uint8_t last_menu_sel = 0;
 
-	uint8_t red_btn;
-	uint8_t gray_btn;
+	uint8_t prev_red_btn;
+	uint8_t prev_gray_btn;
 
 	fixp_t js_vert;
 	fixp_t js_hori;
@@ -67,11 +67,12 @@ int main(void)
 	entity_t* player = entity_init(Spaceship, 100<<14, 30<<14, 0, 0);
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
+	listnode_t* bullets = NULL;
+	listnode_t* bombs = NULL;
 	list_push(&enemies, entity_init(Enemy, 240<<14, 10<<14, fixp_fromint(1), 0));
 	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
 
-	listnode_t* bullets = NULL;
 
 
 	uint8_t lcd_buffer[512];
@@ -94,9 +95,8 @@ int main(void)
 	gotoxy(1,1);
 
   	while (1) {
-
-  		red_btn = buttonRed();
-  		gray_btn = buttonGray();
+  		uint8_t red_btn = buttonRed();
+  		uint8_t gray_btn = buttonGray();
 
   		js_vert = joystick_vert();
   		js_hori = joystick_hori();
@@ -196,11 +196,11 @@ int main(void)
 					enemy_move(current, planet_heightmap);
 
 						++current->counter;
-					if (current->counter == 25) { // If counter is ten, fire bullet
+					if (current->counter == 200) { // If counter is ten, fire bullet
 						current->counter = 0;
 
-						fixp_t toplayer_x = fixp_div(player->x - current->x, fixp_fromint(300)); // Vector from enemy to player
-						fixp_t toplayer_y = fixp_div(player->y - current->y, fixp_fromint(300));
+						fixp_t toplayer_x = fixp_div(player->x - current->x, fixp_fromint(150)); // Vector from enemy to player
+						fixp_t toplayer_y = fixp_div(player->y - current->y, fixp_fromint(150));
 
 						list_push(&bullets, entity_init(Bullet, current->x, current->y, toplayer_x, toplayer_y));
 					}
@@ -242,44 +242,65 @@ int main(void)
 			}
 
 
-  			if (update_flag & (1 << 1)){
+  			if (update_flag & (1 << 1)){ // Update player and bombs
+  				// Rising edge detection of input buttons
+  		  		uint8_t red_btn_rising = red_btn && !prev_red_btn;
+  		  		uint8_t gray_btn_rising = gray_btn && !prev_gray_btn;
 
-			// Update velocity
-				if(js_hori != fixp_fromint(1) && js_vert != fixp_fromint(1)){
+  				// Update list of bombs
+  				listnode_t* current = bombs;
+  				while (current != NULL) {
+  					// TODO Check collision somehow
+  					gravity_move(current->ptr, GRAVITY);
+  					current = current->next;
+  				}
+  				current = bombs;
+  				while (current != NULL) {
+  					entity_t* bomb = current->ptr;
+  					bomb->draw(bomb, NULL, 1);
+  					current = current->next;
+  				}
+  				gotoxy(1,1);
+  				printf("red: %d\ngray: %d\n#bombs: %d", red_btn, gray_btn, list_length(bombs));
 
-					if(js_hori > fixp_fromint(1)) player->update_velocity(player, fixp_fromint(1), player->vel_y);
+  				if (gray_btn_rising) { // Fire bomb? TODO Fix bombs dropping in the wrong direction
+  					// Fire bomb!
+  					list_push(&bombs, entity_init(Bomb, player->x, player->y, player->vel_x, player->vel_y));
+  				}
+
+  				if (red_btn_rising) { // Fire nuke?
+  					// Fire nuke!
+  					list_push(&bombs, entity_init(Nuke, player->x, player->y, player->vel_x, player->vel_y));
+  				}
+
+  				// Update velocity of player
+				if (js_hori != fixp_fromint(1) && js_vert != fixp_fromint(1)) {
+					if (js_hori > fixp_fromint(1)) player->update_velocity(player, fixp_fromint(1), player->vel_y);
 					else player->update_velocity(player, fixp_fromint(-1), player->vel_y);
 
-					if(js_vert > fixp_fromint(1)) player->update_velocity(player, player->vel_x, fixp_fromint(1));
+					if (js_vert > fixp_fromint(1)) player->update_velocity(player, player->vel_x, fixp_fromint(1));
 					else player->update_velocity(player, player->vel_x, fixp_fromint(-1));
-
-
-				}
-
-				else if(js_hori != fixp_fromint(1) && js_vert == fixp_fromint(1))
-				{
-					if(js_hori>fixp_fromint(1)){
+				} else if (js_hori != fixp_fromint(1) && js_vert == fixp_fromint(1)) {
+					if (js_hori > fixp_fromint(1)) {
 						player->update_velocity(player, fixp_fromint(1), fixp_fromint(0));
 						player->update_rotation(player, 1);
-					}
-					else {
+					} else {
 						player->update_velocity(player, fixp_fromint(-1), fixp_fromint(0));
 						player->update_rotation(player, 3);
 					}
-				}
-				else if(js_hori == fixp_fromint(1) && js_vert != fixp_fromint(1)){
-					if(js_vert>fixp_fromint(1)){
+				} else if (js_hori == fixp_fromint(1) && js_vert != fixp_fromint(1)) {
+					if (js_vert > fixp_fromint(1)) {
 						player->update_velocity(player, fixp_fromint(0), fixp_fromint(1));
-						player->update_rotation(player, 0);
-					}
-					else{
-						player->update_velocity(player, fixp_fromint(0), fixp_fromint(-1));
 						player->update_rotation(player, 2);
+					} else {
+						player->update_velocity(player, fixp_fromint(0), fixp_fromint(-1));
+						player->update_rotation(player, 0);
 					}
 				}
 
+				// Update position of player
 				fixp_t new_x = fixp_add(player->x, fixp_div(player->vel_x, fixp_fromint(1)));
-				fixp_t new_y = fixp_sub(player->y, fixp_div(player->vel_y, fixp_fromint(2)));
+				fixp_t new_y = fixp_add(player->y, fixp_div(player->vel_y, fixp_fromint(2)));
 				if (new_x < fixp_fromint(1)) {
 					new_x = fixp_fromint(1);
 				} else if (new_x > fixp_fromint(DISPLAY_WIDTH - 6)) {
@@ -294,10 +315,16 @@ int main(void)
 
 				player->update_position(player, new_x, new_y);
 
-
+				// Draw player
 				player->draw(player, planet_heightmap, 1);
+
+				// Rising edge detection of input buttons
+				prev_red_btn = red_btn;
+				prev_gray_btn = gray_btn;
+
 				update_flag &= ~(1<<1);
 			}
+
 
   			break;
 
@@ -350,11 +377,11 @@ int main(void)
 
   		}
 
+  		// LCD information:
   		sprintf(lcd_lives.content, "Lives: %d", lives);
   		sprintf(lcd_level.content, "Level: %d", level);
   		sprintf(lcd_score.content, "Score: %d", score);
   		sprintf(lcd_kills.content, "Kills: %d", kills);
-
 
   		lcd_write_line(lcd_buffer, &lcd_lives);
   		lcd_write_line(lcd_buffer, &lcd_level);
@@ -365,7 +392,7 @@ int main(void)
   		lcd_push_buffer(lcd_buffer);
 
 
-
+  		// State transitions:
   		if (last_keypress == 'b' && state != BossScreen) {
 			next_state = BossScreen;
 			return_state = state;

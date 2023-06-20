@@ -230,3 +230,8 @@ void entity_move (entity_t* self) {
 	//self->x = self->x + self->vel_x;
 	//self->y = self->y + self->vel_y;
 }
+
+void gravity_move (entity_t* self, fixp_t g) {
+	self->vel_y += g;
+	self->update_position(self, self->x + self->vel_x, self->y+self->vel_y);
+}
