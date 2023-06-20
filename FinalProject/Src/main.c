@@ -186,7 +186,7 @@ int main(void)
 						list_push(&bullets, entity_init(Bullet, current->x, current->y, toplayer_x, toplayer_y));
 					}
 
-					current->draw(current);
+					current->draw(current, 1);
 					current_node = current_node->next;
 				}
 				current_node = bullets;
@@ -200,6 +200,7 @@ int main(void)
 
 					if (collisions) { // Collision with wall/roof/player
 						// Kill the bullet
+						current->draw(current, 0); // Erase bullet
 						if (prev_node) {
 							free(list_remove_next(prev_node));
 						} else {
@@ -211,14 +212,14 @@ int main(void)
 						current_node = prev_node->next;
 
 					} else {
-						current->draw(current);
+						current->draw(current, 1);
 						prev_node = current_node;
 						current_node = current_node->next;
 					}
 				}
 				gotoxy(1,1);
 				printf("%d", list_length(bullets));
-				player->draw(player);
+				player->draw(player, 1);
 				update_flag &= ~1;
 			}
   			if (update_flag & 1<<1) { // Update player

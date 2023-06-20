@@ -10,7 +10,7 @@
 #include "graphics.h"
 
 
-static void draw_spaceship(entity_t * self) {
+static void draw_spaceship(entity_t * self, uint8_t redraw) { // If !redraw -> only erase
 
 	if(fixp_toint(self->last_x) == fixp_toint(self->x)
 			&& fixp_toint(self->last_y) == fixp_toint(self->y)
@@ -60,35 +60,39 @@ switch (self->rotation){
 }
 
 
-static void draw_enemy(entity_t * self) {
+static void draw_enemy(entity_t * self, uint8_t redraw) {
 	gotoxy((self->last_x>>14)+1, (self->last_y>>14)+1);
 	printf(" ");
-	gotoxy((self->x>>14)+1, (self->y>>14)+1);
-	printf("e");
+	if (redraw) {
+		gotoxy((self->x>>14)+1, (self->y>>14)+1);
+		printf("e");
+	}
 }
 
 
-static void draw_bullet(entity_t * self) {
+static void draw_bullet(entity_t * self, uint8_t redraw) {
 	gotoxy((self->last_x>>14)+1, (self->last_y>>14)+1);
 	printf(" ");
-	gotoxy((self->x>>14)+1, (self->y>>14)+1);
-	printf("b");
+	if (redraw) {
+		gotoxy((self->x>>14)+1, (self->y>>14)+1);
+		printf("b");
+	}
 
 }
 
-static void draw_bomb(entity_t * self) {
+static void draw_bomb(entity_t * self, uint8_t redraw) {
 	gotoxy(self->x>>14,self->y>>14);
 	printf("B");
 }
 
 
-static void draw_nuke(entity_t * self) {
+static void draw_nuke(entity_t * self, uint8_t redraw) {
 	gotoxy(self->x>>14,self->y>>14);
 	printf("n");
 }
 
 
-static void draw_powerup(entity_t * self) {
+static void draw_powerup(entity_t * self, uint8_t redraw) {
 	gotoxy(self->x>>14,self->y>>14);
 	printf("p");
 }
