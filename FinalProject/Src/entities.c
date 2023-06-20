@@ -6,59 +6,57 @@
  */
 
 #include <stdlib.h>
+#include <stdint.h>
 #include "entities.h"
 #include "graphics.h"
 
 
-static void draw_spaceship(entity_t * self) {
+static void draw_spaceship(entity_t* self, uint8_t* ground, uint8_t redraw) {
 
-	if(fixp_toint(self->last_x) == fixp_toint(self->x)
-			&& fixp_toint(self->last_y) == fixp_toint(self->y)
-			&& self->last_rotation == self->rotation)
-		return;
-
-switch (self->rotation){
-	case 0:
-		gfx_clear_area(ground, fixp_toint(self->last_x),fixp_toint(self->last_y),fixp_toint(self->last_x)+6,fixp_toint(self->last_y)+3);
-		gotoxy(fixp_toint(self->x),fixp_toint(self->y));
-		printf("/%c%c%c", 0xDB,0xDB,0x5C);
-		gotoxy(fixp_toint(self->x),fixp_toint(self->y)+1);
-		printf("%c  %c", 0xDB,0xDB);
-		gotoxy(fixp_toint(self->x),fixp_toint(self->y)+2);
-		printf("/%c%c%c", 0xDF,0xDF,0x5C);
-		break;
-	case 1:
-		gfx_clear_area(ground, self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
-		gotoxy(self->x,self->y);
-		printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDF,0xDF,0xDB,0x5C);
-		gotoxy(self->x,self->y+1);
-		printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
-		break;
-	case 2:
-		gfx_clear_area(ground, self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
-			gotoxy(self->x,self->y);
-			printf("%c%c%c/", 0x5C,0xDC,0xDC);
-			gotoxy(self->x,self->y+1);
+	//if(fixp_toint(self->last_x) == fixp_toint(self->x) && fixp_toint(self->last_y) == fixp_toint(self->y) && self->last_rotation == self->rotation)
+	//	return;
+	//fgcolor(7);
+	switch (self->rotation) {
+		case 0:
+			gfx_clear_area(ground, fixp_toint(self->last_x),fixp_toint(self->last_y),fixp_toint(self->last_x)+6,fixp_toint(self->last_y)+3);
+			bgcolor(0);
+			fgcolor(7);
+			gotoxy(fixp_toint(self->x),fixp_toint(self->y));
+			printf("/%c%c%c", 0xDB,0xDB,0x5C);
+			gotoxy(fixp_toint(self->x),fixp_toint(self->y)+1);
 			printf("%c  %c", 0xDB,0xDB);
-			gotoxy(self->x,self->y+2);
-			printf("%c%c%c/", 0x5C, 0xDB,0xDB);
+			gotoxy(fixp_toint(self->x),fixp_toint(self->y)+2);
+			printf("/%c%c%c", 0xDF,0xDF,0x5C);
 			break;
-		break;
-	case 3:
-		gfx_clear_area(ground, self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
-		gotoxy(self->x,self->y);
-		printf("/%c%c%c%c/", 0xDB,0xDF,0xDF,0xDB);
-		gotoxy(self->x,self->y+1);
-		printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDC,0xDC,0xDB,0x5C);
-		break;
-	default:
-		printf("ERROR");
-		break;
+		case 1:
+			gfx_clear_area(ground, self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
+			gotoxy(self->x,self->y);
+			printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDF,0xDF,0xDB,0x5C);
+			gotoxy(self->x,self->y+1);
+			printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
+			break;
+		case 2:
+			gfx_clear_area(ground, self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
+				gotoxy(self->x,self->y);
+				printf("%c%c%c/", 0x5C,0xDC,0xDC);
+				gotoxy(self->x,self->y+1);
+				printf("%c  %c", 0xDB,0xDB);
+				gotoxy(self->x,self->y+2);
+				printf("%c%c%c/", 0x5C, 0xDB,0xDB);
+				break;
+			break;
+		case 3:
+			gfx_clear_area(ground, self->last_x,self->last_y,(self->last_x)+6,(self->last_y)+3);
+			gotoxy(self->x,self->y);
+			printf("/%c%c%c%c/", 0xDB,0xDF,0xDF,0xDB);
+			gotoxy(self->x,self->y+1);
+			printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDC,0xDC,0xDB,0x5C);
+			break;
+		default:
+			printf("ERROR");
+			break;
+	}
 }
-
-
-}
-
 
 static void draw_enemy(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 	if ((self->last_x>>14) > 254) {

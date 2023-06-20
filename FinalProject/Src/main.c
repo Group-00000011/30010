@@ -72,6 +72,8 @@ int main(void)
 	list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
 
+	listnode_t* bullets = NULL;
+
 
 	uint8_t lcd_buffer[512];
 	memset(lcd_buffer, 0, 512);
@@ -203,8 +205,6 @@ int main(void)
 						fixp_t toplayer_x = fixp_div(player->x - current->x, fixp_fromint(300)); // Vector from enemy to player
 						fixp_t toplayer_y = fixp_div(player->y - current->y, fixp_fromint(300));
 
-
-
 //						fixp_t distance = fixp_sqrt(fixp_mult(toplayer_x, toplayer_x) + fixp_mult(toplayer_x, toplayer_y)); // Distance from enemy to player
 //						toplayer_x = fixp_div(toplayer_x, distance); // Normalize vector
 //						toplayer_y = fixp_div(toplayer_y, distance); // Normalize vector
@@ -212,7 +212,7 @@ int main(void)
 						list_push(&bullets, entity_init(Bullet, current->x, current->y, toplayer_x, toplayer_y));
 					}
 
-					current->draw(current, 1);
+					current->draw(current, planet_heightmap, 1);
 					current_node = current_node->next;
 				}
 				current_node = bullets;
@@ -226,7 +226,7 @@ int main(void)
 
 					if (collisions) { // Collision with wall/roof/player
 						// Kill the bullet
-						current->draw(current, 0); // Erase bullet
+						current->draw(current, planet_heightmap, 0); // Erase bullet
 						if (prev_node) {
 							free(list_remove_next(prev_node));
 						} else {
@@ -238,14 +238,14 @@ int main(void)
 						current_node = prev_node->next;
 
 					} else {
-						current->draw(current, 1);
+						current->draw(current, planet_heightmap, 1);
 						prev_node = current_node;
 						current_node = current_node->next;
 					}
 				}
 				gotoxy(1,1);
 				printf("%d", list_length(bullets));
-				player->draw(player, 1);
+				player->draw(player, planet_heightmap, 1);
 				update_flag &= ~1;
 			}
   			if (update_flag & 1<<1) { // Update player
