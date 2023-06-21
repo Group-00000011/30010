@@ -111,8 +111,32 @@ static void draw_bullet(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 }
 
 static void draw_bomb(entity_t * self, uint8_t  * ground, uint8_t redraw) {
+	gotoxy(self->last_x>>14, self->last_y>>14);
+	printf(" ");
 	gotoxy(self->x>>14,self->y>>14);
-	printf("%c",0xBE);
+
+	switch(self->rotation){
+	case 0b0001: printf("^"); // up
+		break;
+	case 0b0101: printf("%c", 0xBF);// right up
+		break;
+	case 0b0100: printf(">");//right
+		break;
+	case 0b0110: printf("%c", 0xD9);// right down
+		break;
+	case 0b0010: printf("v");// down
+		break;
+	case 0b1010: printf("%c", 0xC0);// left down
+		break;
+	case 0b1000: printf("<"); //left
+		break;
+	case 0b1001: printf("%c", 0xDA); //left up
+		break;
+	case 0b0000: break;
+	default:	 printf("ERROR");
+		break;
+	}
+
 }
 
 
@@ -142,7 +166,29 @@ static void update_velocity(entity_t * self, fixp_t vel_x, fixp_t vel_y) {
 
 static void update_rotation(entity_t * self, fixp_t rotation) {
 	self->last_rotation = self->rotation;
+
+
+	switch (self->type) {
+		case Spaceship:
+			//implement here maybe?
+			break;;
+		case Bomb:
+			//
+			rotation = 0b0000;
+				if(self->vel_x != 0){
+					if(self->vel_x < 0) rotation |= (0b10 << 2);
+					else  rotation |= (0b01 << 2);
+				}
+				if(self->vel_y != 0){
+					if(self->vel_y < 0) rotation |= 0b01;
+					else rotation |= 0b10;
+				}
+			break;
+		default:
+			printf("ERROR");
+	}
 	self->rotation = rotation;
+
 }
 
 static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* heightmap, entity_t* player) { // [0]=walls, [1]=roof, [2]=ground, [3]=player

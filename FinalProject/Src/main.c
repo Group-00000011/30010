@@ -260,6 +260,7 @@ int main(void)
   				current = bombs;
   				while (current != NULL) {
   					entity_t* bomb = current->ptr;
+  					bomb->update_rotation(bomb, 0);
   					bomb->draw(bomb, NULL, 1);
   					current = current->next;
   				}
