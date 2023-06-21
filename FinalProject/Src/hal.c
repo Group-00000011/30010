@@ -88,6 +88,10 @@ void enable_timer_16 (uint8_t on) {
 	}
 }
 
+void set_timer_15_speed(uint16_t speed) {
+	TIM16->ARR = speed;		// Set auto reload value (original:64000)
+}
+
 void buzzer_set_pwm (uint8_t value) { // Sets the buzzer PWM pulse width to value/255
 	TIM2->CCR3 = value;
 }

@@ -9,6 +9,7 @@
 #include "graphics.h"
 #include "daftpunk8bit.h"
 #include "data_structures.h"
+#include "levels.h"
 
 #define GRAVITY 0x0400
 
@@ -63,12 +64,12 @@ int main(void)
 
 	uint8_t* planet_heightmap;
 
-	entity_t* player = entity_init(Spaceship, 100<<14, 5<<14, 0, 0);
+	entity_t* player = entity_init(Spaceship, 10<<14, 30<<14, 0, 0);
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	listnode_t* bullets = NULL;
 	listnode_t* bombs = NULL;
-	list_push(&enemies, entity_init(Enemy, 220<<14, 10<<14, fixp_fromint(1), 0));
+	//list_push(&enemies, entity_init(Enemy, 220<<14, 10<<14, fixp_fromint(1), 0));
 	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
 
@@ -187,6 +188,10 @@ int main(void)
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
   			}
+
+  			if (enemies == NULL) {
+  				level_setup(&enemies, level, planet_heightmap);
+  			}
 			
   			if (update_flag & 1) {	// Update enemies and bullets
 				listnode_t* current_node = enemies;
@@ -236,8 +241,7 @@ int main(void)
 						current_node = current_node->next;
 					}
 				}
-				gotoxy(1,1);
-				//player->draw(player, planet_heightmap, 1); // <-- Hopefully a mistake, should probably just delete
+				
 				update_flag &= ~1;
 			}
 
@@ -323,6 +327,7 @@ int main(void)
 				prev_red_btn = red_btn;
 				prev_gray_btn = gray_btn;
 
+				player->draw(player, planet_heightmap, 1);
 				update_flag &= ~(1<<1);
 			}
 
