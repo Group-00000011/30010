@@ -173,15 +173,14 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 			//implement here maybe?
 			break;;
 		case Bomb:
-			//
-			rotation = 0b0000;
+		rotation = 0b0000;										 // Resets rotation direction
 				if(self->vel_x != 0){
-					if(self->vel_x < 0) rotation |= (0b10 << 2);
-					else  rotation |= (0b01 << 2);
+					if(self->vel_x < 0) rotation |= (0b10 << 2); // Sets horizontal direction to negative
+					else  rotation |= (0b01 << 2);				 // Sets horizontal direction to positive
 				}
 				if(self->vel_y != 0){
-					if(self->vel_y < 0) rotation |= 0b01;
-					else rotation |= 0b10;
+					if(self->vel_y < 0) rotation |= 0b01;		 // Sets vertical direction to positive
+					else rotation |= 0b10;						 // Sets vertical direction to negative
 				}
 			break;
 		default:
