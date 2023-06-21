@@ -169,19 +169,58 @@ static void update_velocity(entity_t * self, fixp_t vel_x, fixp_t vel_y) {
 
 static void update_rotation(entity_t * self, fixp_t rotation) {
 	self->last_rotation = self->rotation;
-
+	fixp_t vel_x = self->vel_x;
+	fixp_t vel_y = self->vel_y;
 
 	switch (self->type) {
 		case Spaceship:
-			//implement here maybe?
+			if(vel_y > 0)
+			{
+				if(vel_x > vel_y    && vel_x > 0){
+							rotation = 1;		// right
+				}
+				else if(vel_x < (-vel_y) && vel_x < 0){
+							rotation = 3;		// left
+				}
+
+			}
+			else{
+				if(vel_x > (-vel_y)    && vel_x > 0){
+							rotation = 1;		// right
+				}
+				else if(vel_x < vel_y && vel_x < 0){
+							rotation = 3;		// left<
+				}
+
+			}
+			if(vel_x > 0)
+						{
+				if( vel_y > vel_x && vel_y > 0){
+							rotation = 2;		// down
+				}
+				else if(vel_y < (-vel_x) && vel_y < 0){
+							rotation = 0;		// up
+				}
+			}
+			else{
+				if(vel_y > (-vel_x) && vel_y > 0){
+							rotation = 2;		// down
+				}
+				else if(vel_y < vel_x && vel_y < 0){
+							rotation = 0;		// up
+				}
+			}
+
 			break;
 		case Bomb:
-		rotation = 0b0000;										 // Resets rotation direction
-		fixp_t vel_x = self->vel_x;
-		fixp_t vel_y = self->vel_y;
+		rotation = 0b0000;					// Resets rotation direction
 
-		if(vel_x == 0 && vel_y == 0)
+
+		// Become - if no velocity.
+		if(vel_x < (1<<11) && vel_x > (-1<<11) && vel_y < (1<<11) && vel_y > (-1<<11)){
 			break;
+		}
+
 		if(vel_y > -( vel_x << 1) && vel_y < vel_x << 1){
 			rotation |= (0b01 << 2);		// Sets horizontal direction to positive
 		}

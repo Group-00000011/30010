@@ -320,6 +320,7 @@ int main(void)
 							free(list_pop(&bombs));
 						}
 					} else {
+						current_entity->update_rotation(current_entity, 0);
 						current_entity->draw(current_entity, planet_heightmap, 1);
 						prev_node = current_node;
 						current_node = current_node->next;
@@ -350,7 +351,7 @@ int main(void)
 				}
 
 				// Draw player
-				player->draw(player, planet_heightmap, 1);
+				player->update_rotation(player, 0);
 
 				// Rising edge detection of input buttons
 				prev_red_btn = red_btn;
