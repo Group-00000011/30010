@@ -41,7 +41,7 @@ int main(void)
 	button_init();
 
 	// Initialise state machine
-	State state = MainMenu;
+	State state = Game;
 	State last_state = NullState;
 	State next_state = state;
 	State return_state = MainMenu;
