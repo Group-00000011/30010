@@ -57,7 +57,7 @@ int main(void)
 	uint8_t last_keypress;
 
 	uint8_t lives = 3;
-	uint8_t level = 1;
+	uint8_t level = 0;
 	uint16_t kills = 0;
 	uint16_t score = 0;
 
@@ -186,9 +186,11 @@ int main(void)
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
   				lives = 3;
+  				level = 0;
   			}
 
   			if (enemies == NULL) {
+  				level++;
   				level_setup(&enemies, level, planet_heightmap);
   			}
 			
