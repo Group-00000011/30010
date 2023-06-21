@@ -15,7 +15,6 @@
 
 typedef enum State {NullState, MainMenu, HelpMenu, Game, DeathMenu, BossScreen} State;
 
-
 /*
 volatile uint8_t* punk_address = punk_long;
 uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
@@ -53,7 +52,12 @@ int main(void)
 	uint8_t prev_red_btn;
 	uint8_t prev_gray_btn;
 
+<<<<<<< HEAD
 	fixp_t js[2];
+=======
+	fixp_t js_vert;
+	fixp_t js_hori;
+>>>>>>> bullets
 
 	uint8_t last_keypress;
 
@@ -73,7 +77,11 @@ int main(void)
 	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
 
+<<<<<<< HEAD
+=======
 
+
+>>>>>>> bullets
 	uint8_t lcd_buffer[512];
 	memset(lcd_buffer, 0, 512);
 
@@ -87,8 +95,6 @@ int main(void)
 	lcd_init_text(&lcd_score, "", 0, 2, 25);
 	lcd_init_text(&lcd_kills, "", 0, 3, 25);
 
-
-
 	bgcolor(SPACE_COLOR);
 	clrscr();
 	gotoxy(1,1);
@@ -97,9 +103,12 @@ int main(void)
   		uint8_t red_btn = buttonRed();
   		uint8_t gray_btn = buttonGray();
 
-  		//js_vert = 1<<14;//joystick_vert();
-  		//js_hori = 1<<14;//joystick_hori();
+<<<<<<< HEAD
   		joystick_read(js);
+=======
+  		js_vert = (2<<14)-joystick_vert();
+  		js_hori = joystick_hori();
+>>>>>>> bullets
 
   		if (uart_get_count()) {
   			last_keypress = uart_get_char();
@@ -129,14 +138,14 @@ int main(void)
   				draw_menu_title("Main Menu");
   			}
 
-  			if (js[1] > (0x3 << 13)) {
+  			if (js[1] > 0) {
   				if (menu_selection) {
   					last_menu_sel = menu_selection;
   					menu_selection--;
   				}
   			}
 
-  			if (js[1] < (0x1 << 13)) {
+  			if (js[1] < 0) {
 				if (!menu_selection) {
 					last_menu_sel = menu_selection;
 					menu_selection++;
@@ -186,6 +195,7 @@ int main(void)
   		case Game:
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
+  				lives = 3;
   			}
 
   			if (enemies == NULL) {
@@ -200,7 +210,7 @@ int main(void)
 					enemy_move(current, planet_heightmap);
 
 					++current->counter;
-					if (current->counter == 100) { // If counter is ten, fire bullet
+					if (current->counter == (level < 15 ? 50 - level : 30)) { // If counter is reached fire bullet. max count decreases with higher level.
 						current->counter = 0;
 
 						fixp_t toplayer_x = fixp_div(player->x - current->x, fixp_fromint(150)); // Vector from enemy to player
@@ -219,7 +229,7 @@ int main(void)
 
 					entity_move(current);
 
-					uint8_t collisions = current->check_collision(current->x, current->y, 0b00001011, NULL, player); // Check collision with walls/roof/player
+					uint8_t collisions = current->check_collision(current->x, current->y, 0b1111, planet_heightmap, player); // Check collision with walls/roof/player
 
 					if (collisions) { // Collision with wall/roof/player
 						// Kill the bullet
@@ -231,7 +241,7 @@ int main(void)
 							free(list_pop(&bullets));
 						}
 						if (collisions & 1<<4) { // Collision with player
-							// Also kill the player
+							lives--;
 						}
 
 					} else {
@@ -240,12 +250,14 @@ int main(void)
 						current_node = current_node->next;
 					}
 				}
-<<<<<<< HEAD
-				gotoxy(1,1);
-				//player->draw(player, planet_heightmap, 1); // <-- Hopefully a mistake, should probably just delete
-=======
 				
->>>>>>> f73a0e0177b69879fdb12468a2edd1fc294a30c2
+<<<<<<< HEAD
+				if (!lives) {
+					next_state = 	DeathMenu;
+				}
+
+=======
+>>>>>>> bullets
 				update_flag &= ~1;
 			}
 
@@ -265,14 +277,10 @@ int main(void)
   				current = bombs;
   				while (current != NULL) {
   					entity_t* bomb = current->ptr;
+  					bomb->update_rotation(bomb, 0);
   					bomb->draw(bomb, NULL, 1);
   					current = current->next;
   				}
-<<<<<<< HEAD
-  				//gotoxy(1,1);
-  				//printf("red: %d\ngray: %d\n#bombs: %d", red_btn, gray_btn, list_length(bombs));
-=======
->>>>>>> f73a0e0177b69879fdb12468a2edd1fc294a30c2
 
   				if (gray_btn_rising) { // Fire bomb? TODO Fix bombs dropping in the wrong direction
   					// Fire bomb!
@@ -283,9 +291,11 @@ int main(void)
   					// Fire nuke!
   					list_push(&bombs, entity_init(Nuke, player->x, player->y, player->vel_x, player->vel_y));
   				}
+<<<<<<< HEAD
+=======
 
-  				// Update velocity of player BIG SPAGHETTI!!
-				/*if (js_hori != fixp_fromint(1) && js_vert != fixp_fromint(1)) {
+  				// Update velocity of player
+				if (js_hori != fixp_fromint(1) && js_vert != fixp_fromint(1)) {
 					if (js_hori > fixp_fromint(1)) player->update_velocity(player, fixp_fromint(1), player->vel_y);
 					else player->update_velocity(player, fixp_fromint(-1), player->vel_y);
 
@@ -307,18 +317,10 @@ int main(void)
 						player->update_velocity(player, fixp_fromint(0), fixp_fromint(-1));
 						player->update_rotation(player, 0);
 					}
-				}*/
+				}
 
-				gotoxy(1,1);
-				printf("jsx: ");
-				fixp_print(js[0]);
-				printf("\njsy: ");
-				fixp_print(js[1]);
-				printf("\n");
-				//printf("jsx: %10d\njsy: %10d\n", js[0], js[1]);
-
+>>>>>>> bullets
 				// Update position of player
-<<<<<<< HEAD
 				if (js[0] || js[1]) { // TODO Update the velocity of player
 					player->update_velocity(player, js[0], -js[1]);
 				}
@@ -327,9 +329,6 @@ int main(void)
 				if (collisions & 0b1000) {
 					// Player has hit ground, game over.
 				}
-=======
-				player_move(player, planet_heightmap); // Returns collision from check_collision()
->>>>>>> f73a0e0177b69879fdb12468a2edd1fc294a30c2
 
 				// Draw player
 				player->draw(player, planet_heightmap, 1);
@@ -338,9 +337,14 @@ int main(void)
 				prev_red_btn = red_btn;
 				prev_gray_btn = gray_btn;
 
+<<<<<<< HEAD
 				player->draw(player, planet_heightmap, 1);
+
+=======
+>>>>>>> bullets
 				update_flag &= ~(1<<1);
 			}
+
 
   			break;
 
@@ -398,7 +402,6 @@ int main(void)
   		sprintf(lcd_level.content, "Level: %d", level);
   		sprintf(lcd_score.content, "Score: %d", score);
   		sprintf(lcd_kills.content, "Kills: %d", kills);
-
 
   		lcd_write_line(lcd_buffer, &lcd_lives);
   		lcd_write_line(lcd_buffer, &lcd_level);

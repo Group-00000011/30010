@@ -15,6 +15,7 @@
 
 typedef enum State {NullState, MainMenu, HelpMenu, Game, DeathMenu, BossScreen} State;
 
+
 /*
 volatile uint8_t* punk_address = punk_long;
 uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
@@ -63,7 +64,7 @@ int main(void)
 
 	uint8_t* planet_heightmap;
 
-	entity_t* player = entity_init(Spaceship, 10<<14, 30<<14, 0, 0);
+	entity_t* player = entity_init(Spaceship, 100<<14, 30<<14, 0, 0);
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	listnode_t* bullets = NULL;
@@ -71,6 +72,7 @@ int main(void)
 	//list_push(&enemies, entity_init(Enemy, 220<<14, 10<<14, fixp_fromint(1), 0));
 	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
+
 
 	uint8_t lcd_buffer[512];
 	memset(lcd_buffer, 0, 512);
@@ -84,6 +86,8 @@ int main(void)
 	lcd_init_text(&lcd_level, "", 0, 1, 25);
 	lcd_init_text(&lcd_score, "", 0, 2, 25);
 	lcd_init_text(&lcd_kills, "", 0, 3, 25);
+
+
 
 	bgcolor(SPACE_COLOR);
 	clrscr();
@@ -123,14 +127,14 @@ int main(void)
   				draw_menu_title("Main Menu");
   			}
 
-  			if (js[1] > 0) {
+  			if (js[1] > (0x3 << 13)) {
   				if (menu_selection) {
   					last_menu_sel = menu_selection;
   					menu_selection--;
   				}
   			}
 
-  			if (js[1] < 0) {
+  			if (js[1] < (0x1 << 13)) {
 				if (!menu_selection) {
 					last_menu_sel = menu_selection;
 					menu_selection++;
@@ -283,6 +287,9 @@ int main(void)
 					// Player has hit ground, game over.
 				}
 
+				// Update position of player
+				player_move(player, planet_heightmap); // Returns collision from check_collision()
+
 				// Draw player
 				player->draw(player, planet_heightmap, 1);
 
@@ -291,10 +298,8 @@ int main(void)
 				prev_gray_btn = gray_btn;
 
 				player->draw(player, planet_heightmap, 1);
-
 				update_flag &= ~(1<<1);
 			}
-
 
   			break;
 
@@ -352,6 +357,7 @@ int main(void)
   		sprintf(lcd_level.content, "Level: %d", level);
   		sprintf(lcd_score.content, "Score: %d", score);
   		sprintf(lcd_kills.content, "Kills: %d", kills);
+
 
   		lcd_write_line(lcd_buffer, &lcd_lives);
   		lcd_write_line(lcd_buffer, &lcd_level);
