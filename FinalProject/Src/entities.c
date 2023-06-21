@@ -194,41 +194,6 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 		if(vel_x < -( vel_y << 1) && vel_x > vel_y << 1){
 			rotation |= (0b01 << 0);		// Sets vertical direction to positive
 		}
-
-
-		/*if(self->vel_x < 0){
-			if(self->vel_y < 0){
-				if(vel_y < (vel_x << 1) && vel_y < (vel_x << 1) ){
-					rotation |= 0b0100; // Sets horizontal direction to negative
-				}
-				else if (vel_y > (vel_x << 1) ){
-					rotation |= 0b0100; // Sets horizontal direction to negative
-				}
-			}
-			else{
-				rotation |= (0b10 << 2); // Sets horizontal direction to negative
-			}
-		} else {
-			if(self->vel_y<0){
-
-			}
-			else{
-
-			}
-		}
-
-
-
-					} else if (self->vel_x > (1<<13)) {
-						rotation |= (0b01 << 2);				 // Sets horizontal direction to positive
-					}
-
-					if(self->vel_y < ~(1<<13)+1) {
-						rotation |= 0b01;		 // Sets vertical direction to positive
-					} else if(self->vel_y > (1<<13)) {
-						rotation |= 0b10;						 // Sets vertical direction to negative
-					}
-*/
 			break;
 		default:
 			printf("ERROR");
