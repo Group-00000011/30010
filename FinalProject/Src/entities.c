@@ -168,13 +168,10 @@ static void update_velocity(entity_t * self, fixp_t vel_x, fixp_t vel_y) {
 }
 
 static void update_rotation(entity_t * self, fixp_t rotation) {
-	self->last_rotation = self->rotation;
-
-
 	switch (self->type) {
 		case Spaceship:
 			//implement here maybe?
-			break;;
+			break;
 		case Bomb:
 		rotation = 0b0000;										 // Resets rotation direction
 		fixp_t vel_x = self->vel_x;
@@ -199,6 +196,8 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 		default:
 			printf("ERROR");
 	}
+
+	self->last_rotation = self->rotation;
 	self->rotation = rotation;
 }
 
