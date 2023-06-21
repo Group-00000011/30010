@@ -41,7 +41,7 @@ int main(void)
 	button_init();
 
 	// Initialise state machine
-	State state = Game;
+	State state = MainMenu;
 	State last_state = NullState;
 	State next_state = state;
 	State return_state = MainMenu;
@@ -71,8 +71,8 @@ int main(void)
 	//list_push(&enemies, entity_init(Enemy, 220<<14, 10<<14, fixp_fromint(1), 0));
 	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
-	list_push(&bombs, entity_init(Bomb, 120<<14, 10<<14, fixp_fromint(1), 0));
-	list_push(&enemies, entity_init(Enemy, 17<<14, 0, 1<<14, 0));
+	//list_push(&bombs, entity_init(Bomb, 120<<14, 10<<14, fixp_fromint(1), 0));
+	//list_push(&enemies, entity_init(Enemy, 17<<14, 0, 1<<14, 0));
 
 	fixp_t bomb_blast_radius = 5<<14;
 	fixp_t nuke_blast_radius = 15<<14;
@@ -128,14 +128,14 @@ int main(void)
   				draw_menu_title("Main Menu");
   			}
 
-  			if (js[1] > (0x3 << 13)) {
+  			if (js[1] > 0) {
   				if (menu_selection) {
   					last_menu_sel = menu_selection;
   					menu_selection--;
   				}
   			}
 
-  			if (js[1] < (0x1 << 13)) {
+  			if (js[1] < 0) {
 				if (!menu_selection) {
 					last_menu_sel = menu_selection;
 					menu_selection++;
