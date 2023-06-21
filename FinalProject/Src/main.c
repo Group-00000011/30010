@@ -257,21 +257,6 @@ int main(void)
   		  		uint8_t red_btn_rising = red_btn && !prev_red_btn;
   		  		uint8_t gray_btn_rising = gray_btn && !prev_gray_btn;
 
-  				// Update list of bombs
-  				/*while (current_node != NULL) {
-  					// TODO Check collision somehow
-  					current_entity = current_node->ptr;
-  					gravity_move(current_entity, GRAVITY);
-  					current_node = current_node->next;
-  				}
-  				current = bombs;
-  				while (current != NULL) {
-  					entity_t* bomb = current->ptr;
-  					bomb->update_rotation(bomb, 0);
-  					bomb->draw(bomb, NULL, 1);
-  					current = current->next;
-  				}*/
-
   		  		listnode_t* current_node = bombs;
   		  		listnode_t* prev_node = NULL;
   				entity_t* current_entity;
