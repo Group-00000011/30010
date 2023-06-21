@@ -52,8 +52,6 @@ int main(void)
 	uint8_t prev_red_btn;
 	uint8_t prev_gray_btn;
 
-	fixp_t js_vert;
-	fixp_t js_hori;
 	fixp_t js[2];
 
 	uint8_t last_keypress;
@@ -99,9 +97,9 @@ int main(void)
   		uint8_t red_btn = buttonRed();
   		uint8_t gray_btn = buttonGray();
 
-  		js_vert = 1<<14;//(2<<14)-joystick_vert();
-  		js_hori = 1<<14;//joystick_hori();
-  		read_joystick(js);
+  		//js_vert = 1<<14;//joystick_vert();
+  		//js_hori = 1<<14;//joystick_hori();
+  		joystick_read(js);
 
   		if (uart_get_count()) {
   			last_keypress = uart_get_char();
@@ -131,14 +129,14 @@ int main(void)
   				draw_menu_title("Main Menu");
   			}
 
-  			if (js_vert > (0x3 << 13)) {
+  			if (js[1] > (0x3 << 13)) {
   				if (menu_selection) {
   					last_menu_sel = menu_selection;
   					menu_selection--;
   				}
   			}
 
-  			if (js_vert < (0x1 << 13)) {
+  			if (js[1] < (0x1 << 13)) {
 				if (!menu_selection) {
 					last_menu_sel = menu_selection;
 					menu_selection++;
@@ -275,8 +273,8 @@ int main(void)
   					list_push(&bombs, entity_init(Nuke, player->x, player->y, player->vel_x, player->vel_y));
   				}
 
-  				// Update velocity of player
-				if (js_hori != fixp_fromint(1) && js_vert != fixp_fromint(1)) {
+  				// Update velocity of player BIG SPAGHETTI!!
+				/*if (js_hori != fixp_fromint(1) && js_vert != fixp_fromint(1)) {
 					if (js_hori > fixp_fromint(1)) player->update_velocity(player, fixp_fromint(1), player->vel_y);
 					else player->update_velocity(player, fixp_fromint(-1), player->vel_y);
 
@@ -298,7 +296,7 @@ int main(void)
 						player->update_velocity(player, fixp_fromint(0), fixp_fromint(-1));
 						player->update_rotation(player, 0);
 					}
-				}
+				}*/
 
 				gotoxy(1,1);
 				printf("jsx: ");
@@ -306,8 +304,12 @@ int main(void)
 				printf("\njsy: ");
 				fixp_print(js[1]);
 				printf("\n");
+				//printf("jsx: %10d\njsy: %10d\n", js[0], js[1]);
 
 				// Update position of player
+				if (js[0] || js[1]) { // TODO Update the velocity of player
+					player->update_velocity(player, js[0], -js[1]);
+				}
 				uint8_t collisions = player_move(player, planet_heightmap); // Returns collision from check_collision()
 
 				if (collisions & 0b1000) {

@@ -35,7 +35,7 @@ fixp_t fixp_mult (fixp_t n1, fixp_t n2);
 fixp_t fixp_div (fixp_t n1, fixp_t n2);
 fixp_t fixp_sub (fixp_t n1, fixp_t n2);
 fixp_t fixp_sqrt(fixp_t val);
-uint16_t int_sqrt(int16_t val);
+uint16_t int_mag(int16_t val1, int16_t val2);
 
 void fixp_print (fixp_t n);
 

@@ -41,7 +41,7 @@ int16_t buttonGray();
 void joystick_conf();
 fixp_t joystick_hori();
 fixp_t joystick_vert();
-void read_joystick(fixp_t* arr);
+void joystick_read(fixp_t* arr);
 
 
 void enable_timer_2 (uint8_t on);
