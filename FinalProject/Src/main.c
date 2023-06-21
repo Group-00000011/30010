@@ -41,7 +41,7 @@ int main(void)
 	button_init();
 
 	// Initialise state machine
-	State state = MainMenu;
+	State state = Game;
 	State last_state = NullState;
 	State next_state = state;
 	State return_state = MainMenu;
@@ -195,7 +195,7 @@ int main(void)
 					enemy_move(current, planet_heightmap);
 
 					++current->counter;
-					if (current->counter == 100) { // If counter is ten, fire bullet
+					if (current->counter == 100 - 3*(level-1)) { // If counter is one hundred, fire bullet
 						current->counter = 0;
 
 						fixp_t toplayer_x = fixp_div(player->x - current->x, fixp_fromint(150)); // Vector from enemy to player
@@ -226,7 +226,7 @@ int main(void)
 							free(list_pop(&bullets));
 						}
 						if (collisions & 1<<4) { // Collision with player
-							lives--;
+							//lives--;
 						}
 
 					} else {

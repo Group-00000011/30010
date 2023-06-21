@@ -15,7 +15,7 @@ static int8_t sign_invert(int8_t a, int8_t b) { // Integer power
 
 void level_setup(listnode_t** enemies_head, uint16_t level, uint8_t* ground) {
 	// Set timer speed
-	set_timer_15_speed(level < 33? 64000 - (level - 1)*1000 : 32000);
+	set_timer_16_speed(level < 25? 64000 - (level - 1)*2000 : 16000);
 
 	int16_t x;
 
