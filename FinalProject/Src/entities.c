@@ -174,15 +174,36 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 	switch (self->type) {
 		case Spaceship:
 			//implement here maybe?
-			break;;
+			break;
 		case Bomb:
 		rotation = 0b0000;										 // Resets rotation direction
 		fixp_t vel_x = self->vel_x;
 		fixp_t vel_y = self->vel_y;
 
-		if(self->vel_x < 0){
-			if(self->vel_y<0){
+		if(vel_x == 0 && vel_y == 0)
+			break;
+		if(vel_y > -( vel_x << 1) && vel_y < vel_x << 1){
+			rotation |= (0b01 << 2);		// Sets horizontal direction to positive
+		}
+		if(vel_y < -( vel_x << 1) && vel_y > vel_x << 1){
+			rotation |= (0b10 << 2);		// Sets horizontal direction to negative
+		}
+		if(vel_x > -( vel_y << 1) && vel_x < vel_y << 1){
+			rotation |= (0b10 << 0);		// Sets vertical direction to negative
+		}
+		if(vel_x < -( vel_y << 1) && vel_x > vel_y << 1){
+			rotation |= (0b01 << 0);		// Sets vertical direction to positive
+		}
 
+
+		/*if(self->vel_x < 0){
+			if(self->vel_y < 0){
+				if(vel_y < (vel_x << 1) && vel_y < (vel_x << 1) ){
+					rotation |= 0b0100; // Sets horizontal direction to negative
+				}
+				else if (vel_y > (vel_x << 1) ){
+					rotation |= 0b0100; // Sets horizontal direction to negative
+				}
 			}
 			else{
 				rotation |= (0b10 << 2); // Sets horizontal direction to negative
@@ -207,6 +228,7 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 					} else if(self->vel_y > (1<<13)) {
 						rotation |= 0b10;						 // Sets vertical direction to negative
 					}
+*/
 			break;
 		default:
 			printf("ERROR");
