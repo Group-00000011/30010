@@ -116,6 +116,9 @@ fixp_t fixp_div (fixp_t n1, fixp_t n2) {
 	return ((int64_t) n1 << 14) / (int64_t) n2;
 }
 
+
+
+
 fixp_t fixp_sqrt(fixp_t val) { // This function removes decimals may (will) be inaccurate
 	val >>= 14;
 	uint32_t a, b;
@@ -132,6 +135,53 @@ fixp_t fixp_sqrt(fixp_t val) { // This function removes decimals may (will) be i
     }
 
     return a <<= 14;
+}
+
+//static uint16_t ftbl[33]={0,1,1,2,2,4,5,8,11,16,22,32,45,64,90,128,181,256,362,512,724,1024,1448,2048,2896,4096,5792,8192,11585,16384,23170,32768,46340};
+//static uint16_t ftbl2[32]={ 32768,33276,33776,34269,34755,35235,35708,36174,36635,37090,37540,37984,38423,38858,39287,39712,40132,40548,40960,41367,41771,42170,42566,42959,43347,43733,44115,44493,44869,45241,45611,45977};
+
+
+/*int fisqrt (int16_t val1, int16_t val2) {
+    int cnt=0;
+    int t = val;
+    while (t) {cnt++;t>>=1;}
+    if (6>=cnt)    t=(val<<(6-cnt));
+    else           t=(val>>(cnt-6));
+
+    return (ftbl[cnt]*ftbl2[t&31])>>15;
+}*/
+
+uint16_t int_mag(int16_t val1, int16_t val2) { // This function removes decimals may (will) be inaccurate
+	int32_t v = val1*val1 + val2*val2;
+
+	//uint64_t a, b;
+
+//    if (v < 2) return v; /* avoid div/0 */
+//    a = 1255;       /* starting point is relatively unimportant */
+//    b = v / a; a = (a + b)>>1;
+//    b = v / a; a = (a + b)>>1;
+//    b = v / a; a = (a + b)>>1;
+//    b = v / a; a = (a + b)>>1;
+//    if (v < 20000) {
+//        b = v / a; a = (a + b)>>1;    // < 17% error Max
+//        b = v / a; a = (a + b)>>1;    // < 5%  error Max
+//    }
+
+	int32_t hi = v;
+	int32_t lo = 0;
+	int32_t mid = (hi + lo) / 2;
+	int32_t mid2 = mid*mid;
+	while (lo < hi-1 && mid2 != v) {
+	    if(mid2 < v) {
+	        lo = mid;
+	    } else {
+	        hi = mid;
+	    }
+	    mid = (hi + lo) / 2;
+	    mid2 = mid*mid;
+	}
+
+    return mid;
 }
 
 void fixp_print (fixp_t n) {

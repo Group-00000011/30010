@@ -209,16 +209,23 @@ static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* height
 		}
 	}
 
-	if (type & 1<<1) { // Check collisions with ground/roof
+	if (type & 1<<1) { // Check collisions with roof
 		if (y < 0) { // Roof
 			collision |= 1<<2;
-		} else if (type & 1<<2 && y > fixp_fromint(DISPLAY_HEIGHT-1-heightmap[x>>14])) { // Ground
+		}
+	}
+	if (type & 1<<2) {  // Check collisions with ground
+		uint8_t a = DISPLAY_HEIGHT - 1 -  heightmap[x>>14];
+			//y > fixp_fromint(DISPLAY_HEIGHT-1-heightmap[x>>14])
+		if (y > (a << 14)) {
 			collision |= 1<<3;
 		}
 	}
 
 	if (type && 1<<3) {
-		// Check collision with player
+		if ((x > player->x) && (x < player->x + (5<<14)) && (y > player->y) && (y < player->y + (2<<14))) { // Spaceship
+			collision |= 1<<4;
+		}
 	}
 
 	return collision;
@@ -297,12 +304,12 @@ void gravity_move (entity_t* self, fixp_t g) {
 	self->update_position(self, self->x + self->vel_x, self->y+self->vel_y);
 }
 
-void player_move (entity_t* self, uint8_t* heightmap) {
+uint8_t player_move (entity_t* self, uint8_t* heightmap) {
 	fixp_t new_x = self->x + self->vel_x*2;
 	fixp_t new_y = self->y + self->vel_y;
 
-	uint8_t collisions_tl = self->check_collision(new_x, new_y, 0b0111, heightmap, NULL); // Check collision with walls only
-	uint8_t collisions_br = self->check_collision(new_x + (5<<14), new_y + (2<<14), 0b0111, heightmap, NULL); // Check collision with walls only
+	uint8_t collisions_tl = self->check_collision(new_x, new_y, 0b0111, heightmap, NULL); // Top-left
+	uint8_t collisions_br = self->check_collision(new_x + (5<<14), new_y + (2<<14), 0b0111, heightmap, NULL); // Bottom-right
 
 
 	if (collisions_tl) {
@@ -327,4 +334,5 @@ void player_move (entity_t* self, uint8_t* heightmap) {
 	}
 
 	self->update_position(self, new_x, new_y);
+	return collisions_tl | collisions_br;
 }

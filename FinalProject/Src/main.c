@@ -15,7 +15,6 @@
 
 typedef enum State {NullState, MainMenu, HelpMenu, Game, DeathMenu, BossScreen} State;
 
-
 /*
 volatile uint8_t* punk_address = punk_long;
 uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
@@ -53,8 +52,7 @@ int main(void)
 	uint8_t prev_red_btn;
 	uint8_t prev_gray_btn;
 
-	fixp_t js_vert;
-	fixp_t js_hori;
+	fixp_t js[2];
 
 	uint8_t last_keypress;
 
@@ -74,7 +72,6 @@ int main(void)
 	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
 
-
 	uint8_t lcd_buffer[512];
 	memset(lcd_buffer, 0, 512);
 
@@ -88,8 +85,6 @@ int main(void)
 	lcd_init_text(&lcd_score, "", 0, 2, 25);
 	lcd_init_text(&lcd_kills, "", 0, 3, 25);
 
-
-
 	bgcolor(SPACE_COLOR);
 	clrscr();
 	gotoxy(1,1);
@@ -98,8 +93,7 @@ int main(void)
   		uint8_t red_btn = buttonRed();
   		uint8_t gray_btn = buttonGray();
 
-  		js_vert = (2<<14)-joystick_vert();
-  		js_hori = joystick_hori();
+  		joystick_read(js);
 
   		if (uart_get_count()) {
   			last_keypress = uart_get_char();
@@ -129,14 +123,14 @@ int main(void)
   				draw_menu_title("Main Menu");
   			}
 
-  			if (js_vert > (0x3 << 13)) {
+  			if (js[1] > 0) {
   				if (menu_selection) {
   					last_menu_sel = menu_selection;
   					menu_selection--;
   				}
   			}
 
-  			if (js_vert < (0x1 << 13)) {
+  			if (js[1] < 0) {
 				if (!menu_selection) {
 					last_menu_sel = menu_selection;
 					menu_selection++;
@@ -186,6 +180,7 @@ int main(void)
   		case Game:
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
+  				lives = 3;
   			}
 
   			if (enemies == NULL) {
@@ -200,7 +195,7 @@ int main(void)
 					enemy_move(current, planet_heightmap);
 
 					++current->counter;
-					if (current->counter == 100) { // If counter is ten, fire bullet
+					if (current->counter == (level < 15 ? 50 - level : 30)) { // If counter is reached fire bullet. max count decreases with higher level.
 						current->counter = 0;
 
 						fixp_t toplayer_x = fixp_div(player->x - current->x, fixp_fromint(150)); // Vector from enemy to player
@@ -219,7 +214,7 @@ int main(void)
 
 					entity_move(current);
 
-					uint8_t collisions = current->check_collision(current->x, current->y, 0b00001011, NULL, player); // Check collision with walls/roof/player
+					uint8_t collisions = current->check_collision(current->x, current->y, 0b1111, planet_heightmap, player); // Check collision with walls/roof/player
 
 					if (collisions) { // Collision with wall/roof/player
 						// Kill the bullet
@@ -231,7 +226,7 @@ int main(void)
 							free(list_pop(&bullets));
 						}
 						if (collisions & 1<<4) { // Collision with player
-							// Also kill the player
+							lives--;
 						}
 
 					} else {
@@ -241,6 +236,10 @@ int main(void)
 					}
 				}
 				
+				if (!lives) {
+					next_state = 	DeathMenu;
+				}
+
 				update_flag &= ~1;
 			}
 
@@ -274,34 +273,15 @@ int main(void)
   					// Fire nuke!
   					list_push(&bombs, entity_init(Nuke, player->x, player->y, player->vel_x, player->vel_y));
   				}
-
-  				// Update velocity of player
-				if (js_hori != fixp_fromint(1) && js_vert != fixp_fromint(1)) {
-					if (js_hori > fixp_fromint(1)) player->update_velocity(player, fixp_fromint(1), player->vel_y);
-					else player->update_velocity(player, fixp_fromint(-1), player->vel_y);
-
-					if (js_vert > fixp_fromint(1)) player->update_velocity(player, player->vel_x, fixp_fromint(1));
-					else player->update_velocity(player, player->vel_x, fixp_fromint(-1));
-				} else if (js_hori != fixp_fromint(1) && js_vert == fixp_fromint(1)) {
-					if (js_hori > fixp_fromint(1)) {
-						player->update_velocity(player, fixp_fromint(1), fixp_fromint(0));
-						player->update_rotation(player, 1);
-					} else {
-						player->update_velocity(player, fixp_fromint(-1), fixp_fromint(0));
-						player->update_rotation(player, 3);
-					}
-				} else if (js_hori == fixp_fromint(1) && js_vert != fixp_fromint(1)) {
-					if (js_vert > fixp_fromint(1)) {
-						player->update_velocity(player, fixp_fromint(0), fixp_fromint(1));
-						player->update_rotation(player, 2);
-					} else {
-						player->update_velocity(player, fixp_fromint(0), fixp_fromint(-1));
-						player->update_rotation(player, 0);
-					}
-				}
-
 				// Update position of player
-				player_move(player, planet_heightmap); // Returns collision from check_collision()
+				if (js[0] || js[1]) { // TODO Update the velocity of player
+					player->update_velocity(player, js[0], -js[1]);
+				}
+				uint8_t collisions = player_move(player, planet_heightmap); // Returns collision from check_collision()
+
+				if (collisions & 0b1000) {
+					// Player has hit ground, game over.
+				}
 
 				// Draw player
 				player->draw(player, planet_heightmap, 1);
@@ -311,8 +291,10 @@ int main(void)
 				prev_gray_btn = gray_btn;
 
 				player->draw(player, planet_heightmap, 1);
+
 				update_flag &= ~(1<<1);
 			}
+
 
   			break;
 
@@ -370,7 +352,6 @@ int main(void)
   		sprintf(lcd_level.content, "Level: %d", level);
   		sprintf(lcd_score.content, "Score: %d", score);
   		sprintf(lcd_kills.content, "Kills: %d", kills);
-
 
   		lcd_write_line(lcd_buffer, &lcd_lives);
   		lcd_write_line(lcd_buffer, &lcd_level);
