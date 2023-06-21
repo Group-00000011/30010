@@ -168,39 +168,38 @@ static void update_velocity(entity_t * self, fixp_t vel_x, fixp_t vel_y) {
 }
 
 static void update_rotation(entity_t * self, fixp_t rotation) {
-	self->last_rotation = self->rotation;
-
-
 	switch (self->type) {
 		case Spaceship:
 			//implement here maybe?
-			break;;
+			break;
 		case Bomb:
-		rotation = 0b0000;										 // Resets rotation direction
-		fixp_t vel_x = self->vel_x;
-		fixp_t vel_y = self->vel_y;
+<<<<<<< HEAD
+=======
+			//rotation = 0b0000;										 // Resets rotation direction
 
-		if(self->vel_x < 0){
-			if(self->vel_y<0){
+>>>>>>> american-faxe-kondi
+			if(self->vel_x == 0 && self->vel_y == 0) {
+				rotation = 0;
+				break;
+			}
 
+			if (self->vel_y > -(self->vel_x << 1) && self->vel_y < self->vel_x << 1) {
+				rotation |= (0b0100);		// Sets horizontal direction to positive
+			} else if (self->vel_y < -(self->vel_x << 1) && self->vel_y > self->vel_x << 1) {
+				rotation |= (0b1000);		// Sets horizontal direction to negative
 			}
-			else{
-				rotation |= (0b10 << 2); // Sets horizontal direction to negative
+			if(self->vel_x > -(self->vel_y << 1) && self->vel_x < self->vel_y << 1) {
+				rotation |= (0b0010);		// Sets vertical direction to negative
+			} else if (self->vel_x < -(self->vel_y << 1) && self->vel_x > self->vel_y << 1) {
+				rotation |= (0b0001);		// Sets vertical direction to positive
 			}
-		} else {
-			if(self->vel_y<0){
-
-			}
-			else{
-
-			}
-		}
 			break;
 		default:
 			printf("ERROR");
 	}
-	self->rotation = rotation;
 
+	self->last_rotation = self->rotation;
+	self->rotation = rotation;
 }
 
 static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* heightmap, entity_t* player) { // [0]=walls, [1]=roof, [2]=ground, [3]=player
@@ -225,24 +224,14 @@ static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* height
 	if (type & 1<<1) { // Check collisions with roof
 		if (y < 0) { // Roof
 			collision |= 1<<2;
-<<<<<<< HEAD
-		}
-	}
-	if (type & 1<<2) {  // Check collisions with ground
-		uint8_t a = DISPLAY_HEIGHT - 1 -  heightmap[x>>14];
-			//y > fixp_fromint(DISPLAY_HEIGHT-1-heightmap[x>>14])
-		if (y > (a << 14)) {
-			collision |= 1<<3;
-=======
 		} else if (type & 1<<2 && heightmap) {
 			if (y > fixp_fromint(DISPLAY_HEIGHT-1-heightmap[x>>14])) { // Ground
 				collision |= 1<<3;
 			}
->>>>>>> 79a2da4decdd0fc1a158708746e4c881223db36c
 		}
 	}
 
-	if (type && 1<<3) {
+	if (type & 1<<3) {
 		if ((x > player->x) && (x < player->x + (5<<14)) && (y > player->y) && (y < player->y + (2<<14))) { // Spaceship
 			collision |= 1<<4;
 		}
@@ -325,7 +314,7 @@ void gravity_move (entity_t* self, fixp_t g) {
 }
 
 uint8_t player_move (entity_t* self, uint8_t* heightmap) {
-	fixp_t new_x = self->x + self->vel_x*2;
+	fixp_t new_x = self->x + self->vel_x;
 	fixp_t new_y = self->y + self->vel_y;
 
 	uint8_t collisions_tl = self->check_collision(new_x, new_y, 0b0111, heightmap, NULL); // Top-left

@@ -168,6 +168,9 @@ static void update_velocity(entity_t * self, fixp_t vel_x, fixp_t vel_y) {
 }
 
 static void update_rotation(entity_t * self, fixp_t rotation) {
+	self->last_rotation = self->rotation;
+
+
 	switch (self->type) {
 		case Spaceship:
 			//implement here maybe?
@@ -177,6 +180,11 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 				rotation = 0;
 				break;
 			}
+			else{
+				rotation |= (0b10 << 2); // Sets horizontal direction to negative
+			}
+		} else {
+			if(self->vel_y<0){
 
 			if (self->vel_y > -(self->vel_x << 1) && self->vel_y < self->vel_x << 1) {
 				rotation |= (0b0100);		// Sets horizontal direction to positive
@@ -188,6 +196,19 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 			} else if (self->vel_x < -(self->vel_y << 1) && self->vel_x > self->vel_y << 1) {
 				rotation |= (0b0001);		// Sets vertical direction to positive
 			}
+		}
+
+
+
+					} else if (self->vel_x > (1<<13)) {
+						rotation |= (0b01 << 2);				 // Sets horizontal direction to positive
+					}
+
+					if(self->vel_y < ~(1<<13)+1) {
+						rotation |= 0b01;		 // Sets vertical direction to positive
+					} else if(self->vel_y > (1<<13)) {
+						rotation |= 0b10;						 // Sets vertical direction to negative
+					}
 			break;
 		default:
 			printf("ERROR");
@@ -195,6 +216,7 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 
 	self->last_rotation = self->rotation;
 	self->rotation = rotation;
+
 }
 
 static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* heightmap, entity_t* player) { // [0]=walls, [1]=roof, [2]=ground, [3]=player
