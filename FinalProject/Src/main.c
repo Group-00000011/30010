@@ -65,7 +65,7 @@ int main(void)
 
 	uint8_t* planet_heightmap;
 
-	entity_t* player = entity_init(Spaceship, 100<<14, 30<<14, 0, 0);
+	entity_t* player = entity_init(Spaceship, 255<<14, 30<<14, 0, 0);
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	listnode_t* bullets = NULL;
