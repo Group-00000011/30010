@@ -1,4 +1,5 @@
 #include "hal.h"
+#include "data_structures.h"
 
 #define AUDIO_BIT_DEPTH 0xff
 
@@ -130,9 +131,9 @@ fixp_t joystick_vert(){
 	ADC_StartConversion(ADC1); // Start ADC read
 	while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0); // Wait for ADC read
 
-	fixp_t stick_y = fixp_fromint(ADC_GetConversionValue(ADC1));
+	fixp_t stick_y = ADC_GetConversionValue(ADC1);
 
-	if(stick_y > fixp_fromint(1850)){
+	/*if(stick_y > fixp_fromint(1850)){
 		stick_y = fixp_sub(stick_y, fixp_fromint(1850));
 		stick_y = fixp_div(stick_y, fixp_fromint(2150));
 		stick_y = fixp_add(stick_y, fixp_fromint(1));
@@ -140,9 +141,9 @@ fixp_t joystick_vert(){
 	else if (stick_y < fixp_fromint(600))
 		stick_y = fixp_div(stick_y,fixp_fromint(600));
 	else
-		stick_y = fixp_fromint(1);
+		stick_y = fixp_fromint(1);*/
 
-	return stick_y; // Read the ADC value
+	return stick_y;
 
 }
 
@@ -152,9 +153,9 @@ fixp_t joystick_hori(){
 	ADC_StartConversion(ADC1); // Start ADC read
 	while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0); // Wait for ADC read
 
-	fixp_t stick_x = fixp_fromint(ADC_GetConversionValue(ADC1));
+	fixp_t stick_x = ADC_GetConversionValue(ADC1);
 
-	if(stick_x > fixp_fromint(1950)){
+	/*if(stick_x > fixp_fromint(1950)){
 		stick_x = fixp_sub(stick_x, fixp_fromint(1950));
 		stick_x = fixp_div(stick_x,fixp_fromint(2050));
 		stick_x = fixp_add(stick_x, fixp_fromint(1));
@@ -165,11 +166,38 @@ fixp_t joystick_hori(){
 	}
 	else{
 		stick_x= fixp_fromint(1);
-	}
+	}*/
 
 
 
 	return stick_x; // Read the ADC value
+}
+
+void joystick_read (fixp_t* arr) {
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 1, ADC_SampleTime_1Cycles5); // Horizontal
+
+	ADC_StartConversion(ADC1); // Start ADC read
+	while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0); // Wait for ADC read
+
+	int32_t stick_x = ADC_GetConversionValue(ADC1)-1220; // 1220 is apparently the center between 0 and 4096
+
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 1, ADC_SampleTime_1Cycles5); // Vertical
+
+	ADC_StartConversion(ADC1); // Start ADC read
+	while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == 0); // Wait for ADC read
+
+	int32_t stick_y = ADC_GetConversionValue(ADC1)-1300; // now 1300 is apparently the center between 0 and 4096
+
+	stick_x = stick_x > 0 ? stick_x*3*4 : stick_x*7*4; // Scaling is for calibration of non-linear joystick. Dont worry about it
+	stick_y = stick_y > 0 ? stick_y*1*13 : stick_y*2*13;
+
+	if ((stick_x < 15000 && stick_x > -20000) && (stick_y < 15000 && stick_y > -20000)) { // Very wide deadzone, no normalization needed;))
+		stick_x = 0;
+		stick_y = 0;
+	}
+
+	arr[0] = stick_x>>1;
+	arr[1] = stick_y>>1;
 }
 
 void joystick_conf(){

@@ -15,7 +15,6 @@
 
 typedef enum State {NullState, MainMenu, HelpMenu, Game, DeathMenu, BossScreen} State;
 
-
 /*
 volatile uint8_t* punk_address = punk_long;
 uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
@@ -53,8 +52,7 @@ int main(void)
 	uint8_t prev_red_btn;
 	uint8_t prev_gray_btn;
 
-	fixp_t js_vert;
-	fixp_t js_hori;
+	fixp_t js[2];
 
 	uint8_t last_keypress;
 
@@ -74,7 +72,6 @@ int main(void)
 	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
 
-
 	uint8_t lcd_buffer[512];
 	memset(lcd_buffer, 0, 512);
 
@@ -88,8 +85,6 @@ int main(void)
 	lcd_init_text(&lcd_score, "", 0, 2, 25);
 	lcd_init_text(&lcd_kills, "", 0, 3, 25);
 
-
-
 	bgcolor(SPACE_COLOR);
 	clrscr();
 	gotoxy(1,1);
@@ -98,8 +93,7 @@ int main(void)
   		uint8_t red_btn = buttonRed();
   		uint8_t gray_btn = buttonGray();
 
-  		js_vert = (2<<14)-joystick_vert();
-  		js_hori = joystick_hori();
+  		joystick_read(js);
 
   		if (uart_get_count()) {
   			last_keypress = uart_get_char();
@@ -129,14 +123,14 @@ int main(void)
   				draw_menu_title("Main Menu");
   			}
 
-  			if (js_vert > (0x3 << 13)) {
+  			if (js[1] > (0x3 << 13)) {
   				if (menu_selection) {
   					last_menu_sel = menu_selection;
   					menu_selection--;
   				}
   			}
 
-  			if (js_vert < (0x1 << 13)) {
+  			if (js[1] < (0x1 << 13)) {
 				if (!menu_selection) {
 					last_menu_sel = menu_selection;
 					menu_selection++;
@@ -268,6 +262,8 @@ int main(void)
   					bomb->draw(bomb, NULL, 1);
   					current = current->next;
   				}
+  				//gotoxy(1,1);
+  				//printf("red: %d\ngray: %d\n#bombs: %d", red_btn, gray_btn, list_length(bombs));
 
   				if (gray_btn_rising) { // Fire bomb? TODO Fix bombs dropping in the wrong direction
   					// Fire bomb!
@@ -279,33 +275,23 @@ int main(void)
   					list_push(&bombs, entity_init(Nuke, player->x, player->y, player->vel_x, player->vel_y));
   				}
 
-  				// Update velocity of player
-				if (js_hori != fixp_fromint(1) && js_vert != fixp_fromint(1)) {
-					if (js_hori > fixp_fromint(1)) player->update_velocity(player, fixp_fromint(1), player->vel_y);
-					else player->update_velocity(player, fixp_fromint(-1), player->vel_y);
-
-					if (js_vert > fixp_fromint(1)) player->update_velocity(player, player->vel_x, fixp_fromint(1));
-					else player->update_velocity(player, player->vel_x, fixp_fromint(-1));
-				} else if (js_hori != fixp_fromint(1) && js_vert == fixp_fromint(1)) {
-					if (js_hori > fixp_fromint(1)) {
-						player->update_velocity(player, fixp_fromint(1), fixp_fromint(0));
-						player->update_rotation(player, 1);
-					} else {
-						player->update_velocity(player, fixp_fromint(-1), fixp_fromint(0));
-						player->update_rotation(player, 3);
-					}
-				} else if (js_hori == fixp_fromint(1) && js_vert != fixp_fromint(1)) {
-					if (js_vert > fixp_fromint(1)) {
-						player->update_velocity(player, fixp_fromint(0), fixp_fromint(1));
-						player->update_rotation(player, 2);
-					} else {
-						player->update_velocity(player, fixp_fromint(0), fixp_fromint(-1));
-						player->update_rotation(player, 0);
-					}
-				}
+				gotoxy(1,1);
+				printf("jsx: ");
+				fixp_print(js[0]);
+				printf("\njsy: ");
+				fixp_print(js[1]);
+				printf("\n");
+				//printf("jsx: %10d\njsy: %10d\n", js[0], js[1]);
 
 				// Update position of player
-				player_move(player, planet_heightmap); // Returns collision from check_collision()
+				if (js[0] || js[1]) { // TODO Update the velocity of player
+					player->update_velocity(player, js[0], -js[1]);
+				}
+				uint8_t collisions = player_move(player, planet_heightmap); // Returns collision from check_collision()
+
+				if (collisions & 0b1000) {
+					// Player has hit ground, game over.
+				}
 
 				// Draw player
 				player->draw(player, planet_heightmap, 1);
@@ -318,6 +304,7 @@ int main(void)
 
 				update_flag &= ~(1<<1);
 			}
+
 
   			break;
 
@@ -375,7 +362,6 @@ int main(void)
   		sprintf(lcd_level.content, "Level: %d", level);
   		sprintf(lcd_score.content, "Score: %d", score);
   		sprintf(lcd_kills.content, "Kills: %d", kills);
-
 
   		lcd_write_line(lcd_buffer, &lcd_lives);
   		lcd_write_line(lcd_buffer, &lcd_level);

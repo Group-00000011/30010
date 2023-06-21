@@ -244,12 +244,12 @@ void gravity_move (entity_t* self, fixp_t g) {
 	self->update_position(self, self->x + self->vel_x, self->y+self->vel_y);
 }
 
-void player_move (entity_t* self, uint8_t* heightmap) {
+uint8_t player_move (entity_t* self, uint8_t* heightmap) {
 	fixp_t new_x = self->x + self->vel_x*2;
 	fixp_t new_y = self->y + self->vel_y;
 
-	uint8_t collisions_tl = self->check_collision(new_x, new_y, 0b0111, heightmap, NULL); // Check collision with walls only
-	uint8_t collisions_br = self->check_collision(new_x + (5<<14), new_y + (2<<14), 0b0111, heightmap, NULL); // Check collision with walls only
+	uint8_t collisions_tl = self->check_collision(new_x, new_y, 0b0111, heightmap, NULL); // Top-left
+	uint8_t collisions_br = self->check_collision(new_x + (5<<14), new_y + (2<<14), 0b0111, heightmap, NULL); // Bottom-right
 
 
 	if (collisions_tl) {
@@ -274,4 +274,5 @@ void player_move (entity_t* self, uint8_t* heightmap) {
 	}
 
 	self->update_position(self, new_x, new_y);
+	return collisions_tl | collisions_br;
 }
