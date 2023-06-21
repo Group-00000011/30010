@@ -158,7 +158,9 @@ static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* height
 	}
 
 	if (type && 1<<3) {
-		// Check collision with player
+		if ((x > player->x) && (x < player->x + (5<<14)) && (y > player->y) && (y < player->y + (2<<14))) { // Spaceship
+			collision |= 1<<4;
+		}
 	}
 
 	return collision;

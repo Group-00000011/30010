@@ -219,7 +219,7 @@ int main(void)
 
 					entity_move(current);
 
-					uint8_t collisions = current->check_collision(current->x, current->y, 0b00001011, NULL, player); // Check collision with walls/roof/player
+					uint8_t collisions = current->check_collision(current->x, current->y, 0b1011, NULL, player); // Check collision with walls/roof/player
 
 					if (collisions) { // Collision with wall/roof/player
 						// Kill the bullet
@@ -231,7 +231,7 @@ int main(void)
 							free(list_pop(&bullets));
 						}
 						if (collisions & 1<<4) { // Collision with player
-							// Also kill the player
+							lives--;
 						}
 
 					} else {
@@ -241,6 +241,10 @@ int main(void)
 					}
 				}
 				
+				if (!lives) {
+					next_state = 	DeathMenu;
+				}
+
 				update_flag &= ~1;
 			}
 
@@ -310,6 +314,7 @@ int main(void)
 				prev_gray_btn = gray_btn;
 
 				player->draw(player, planet_heightmap, 1);
+
 				update_flag &= ~(1<<1);
 			}
 
