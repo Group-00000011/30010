@@ -9,6 +9,7 @@
 #include "graphics.h"
 #include "daftpunk8bit.h"
 #include "data_structures.h"
+#include "levels.h"
 
 #define GRAVITY 0x0400
 
@@ -54,7 +55,6 @@ int main(void)
 
 	fixp_t js_vert;
 	fixp_t js_hori;
-	fixp_t js[2];
 
 	uint8_t last_keypress;
 
@@ -65,12 +65,12 @@ int main(void)
 
 	uint8_t* planet_heightmap;
 
-	entity_t* player = entity_init(Spaceship, 100<<14, 5<<14, 0, 0);
+	entity_t* player = entity_init(Spaceship, 10<<14, 30<<14, 0, 0);
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	listnode_t* bullets = NULL;
 	listnode_t* bombs = NULL;
-	list_push(&enemies, entity_init(Enemy, 220<<14, 10<<14, fixp_fromint(1), 0));
+	//list_push(&enemies, entity_init(Enemy, 220<<14, 10<<14, fixp_fromint(1), 0));
 	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
 
@@ -99,9 +99,8 @@ int main(void)
   		uint8_t red_btn = buttonRed();
   		uint8_t gray_btn = buttonGray();
 
-  		js_vert = 1<<14;//(2<<14)-joystick_vert();
-  		js_hori = 1<<14;//joystick_hori();
-  		read_joystick(js);
+  		js_vert = (2<<14)-joystick_vert();
+  		js_hori = joystick_hori();
 
   		if (uart_get_count()) {
   			last_keypress = uart_get_char();
@@ -189,6 +188,10 @@ int main(void)
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
   			}
+
+  			if (enemies == NULL) {
+  				level_setup(&enemies, level, planet_heightmap);
+  			}
 			
   			if (update_flag & 1) {	// Update enemies and bullets
 				listnode_t* current_node = enemies;
@@ -238,8 +241,7 @@ int main(void)
 						current_node = current_node->next;
 					}
 				}
-				gotoxy(1,1);
-				//player->draw(player, planet_heightmap, 1); // <-- Hopefully a mistake, should probably just delete
+				
 				update_flag &= ~1;
 			}
 
@@ -262,8 +264,6 @@ int main(void)
   					bomb->draw(bomb, NULL, 1);
   					current = current->next;
   				}
-  				//gotoxy(1,1);
-  				//printf("red: %d\ngray: %d\n#bombs: %d", red_btn, gray_btn, list_length(bombs));
 
   				if (gray_btn_rising) { // Fire bomb? TODO Fix bombs dropping in the wrong direction
   					// Fire bomb!
@@ -300,19 +300,8 @@ int main(void)
 					}
 				}
 
-				gotoxy(1,1);
-				printf("jsx: ");
-				fixp_print(js[0]);
-				printf("\njsy: ");
-				fixp_print(js[1]);
-				printf("\n");
-
 				// Update position of player
-				uint8_t collisions = player_move(player, planet_heightmap); // Returns collision from check_collision()
-
-				if (collisions & 0b1000) {
-					// Player has hit ground, game over.
-				}
+				player_move(player, planet_heightmap); // Returns collision from check_collision()
 
 				// Draw player
 				player->draw(player, planet_heightmap, 1);

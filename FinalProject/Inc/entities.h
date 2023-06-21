@@ -34,6 +34,6 @@ entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t vel_x, fixp_t 
 void enemy_move (entity_t* self, uint8_t* heightmap);
 void entity_move (entity_t* self);
 void gravity_move (entity_t* self, fixp_t g);
-uint8_t player_move (entity_t* self, uint8_t* heightmap);
+void player_move (entity_t* self, uint8_t* heightmap);
 
 #endif /* ENTITIES_H_ */

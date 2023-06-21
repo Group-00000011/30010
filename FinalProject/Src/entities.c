@@ -152,7 +152,7 @@ static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* height
 	if (type & 1<<1) { // Check collisions with ground/roof
 		if (y < 0) { // Roof
 			collision |= 1<<2;
-		} else if (type & 1<<2 && y > fixp_fromint(DISPLAY_HEIGHT-1-heightmap[fixp_toint(x)])) { // Ground
+		} else if (type & 1<<2 && y > fixp_fromint(DISPLAY_HEIGHT-1-heightmap[x>>14])) { // Ground
 			collision |= 1<<3;
 		}
 	}
@@ -237,19 +237,19 @@ void gravity_move (entity_t* self, fixp_t g) {
 	self->update_position(self, self->x + self->vel_x, self->y+self->vel_y);
 }
 
-uint8_t player_move (entity_t* self, uint8_t* heightmap) {
+void player_move (entity_t* self, uint8_t* heightmap) {
 	fixp_t new_x = self->x + self->vel_x*2;
 	fixp_t new_y = self->y + self->vel_y;
 
-	uint8_t collisions = self->check_collision(new_x, new_y, 0b0111, heightmap, NULL); // Check collision with walls only
+	uint8_t collisions_tl = self->check_collision(new_x, new_y, 0b0111, heightmap, NULL); // Check collision with walls only
+	uint8_t collisions_br = self->check_collision(new_x + (5<<14), new_y + (2<<14), 0b0111, heightmap, NULL); // Check collision with walls only
 
-	if (collisions) {
-		if (collisions & 1) { // Collision with left wall
-			new_x = fixp_fromint(DISPLAY_WIDTH-1);
-		} else if (collisions & 0b10) { // Right wall
-			new_x = 0;
+
+	if (collisions_tl) {
+		if (collisions_tl & 0b1) { // Collision with left wall
+			new_x = (DISPLAY_WIDTH - 6) << 14;
 		}
-		if (collisions & 0b100) { // Ceiling
+		if (collisions_tl & 0b100) { // Ceiling
 			self->vel_y = -self->vel_y;
 			new_y = 0;
 		} /*else if (collisions & 0b1000) { // Ground
@@ -257,6 +257,14 @@ uint8_t player_move (entity_t* self, uint8_t* heightmap) {
 		}*/
 	}
 
+	if (collisions_br) {
+		if (collisions_br & 0b10) {
+			new_x = 0;
+		}
+		if(collisions_br & 0b1000) {
+			new_y = ((DISPLAY_HEIGHT - 1 - heightmap[(new_x >> 14) + 5]) - 2) << 14 ;
+		}
+	}
+
 	self->update_position(self, new_x, new_y);
-	return collisions;
 }
