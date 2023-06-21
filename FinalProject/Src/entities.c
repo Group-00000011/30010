@@ -176,59 +176,23 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 			//implement here maybe?
 			break;
 		case Bomb:
-		rotation = 0b0000;										 // Resets rotation direction
-		fixp_t vel_x = self->vel_x;
-		fixp_t vel_y = self->vel_y;
+			//rotation = 0b0000;										 // Resets rotation direction
 
-		if(vel_x == 0 && vel_y == 0)
-			break;
-		if(vel_y > -( vel_x << 1) && vel_y < vel_x << 1){
-			rotation |= (0b01 << 2);		// Sets horizontal direction to positive
-		}
-		if(vel_y < -( vel_x << 1) && vel_y > vel_x << 1){
-			rotation |= (0b10 << 2);		// Sets horizontal direction to negative
-		}
-		if(vel_x > -( vel_y << 1) && vel_x < vel_y << 1){
-			rotation |= (0b10 << 0);		// Sets vertical direction to negative
-		}
-		if(vel_x < -( vel_y << 1) && vel_x > vel_y << 1){
-			rotation |= (0b01 << 0);		// Sets vertical direction to positive
-		}
-
-
-		/*if(self->vel_x < 0){
-			if(self->vel_y < 0){
-				if(vel_y < (vel_x << 1) && vel_y < (vel_x << 1) ){
-					rotation |= 0b0100; // Sets horizontal direction to negative
-				}
-				else if (vel_y > (vel_x << 1) ){
-					rotation |= 0b0100; // Sets horizontal direction to negative
-				}
+			if(self->vel_x == 0 && self->vel_y == 0) {
+				rotation = 0;
+				break;
 			}
-			else{
-				rotation |= (0b10 << 2); // Sets horizontal direction to negative
+
+			if (self->vel_y > -(self->vel_x << 1) && self->vel_y < self->vel_x << 1) {
+				rotation |= (0b0100);		// Sets horizontal direction to positive
+			} else if (self->vel_y < -(self->vel_x << 1) && self->vel_y > self->vel_x << 1) {
+				rotation |= (0b1000);		// Sets horizontal direction to negative
 			}
-		} else {
-			if(self->vel_y<0){
-
+			if(self->vel_x > -(self->vel_y << 1) && self->vel_x < self->vel_y << 1) {
+				rotation |= (0b0010);		// Sets vertical direction to negative
+			} else if (self->vel_x < -(self->vel_y << 1) && self->vel_x > self->vel_y << 1) {
+				rotation |= (0b0001);		// Sets vertical direction to positive
 			}
-			else{
-
-			}
-		}
-
-
-
-					} else if (self->vel_x > (1<<13)) {
-						rotation |= (0b01 << 2);				 // Sets horizontal direction to positive
-					}
-
-					if(self->vel_y < ~(1<<13)+1) {
-						rotation |= 0b01;		 // Sets vertical direction to positive
-					} else if(self->vel_y > (1<<13)) {
-						rotation |= 0b10;						 // Sets vertical direction to negative
-					}
-*/
 			break;
 		default:
 			printf("ERROR");
