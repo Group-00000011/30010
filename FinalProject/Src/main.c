@@ -195,7 +195,7 @@ int main(void)
 					enemy_move(current, planet_heightmap);
 
 					++current->counter;
-					if (current->counter == 100 - 3*(level-1)) { // If counter is one hundred, fire bullet
+					if (current->counter == (level < 15 ? 50 - level : 30)) { // If counter is reached fire bullet. max count decreases with higher level.
 						current->counter = 0;
 
 						fixp_t toplayer_x = fixp_div(player->x - current->x, fixp_fromint(150)); // Vector from enemy to player
@@ -226,7 +226,7 @@ int main(void)
 							free(list_pop(&bullets));
 						}
 						if (collisions & 1<<4) { // Collision with player
-							//lives--;
+							lives--;
 						}
 
 					} else {
@@ -262,8 +262,6 @@ int main(void)
   					bomb->draw(bomb, NULL, 1);
   					current = current->next;
   				}
-  				//gotoxy(1,1);
-  				//printf("red: %d\ngray: %d\n#bombs: %d", red_btn, gray_btn, list_length(bombs));
 
   				if (gray_btn_rising) { // Fire bomb? TODO Fix bombs dropping in the wrong direction
   					// Fire bomb!
@@ -274,15 +272,6 @@ int main(void)
   					// Fire nuke!
   					list_push(&bombs, entity_init(Nuke, player->x, player->y, player->vel_x, player->vel_y));
   				}
-
-				gotoxy(1,1);
-				printf("jsx: ");
-				fixp_print(js[0]);
-				printf("\njsy: ");
-				fixp_print(js[1]);
-				printf("\n");
-				//printf("jsx: %10d\njsy: %10d\n", js[0], js[1]);
-
 				// Update position of player
 				if (js[0] || js[1]) { // TODO Update the velocity of player
 					player->update_velocity(player, js[0], -js[1]);

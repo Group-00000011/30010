@@ -28,7 +28,7 @@ void level_setup(listnode_t** enemies_head, uint16_t level, uint8_t* ground) {
 				x -= 69;
 			}
 		}
-		list_push(enemies_head, entity_init(Enemy, x << 14, ground[x] << 14, sign_invert(-1, (i+2)>>2)<<14, 0));
+		list_push(enemies_head, entity_init(Enemy, x << 14, ground[x] << 14, 2*sign_invert(-1, (i+2)>>2)<<14, 0));
 	}
 }
 
