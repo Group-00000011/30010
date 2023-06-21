@@ -15,7 +15,6 @@
 
 typedef enum State {NullState, MainMenu, HelpMenu, Game, DeathMenu, BossScreen} State;
 
-
 /*
 volatile uint8_t* punk_address = punk_long;
 uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
@@ -73,8 +72,6 @@ int main(void)
 	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
 
-
-
 	uint8_t lcd_buffer[512];
 	memset(lcd_buffer, 0, 512);
 
@@ -88,8 +85,6 @@ int main(void)
 	lcd_init_text(&lcd_score, "", 0, 2, 25);
 	lcd_init_text(&lcd_kills, "", 0, 3, 25);
 
-
-
 	bgcolor(SPACE_COLOR);
 	clrscr();
 	gotoxy(1,1);
@@ -98,8 +93,6 @@ int main(void)
   		uint8_t red_btn = buttonRed();
   		uint8_t gray_btn = buttonGray();
 
-  		//js_vert = 1<<14;//joystick_vert();
-  		//js_hori = 1<<14;//joystick_hori();
   		joystick_read(js);
 
   		if (uart_get_count()) {
@@ -276,31 +269,6 @@ int main(void)
   					// Fire nuke!
   					list_push(&bombs, entity_init(Nuke, player->x, player->y, player->vel_x, player->vel_y));
   				}
-
-  				// Update velocity of player BIG SPAGHETTI!!
-				/*if (js_hori != fixp_fromint(1) && js_vert != fixp_fromint(1)) {
-					if (js_hori > fixp_fromint(1)) player->update_velocity(player, fixp_fromint(1), player->vel_y);
-					else player->update_velocity(player, fixp_fromint(-1), player->vel_y);
-
-					if (js_vert > fixp_fromint(1)) player->update_velocity(player, player->vel_x, fixp_fromint(1));
-					else player->update_velocity(player, player->vel_x, fixp_fromint(-1));
-				} else if (js_hori != fixp_fromint(1) && js_vert == fixp_fromint(1)) {
-					if (js_hori > fixp_fromint(1)) {
-						player->update_velocity(player, fixp_fromint(1), fixp_fromint(0));
-						player->update_rotation(player, 1);
-					} else {
-						player->update_velocity(player, fixp_fromint(-1), fixp_fromint(0));
-						player->update_rotation(player, 3);
-					}
-				} else if (js_hori == fixp_fromint(1) && js_vert != fixp_fromint(1)) {
-					if (js_vert > fixp_fromint(1)) {
-						player->update_velocity(player, fixp_fromint(0), fixp_fromint(1));
-						player->update_rotation(player, 2);
-					} else {
-						player->update_velocity(player, fixp_fromint(0), fixp_fromint(-1));
-						player->update_rotation(player, 0);
-					}
-				}*/
 
 				gotoxy(1,1);
 				printf("jsx: ");
