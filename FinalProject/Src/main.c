@@ -123,14 +123,14 @@ int main(void)
   				draw_menu_title("Main Menu");
   			}
 
-  			if (js[1] > (0x3 << 13)) {
+  			if (js[1] > 0) {
   				if (menu_selection) {
   					last_menu_sel = menu_selection;
   					menu_selection--;
   				}
   			}
 
-  			if (js[1] < (0x1 << 13)) {
+  			if (js[1] < 0) {
 				if (!menu_selection) {
 					last_menu_sel = menu_selection;
 					menu_selection++;
