@@ -63,7 +63,7 @@ int main(void)
 
 	uint8_t* planet_heightmap;
 
-	entity_t* player = entity_init(Spaceship, 100<<14, 30<<14, 0, 0);
+	entity_t* player = entity_init(Spaceship, 200<<14, 25<<14, -1<<14, 0);
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	listnode_t* bullets = NULL;
@@ -245,7 +245,7 @@ int main(void)
 				}
 				
 				if (!lives) {
-					next_state = 	DeathMenu;
+					next_state = DeathMenu;
 				}
 
 				update_flag &= ~1;
@@ -326,7 +326,7 @@ int main(void)
 
 				// Update position of player
 				if (js[0] || js[1]) {
-					player->update_velocity(player, js[0], -js[1]);
+					player->update_velocity(player, 2*js[0], -js[1]);
 				}
 				uint8_t collisions = player_move(player, planet_heightmap); // Returns collision from check_collision()
 

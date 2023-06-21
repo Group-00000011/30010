@@ -314,7 +314,7 @@ void gravity_move (entity_t* self, fixp_t g) {
 }
 
 uint8_t player_move (entity_t* self, uint8_t* heightmap) {
-	fixp_t new_x = self->x + self->vel_x*2;
+	fixp_t new_x = self->x + self->vel_x;
 	fixp_t new_y = self->y + self->vel_y;
 
 	uint8_t collisions_tl = self->check_collision(new_x, new_y, 0b0111, heightmap, NULL); // Top-left
