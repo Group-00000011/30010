@@ -42,7 +42,7 @@ int main(void)
 	button_init();
 
 	// Initialise state machine
-	State state = Game;
+	State state = MainMenu;
 	State last_state = NullState;
 	State next_state = state;
 	State return_state = MainMenu;
@@ -186,6 +186,7 @@ int main(void)
   		case Game:
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
+  				lives = 3;
   			}
 
   			if (enemies == NULL) {
@@ -219,7 +220,7 @@ int main(void)
 
 					entity_move(current);
 
-					uint8_t collisions = current->check_collision(current->x, current->y, 0b1011, NULL, player); // Check collision with walls/roof/player
+					uint8_t collisions = current->check_collision(current->x, current->y, 0b1111, planet_heightmap, player); // Check collision with walls/roof/player
 
 					if (collisions) { // Collision with wall/roof/player
 						// Kill the bullet
