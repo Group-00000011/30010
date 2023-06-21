@@ -200,7 +200,6 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 			printf("ERROR");
 	}
 	self->rotation = rotation;
-
 }
 
 static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* heightmap, entity_t* player) { // [0]=walls, [1]=roof, [2]=ground, [3]=player
@@ -225,13 +224,10 @@ static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* height
 	if (type & 1<<1) { // Check collisions with roof
 		if (y < 0) { // Roof
 			collision |= 1<<2;
-		}
-	}
-	if (type & 1<<2) {  // Check collisions with ground
-		uint8_t a = DISPLAY_HEIGHT - 1 -  heightmap[x>>14];
-			//y > fixp_fromint(DISPLAY_HEIGHT-1-heightmap[x>>14])
-		if (y > (a << 14)) {
-			collision |= 1<<3;
+		} else if (type & 1<<2 && heightmap) {
+			if (y > fixp_fromint(DISPLAY_HEIGHT-1-heightmap[x>>14])) { // Ground
+				collision |= 1<<3;
+			}
 		}
 	}
 
