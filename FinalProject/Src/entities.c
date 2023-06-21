@@ -152,8 +152,10 @@ static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* height
 	if (type & 1<<1) { // Check collisions with ground/roof
 		if (y < 0) { // Roof
 			collision |= 1<<2;
-		} else if (type & 1<<2 && y > fixp_fromint(DISPLAY_HEIGHT-1-heightmap[x>>14])) { // Ground
-			collision |= 1<<3;
+		} else if (type & 1<<2 && heightmap) {
+			if (y > fixp_fromint(DISPLAY_HEIGHT-1-heightmap[x>>14])) { // Ground
+				collision |= 1<<3;
+			}
 		}
 	}
 

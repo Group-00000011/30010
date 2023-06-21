@@ -188,36 +188,37 @@ int main(void)
 			
   			if (update_flag & 1) {	// Update enemies and bullets
 				listnode_t* current_node = enemies;
+				entity_t* current_entity;
 				while (current_node != NULL) { // Loop through enemies
-					entity_t* current = current_node->ptr;
+					current_entity = current_node->ptr;
 
-					enemy_move(current, planet_heightmap);
+					enemy_move(current_entity, planet_heightmap);
 
-					++current->counter;
-					if (current->counter == 100) { // If counter is ten, fire bullet
-						current->counter = 0;
+					++current_entity->counter;
+					if (current_entity->counter == 100) { // If counter is ten, fire bullet
+						current_entity->counter = 0;
 
-						fixp_t toplayer_x = fixp_div(player->x - current->x, fixp_fromint(150)); // Vector from enemy to player
-						fixp_t toplayer_y = fixp_div(player->y - current->y, fixp_fromint(150));
+						fixp_t toplayer_x = fixp_div(player->x - current_entity->x, fixp_fromint(150)); // Vector from enemy to player
+						fixp_t toplayer_y = fixp_div(player->y - current_entity->y, fixp_fromint(150));
 
-						list_push(&bullets, entity_init(Bullet, current->x, current->y, toplayer_x, toplayer_y));
+						list_push(&bullets, entity_init(Bullet, current_entity->x, current_entity->y, toplayer_x, toplayer_y));
 					}
 
-					current->draw(current, planet_heightmap, 1);
+					current_entity->draw(current_entity, planet_heightmap, 1);
 					current_node = current_node->next;
 				}
 				current_node = bullets;
 				listnode_t* prev_node = NULL;
 				while (current_node != NULL) { // Loop through bullets
-					entity_t* current = current_node->ptr;
+					current_entity = current_node->ptr;
 
-					entity_move(current);
+					entity_move(current_entity);
 
-					uint8_t collisions = current->check_collision(current->x, current->y, 0b00001011, NULL, player); // Check collision with walls/roof/player
+					uint8_t collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b00001011, NULL, player); // Check collision with walls/roof/player
 
 					if (collisions) { // Collision with wall/roof/player
 						// Kill the bullet
-						current->draw(current, planet_heightmap, 0); // Erase bullet
+						current_entity->draw(current_entity, planet_heightmap, 0); // Erase bullet
 						current_node = current_node->next;
 						if (prev_node) {
 							free(list_remove_next(prev_node));
@@ -229,7 +230,7 @@ int main(void)
 						}
 
 					} else {
-						current->draw(current, planet_heightmap, 1);
+						current_entity->draw(current_entity, planet_heightmap, 1);
 						prev_node = current_node;
 						current_node = current_node->next;
 					}
@@ -245,22 +246,57 @@ int main(void)
   		  		uint8_t gray_btn_rising = gray_btn && !prev_gray_btn;
 
   				// Update list of bombs
-  				listnode_t* current = bombs;
-  				while (current != NULL) {
+  				/*while (current_node != NULL) {
   					// TODO Check collision somehow
-  					gravity_move(current->ptr, GRAVITY);
-  					current = current->next;
+  					current_entity = current_node->ptr;
+  					gravity_move(current_entity, GRAVITY);
+  					current_node = current_node->next;
   				}
   				current = bombs;
   				while (current != NULL) {
   					entity_t* bomb = current->ptr;
   					bomb->draw(bomb, NULL, 1);
   					current = current->next;
-  				}
+  				}*/
+
+  		  		listnode_t* current_node = bombs;
+  		  		listnode_t* prev_node = NULL;
+  				entity_t* current_entity;
+				while (current_node != NULL) { // Loop through bombs
+					current_entity = current_node->ptr;
+
+					gravity_move(current_entity, GRAVITY);
+
+					uint8_t collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b00000111, planet_heightmap, player); // Check collision with walls/roof/ground
+					// TODO Bombs are not detecting collisions with ground properly
+					if (collisions) { // Collision with wall/roof/ground
+						// Kill the bomb
+						gotoxy(1,5);
+						printf("Bomb collision\n");
+						current_entity->draw(current_entity, planet_heightmap, 0); // Erase bomb
+						current_node = current_node->next;
+						if (prev_node) {
+							printf("remove\n");
+							free(list_remove_next(prev_node));
+						} else {
+							printf("pop\n");
+							free(list_pop(&bombs));
+						}
+						if (collisions & 1<<3) { // Collision with ground
+							// Find all enemies within radius and kill them
+						}
+
+					} else {
+						current_entity->draw(current_entity, planet_heightmap, 1);
+						prev_node = current_node;
+						current_node = current_node->next;
+					}
+				}
+
   				//gotoxy(1,1);
   				//printf("red: %d\ngray: %d\n#bombs: %d", red_btn, gray_btn, list_length(bombs));
 
-  				if (gray_btn_rising) { // Fire bomb? TODO Fix bombs dropping in the wrong direction
+  				if (gray_btn_rising) { // Fire bomb?
   					// Fire bomb!
   					list_push(&bombs, entity_init(Bomb, player->x, player->y, player->vel_x, player->vel_y));
   				}
@@ -298,7 +334,6 @@ int main(void)
 				player->draw(player, planet_heightmap, 1);
 				update_flag &= ~(1<<1);
 			}
-
 
   			break;
 
