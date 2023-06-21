@@ -71,6 +71,11 @@ int main(void)
 	//list_push(&enemies, entity_init(Enemy, 220<<14, 10<<14, fixp_fromint(1), 0));
 	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
+	list_push(&bombs, entity_init(Bomb, 120<<14, 10<<14, fixp_fromint(1), 0));
+	list_push(&enemies, entity_init(Enemy, 17<<14, 0, 1<<14, 0));
+
+	fixp_t bomb_blast_radius = 5<<14;
+	fixp_t nuke_blast_radius = 15<<14;
 
 	uint8_t lcd_buffer[512];
 	memset(lcd_buffer, 0, 512);
@@ -274,11 +279,35 @@ int main(void)
 					gravity_move(current_entity, GRAVITY);
 
 					uint8_t collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b00000111, planet_heightmap, player); // Check collision with walls/roof/ground
-					// TODO Bombs are not detecting collisions with ground properly
+
 					if (collisions) { // Collision with wall/roof/ground
 						// Kill the bomb
 						gotoxy(1,5);
 						printf("Bomb collision\n");
+						if (collisions & 1<<3) { // Collision with ground
+							// Find all enemies within radius and kill them
+							listnode_t* enemy_node = enemies;
+							listnode_t* prev_enemy_node = NULL;
+							entity_t* enemy;
+							while (enemy_node != NULL) {
+								enemy = enemy_node->ptr;
+
+								if (enemy->x > current_entity->x-bomb_blast_radius && enemy->x < current_entity->x+bomb_blast_radius) {
+									// Current enemy is within blast radius, it should die
+									//gotoxy(fixp_toint(enemy->x), fixp_toint(enemy->y));
+									gotoxy(0,5);
+									printf("Skrrt");
+									if (prev_enemy_node) {
+										free(list_remove_next(prev_enemy_node));
+									} else {
+										free(list_pop(&enemies));
+									}
+								}
+
+								prev_enemy_node = enemy_node;
+								enemy_node = enemy_node->next;
+							}
+						}
 						current_entity->draw(current_entity, planet_heightmap, 0); // Erase bomb
 						current_node = current_node->next;
 						if (prev_node) {
@@ -288,10 +317,6 @@ int main(void)
 							printf("pop\n");
 							free(list_pop(&bombs));
 						}
-						if (collisions & 1<<3) { // Collision with ground
-							// Find all enemies within radius and kill them
-						}
-
 					} else {
 						current_entity->draw(current_entity, planet_heightmap, 1);
 						prev_node = current_node;
@@ -302,24 +327,24 @@ int main(void)
   				//gotoxy(1,1);
   				//printf("red: %d\ngray: %d\n#bombs: %d", red_btn, gray_btn, list_length(bombs));
 
-  				if (gray_btn_rising) { // Fire bomb?
+  				if (gray_btn_rising && !state_transition) { // Fire bomb?
   					// Fire bomb!
   					list_push(&bombs, entity_init(Bomb, player->x, player->y, player->vel_x, player->vel_y));
   				}
 
-  				if (red_btn_rising) { // Fire nuke?
+  				if (red_btn_rising && !state_transition) { // Fire nuke?
   					// Fire nuke!
   					list_push(&bombs, entity_init(Nuke, player->x, player->y, player->vel_x, player->vel_y));
   				}
 
 				// Update position of player
-				if (js[0] || js[1]) { // TODO Update the velocity of player
+				if (js[0] || js[1]) {
 					player->update_velocity(player, js[0], -js[1]);
 				}
 				uint8_t collisions = player_move(player, planet_heightmap); // Returns collision from check_collision()
 
 				if (collisions & 0b1000) {
-					// Player has hit ground, game over.
+					// Player has hit ground, game over. TODO
 				}
 
 				// Draw player
@@ -332,7 +357,6 @@ int main(void)
 				player->draw(player, planet_heightmap, 1);
 				update_flag &= ~(1<<1);
 			}
-
 
   			break;
 
