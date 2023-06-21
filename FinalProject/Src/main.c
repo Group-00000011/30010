@@ -65,7 +65,7 @@ int main(void)
 
 	uint8_t* planet_heightmap;
 
-	entity_t* player = entity_init(Spaceship, 255<<14, 30<<14, 0, 0);
+	entity_t* player = entity_init(Spaceship, 10<<14, 30<<14, 0, 0);
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	listnode_t* bullets = NULL;
@@ -300,11 +300,7 @@ int main(void)
 				}
 
 				// Update position of player
-				uint8_t collisions = player_move(player, planet_heightmap); // Returns collision from check_collision()
-
-				if (collisions & 0b1000) {
-					// Player has hit ground, game over.
-				}
+				player_move(player, planet_heightmap); // Returns collision from check_collision()
 
 				// Draw player
 				player->draw(player, planet_heightmap, 1);

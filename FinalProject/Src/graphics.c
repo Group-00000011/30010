@@ -71,23 +71,25 @@ uint8_t* gfx_draw_background() {
 
 
 void gfx_clear_area(uint8_t * ground, int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
-	gotoxy(x1, y1);
-	bgcolor(SPACE_COLOR);
-	fgcolor(0);
-
-	if (x1 < 1) {
-		x1 = 1;
+	if (x1 < 0) {
+		x1 = 0;
 	} else if (x1 > 255) {
 		x1 = 255;
 	}
 
-	if (x2 < 1) {
-		x2 = 1;
+	if (x2 < 0) {
+		x2 = 0;
 	} else if (x2 > 255) {
 		x2 = 255;
-	} else if (x2 < x1) {
+	}
+
+	if (x2 < x1) {
 		x2 = x1;
 	}
+
+	gotoxy(x1, y1);
+	bgcolor(SPACE_COLOR);
+	fgcolor(0);
 
 	uint8_t is_drawing_space = 1;
 	char hline[x2 - x1 + 2 + 5*8];
