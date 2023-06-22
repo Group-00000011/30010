@@ -184,7 +184,7 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 			//implement here maybe?
 			break;
 		case Bomb:
-			if(self->vel_x == 0 && self->vel_y == 0) {
+			if(self->vel_x < (1<<11) && self->vel_x > (-1<<11) && self->vel_y < (1<<11) && self->vel_y > (-1<<11)){
 				rotation = 0;
 				break;
 			}

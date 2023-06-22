@@ -71,7 +71,7 @@ int main(void)
 	//list_push(&enemies, entity_init(Enemy, 220<<14, 10<<14, fixp_fromint(1), 0));
 	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
-	list_push(&bombs, entity_init(Nuke, 120<<14, 10<<14, fixp_fromint(1), fixp_fromint(-1)));
+	list_push(&bombs, entity_init(Bomb, 120<<14, 10<<14, fixp_fromint(1), fixp_fromint(-1)));
 	list_push(&enemies, entity_init(Enemy, 30<<14, 0, 2<<14, 0));
 
 	fixp_t bomb_blast_radius = 20<<14;
