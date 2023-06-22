@@ -10,6 +10,7 @@
 #include "daftpunk8bit.h"
 #include "data_structures.h"
 #include "levels.h"
+#include "flash_memory.h"
 
 #define GRAVITY 0x0400
 
@@ -56,10 +57,18 @@ int main(void)
 
 	uint8_t last_keypress;
 
-	uint8_t lives = 3;
+	int8_t lives = 3;
 	uint8_t level = 0;
 	uint16_t kills = 0;
 	uint16_t score = 0;
+	//Uncomment below line to reset highscore to 0.
+	//flash_write_halfword(1, 0);
+	uint16_t high_score = flash_read_halfword(0);
+	uint16_t a = ~flash_read_halfword(1);
+	if (a) { // If the halfword after high_score is not all 1s
+		flash_write_halfword(0, 0);
+		high_score = 0;
+	}
 
 	uint8_t* planet_heightmap;
 
@@ -76,6 +85,9 @@ int main(void)
 
 	fixp_t bomb_blast_radius = 5<<14;
 	fixp_t nuke_blast_radius = 15<<14;
+
+
+
 
 	uint8_t lcd_buffer[512];
 	memset(lcd_buffer, 0, 512);
@@ -187,6 +199,8 @@ int main(void)
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
   				lives = 3;
   				level = 0;
+  				score = 0;
+  				kills = 0;
   			}
 
   			if (enemies == NULL) {
@@ -244,8 +258,23 @@ int main(void)
 					}
 				}
 				
-				if (!lives) {
-					next_state = 	DeathMenu;
+				if (lives < 1) {
+					next_state = DeathMenu;
+
+					// Delete all enemies
+					while (enemies != NULL) {
+						free(list_pop(&enemies));
+					}
+
+					// Delete all bullets
+					while (bullets != NULL) {
+						free(list_pop(&bullets));
+					}
+
+					// Delete bombs/nukes
+					while (bombs != NULL) {
+						free(list_pop(&bombs));
+					}
 				}
 
 				update_flag &= ~1;
@@ -363,6 +392,22 @@ int main(void)
 				update_flag &= ~(1<<1);
 			}
 
+
+
+  			// LCD information:
+			sprintf(lcd_lives.content, "Lives: %d", lives);
+			sprintf(lcd_level.content, "Level: %d", level);
+			sprintf(lcd_score.content, "Score: %d", score);
+			sprintf(lcd_kills.content, "Kills: %d", kills);
+
+			lcd_write_line(lcd_buffer, &lcd_lives);
+			lcd_write_line(lcd_buffer, &lcd_level);
+			lcd_write_line(lcd_buffer, &lcd_score);
+			lcd_write_line(lcd_buffer, &lcd_kills);
+
+
+			lcd_push_buffer(lcd_buffer);
+
   			break;
 
 		// ------------------------------
@@ -374,7 +419,11 @@ int main(void)
 					draw_menu_screen();
 				}
   				draw_menu_title("You Lost :(");
-  	  			draw_death_menu(level, score, kills);
+  				if (score > high_score) {
+  					high_score = score;
+  					flash_write_halfword(0, high_score);
+  				}
+  	  			draw_death_menu(level, score, kills, high_score);
   			}
 
   			if (gray_btn) {
@@ -413,20 +462,6 @@ int main(void)
   			break;
 
   		}
-
-  		// LCD information:
-  		sprintf(lcd_lives.content, "Lives: %d", lives);
-  		sprintf(lcd_level.content, "Level: %d", level);
-  		sprintf(lcd_score.content, "Score: %d", score);
-  		sprintf(lcd_kills.content, "Kills: %d", kills);
-
-  		lcd_write_line(lcd_buffer, &lcd_lives);
-  		lcd_write_line(lcd_buffer, &lcd_level);
-  		lcd_write_line(lcd_buffer, &lcd_score);
-  		lcd_write_line(lcd_buffer, &lcd_kills);
-
-
-  		lcd_push_buffer(lcd_buffer);
 
 
   		// State transitions:
