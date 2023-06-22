@@ -261,13 +261,22 @@ static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* height
 		}
 	}
 
+
 	if (type & 1<<1) { // Check collisions with roof
 		if (y < 0) { // Roof
 			collision |= 1<<2;
-		} else if (type & 1<<2 && heightmap) {
-			if (y > fixp_fromint(DISPLAY_HEIGHT-1-heightmap[x>>14])) { // Ground
-				collision |= 1<<3;
-			}
+		}
+	}
+	if (type & 1<<2) {  // Check collisions with ground
+
+		// Works if split into variables, not if put together in expression for some reason idk
+		uint8_t a = x>>14;
+		uint8_t b = heightmap[a];
+		uint8_t c = DISPLAY_HEIGHT - 1 - b;
+		fixp_t d = c << 14;
+
+		if (y > d) {
+			collision |= 1<<3;
 		}
 	}
 
@@ -374,10 +383,10 @@ uint8_t player_move (entity_t* self, uint8_t* heightmap) {
 	}
 
 	if (collisions_br) {
-		if (collisions_br & 0b10) {
+		if (collisions_br & 0b10) { // Collision with right wall
 			new_x = 0;
 		}
-		if(collisions_br & 0b1000) {
+		if(collisions_br & 0b1000) { // Collision with floor
 			new_y = ((DISPLAY_HEIGHT - 1 - heightmap[(new_x >> 14) + 5]) - 2) << 14 ;
 		}
 	}

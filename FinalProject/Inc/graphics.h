@@ -32,7 +32,7 @@ void draw_menu_title(char title[]);
 void draw_main_menu(uint8_t sel);
 void draw_help_menu();
 void draw_boss_screen();
-void draw_death_menu();
+void draw_death_menu(uint16_t level, uint16_t score, uint16_t kills, uint16_t high_score);
 
 
 

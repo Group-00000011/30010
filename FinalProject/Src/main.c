@@ -10,6 +10,7 @@
 #include "daftpunk8bit.h"
 #include "data_structures.h"
 #include "levels.h"
+#include "flash_memory.h"
 
 #define GRAVITY 0x0400
 
@@ -41,7 +42,7 @@ int main(void)
 	button_init();
 
 	// Initialise state machine
-	State state = Game;
+	State state = MainMenu;
 	State last_state = NullState;
 	State next_state = state;
 	State return_state = MainMenu;
@@ -56,10 +57,20 @@ int main(void)
 
 	uint8_t last_keypress;
 
-	uint8_t lives = 3;
+	int8_t lives = 3;
 	uint8_t level = 0;
 	uint16_t kills = 0;
 	uint16_t score = 0;
+	uint8_t nukes_cnt = 0;
+	uint8_t powerup_delay = 0;
+	//Uncomment below line to reset highscore to 0.
+	//flash_write_halfword(1, 0);
+	uint16_t high_score = flash_read_halfword(0);
+	uint16_t a = ~flash_read_halfword(1);
+	if (a) { // If the halfword after high_score is not all 1s
+		flash_write_halfword(0, 0);
+		high_score = 0;
+	}
 
 	uint8_t* planet_heightmap;
 
@@ -68,14 +79,18 @@ int main(void)
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	listnode_t* bullets = NULL;
 	listnode_t* bombs = NULL;
+	entity_t* powerup = NULL;
 	//list_push(&enemies, entity_init(Enemy, 220<<14, 10<<14, fixp_fromint(1), 0));
 	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
-	list_push(&bombs, entity_init(Bomb, 120<<14, 10<<14, fixp_fromint(1), fixp_fromint(-1)));
-	list_push(&enemies, entity_init(Enemy, 30<<14, 0, 2<<14, 0));
+	//list_push(&bombs, entity_init(Bomb, 120<<14, 10<<14, fixp_fromint(1), 0));
+	//list_push(&enemies, entity_init(Enemy, 17<<14, 0, 1<<14, 0));
 
-	fixp_t bomb_blast_radius = 20<<14;
-	fixp_t nuke_blast_radius = 128<<14;
+	fixp_t bomb_blast_radius = 5<<14;
+	fixp_t nuke_blast_radius = 15<<14;
+
+
+
 
 	uint8_t lcd_buffer[512];
 	memset(lcd_buffer, 0, 512);
@@ -84,11 +99,13 @@ int main(void)
 	lcd_text_t lcd_level;
 	lcd_text_t lcd_score;
 	lcd_text_t lcd_kills;
+	lcd_text_t lcd_nukes;
 
-	lcd_init_text(&lcd_lives, "", 0, 0, 25);
-	lcd_init_text(&lcd_level, "", 0, 1, 25);
-	lcd_init_text(&lcd_score, "", 0, 2, 25);
-	lcd_init_text(&lcd_kills, "", 0, 3, 25);
+	lcd_init_text(&lcd_lives, "", 0, 0, 25*5);
+	lcd_init_text(&lcd_level, "", 0, 1, 25*5);
+	lcd_init_text(&lcd_score, "", 0, 2, 25*5);
+	lcd_init_text(&lcd_kills, "", 0, 3, 25*5);
+	lcd_init_text(&lcd_nukes, "", 12*5, 0, 13*5);
 
 	bgcolor(SPACE_COLOR);
 	clrscr();
@@ -124,18 +141,20 @@ int main(void)
   				if (!(last_state == HelpMenu || last_state == DeathMenu)) {
   					draw_menu_screen();
   				}
+  				set_led(3);
   				draw_main_menu(menu_selection);
   				draw_menu_title("Main Menu");
+
   			}
 
-  			if (js[1] > (0x3 << 13)) {
+  			if (js[1] > 0) {
   				if (menu_selection) {
   					last_menu_sel = menu_selection;
   					menu_selection--;
   				}
   			}
 
-  			if (js[1] < (0x1 << 13)) {
+  			if (js[1] < 0) {
 				if (!menu_selection) {
 					last_menu_sel = menu_selection;
 					menu_selection++;
@@ -184,9 +203,12 @@ int main(void)
 
   		case Game:
   			if (state_transition) {
+  				set_led(2);
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
   				lives = 3;
   				level = 0;
+  				score = 0;
+  				kills = 0;
   			}
 
   			if (enemies == NULL) {
@@ -244,8 +266,48 @@ int main(void)
 					}
 				}
 				
-				if (!lives) {
+				if (lives < 1) {
 					next_state = DeathMenu;
+
+					// Delete all enemies
+					while (enemies != NULL) {
+						free(list_pop(&enemies));
+					}
+
+					// Delete all bullets
+					while (bullets != NULL) {
+						free(list_pop(&bullets));
+					}
+
+					// Delete bombs/nukes
+					while (bombs != NULL) {
+						free(list_pop(&bombs));
+					}
+				}
+
+
+				if (powerup != NULL) {
+					uint8_t collisions = powerup->check_collision(powerup->x, powerup->y, 0b1000, NULL, player);
+
+					if (collisions) {
+						nukes_cnt++;
+						powerup->draw(powerup, NULL, 0);
+						free(powerup);
+						powerup = NULL;
+					}
+					if (powerup != NULL) {
+						powerup->draw(powerup, NULL, 1);
+					}
+				} else {
+					if (level > 3) {
+						powerup_delay++;
+						if (powerup_delay == 255) {
+							powerup_delay = 0;
+							fixp_t powerup_x = enemies ? ((entity_t *) enemies->ptr)->x : 30<<13;
+							fixp_t powerup_y = enemies ? (((entity_t *) enemies->ptr)->y) - (20<<14) : 30<<14;
+							powerup = entity_init(Powerup, powerup_x, powerup_y, 0 , 0);
+						}
+					}
 				}
 
 				update_flag &= ~1;
@@ -282,10 +344,15 @@ int main(void)
 
 					uint8_t collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b00000111, planet_heightmap, player); // Check collision with walls/roof/ground
 
-					if (collisions) { // Collision with wall/roof/ground
+					if (collisions & 1<<2) { // Check collision with roof
+						current_entity->y = 0;
+						current_entity->vel_y = 0;
+					} else if (collisions) { // Collision with wall/ground but only if not roof
 						// Kill the bomb
 						gotoxy(1,5);
-						printf("%s collision\n", current_entity->type == Bomb ? "Bomb" : "Nuke");
+						printf("Bomb collision\n");
+
+
 						if (collisions & 1<<3) { // Collision with ground
 							// Find all enemies within radius and kill them
 							listnode_t* enemy_node = enemies;
@@ -294,13 +361,12 @@ int main(void)
 							while (enemy_node != NULL) {
 								enemy = enemy_node->ptr;
 
-								fixp_t dist_x = enemy->x - current_entity->x; // Horizontal distance from bomb to enemy
-								fixp_t blast_radius = current_entity->type == Nuke ? nuke_blast_radius : bomb_blast_radius;
-								if (dist_x < blast_radius && dist_x > -blast_radius) {
+								if (enemy->x > current_entity->x-bomb_blast_radius && enemy->x < current_entity->x+bomb_blast_radius) {
 									// Current enemy is within blast radius, it should die
 									//gotoxy(fixp_toint(enemy->x), fixp_toint(enemy->y));
-									gotoxy(0,6);
-									fixp_print(dist_x);
+									gotoxy(0,5);
+									printf("Skrrt");
+									kills++;
 									if (prev_enemy_node) {
 										free(list_remove_next(prev_enemy_node));
 									} else {
@@ -322,9 +388,6 @@ int main(void)
 							free(list_pop(&bombs));
 						}
 					} else {
-						if (current_entity->type == Bomb) {
-							current_entity->update_rotation(current_entity, 0);
-						}
 						current_entity->draw(current_entity, planet_heightmap, 1);
 						prev_node = current_node;
 						current_node = current_node->next;
@@ -339,14 +402,15 @@ int main(void)
   					list_push(&bombs, entity_init(Bomb, player->x, player->y, player->vel_x, player->vel_y));
   				}
 
-  				if (red_btn_rising && !state_transition) { // Fire nuke?
+  				if (red_btn_rising && nukes_cnt && !state_transition) { // Fire nuke and have enough?
   					// Fire nuke!
+  					nukes_cnt--;
   					list_push(&bombs, entity_init(Nuke, player->x, player->y, player->vel_x, player->vel_y));
   				}
 
 				// Update position of player
 				if (js[0] || js[1]) {
-					player->update_velocity(player, 4*js[0], -2*js[1]);
+					player->update_velocity(player, js[0], -js[1]);
 				}
 				uint8_t collisions = player_move(player, planet_heightmap); // Returns collision from check_collision()
 
@@ -354,8 +418,10 @@ int main(void)
 					// Player has hit ground, game over. TODO
 				}
 
+				score = (level-1)*50 + kills*10;
+
 				// Draw player
-				player->update_rotation(player, 0);
+				player->draw(player, planet_heightmap, 1);
 
 				// Rising edge detection of input buttons
 				prev_red_btn = red_btn;
@@ -372,11 +438,16 @@ int main(void)
 		// ------------------------------
   		case DeathMenu:
   			if(state_transition) {
+  				set_led(1);
   				if (!(last_state == MainMenu || last_state == HelpMenu)) {
 					draw_menu_screen();
 				}
   				draw_menu_title("You Lost :(");
-  	  			draw_death_menu();
+  				if (score > high_score) {
+  					high_score = score;
+  					flash_write_halfword(0, high_score);
+  				}
+  	  			draw_death_menu(level, score, kills, high_score);
   			}
 
   			if (gray_btn) {
@@ -394,6 +465,7 @@ int main(void)
 
   		case BossScreen:
   			if (state_transition) {
+  				set_led(3);
 				draw_boss_screen();
 				enable_timer_2 (0);
 				enable_timer_15 (0);
@@ -417,18 +489,28 @@ int main(void)
   		}
 
   		// LCD information:
-  		sprintf(lcd_lives.content, "Lives: %d", lives);
-  		sprintf(lcd_level.content, "Level: %d", level);
-  		sprintf(lcd_score.content, "Score: %d", score);
-  		sprintf(lcd_kills.content, "Kills: %d", kills);
+		sprintf(lcd_lives.content, "Lives: %d", lives);
+		sprintf(lcd_level.content, "Level: %d", level);
+		sprintf(lcd_score.content, "Score: %d", score);
+		sprintf(lcd_kills.content, "Kills: %d", kills);
+		sprintf(lcd_nukes.content, "Nukes: %d", nukes_cnt);
 
-  		lcd_write_line(lcd_buffer, &lcd_lives);
-  		lcd_write_line(lcd_buffer, &lcd_level);
-  		lcd_write_line(lcd_buffer, &lcd_score);
-  		lcd_write_line(lcd_buffer, &lcd_kills);
+		lcd_write_line(lcd_buffer, &lcd_lives);
+		lcd_write_line(lcd_buffer, &lcd_level);
+		lcd_write_line(lcd_buffer, &lcd_score);
+		lcd_write_line(lcd_buffer, &lcd_kills);
+		uint8_t ndigits = 0;
+		uint8_t temp_nukes = nukes_cnt;
+		do {
+			temp_nukes /= 10;
+			ndigits++;
+		} while (temp_nukes != 0);
+
+		lcd_nukes.text_width = 7*5 + ndigits*5; // Set width to match digits in nukes cnt
+		lcd_write_string(lcd_buffer, &lcd_nukes);
 
 
-  		lcd_push_buffer(lcd_buffer);
+		lcd_push_buffer(lcd_buffer);
 
 
   		// State transitions:
