@@ -279,11 +279,11 @@ void led_init() {
 	GPIOA->OSPEEDR &= ~(0x00000003 << (9 * 2));
 	GPIOA->OSPEEDR |= (0x00000002 << (9 * 2));
 
-	// Reset and set PB4 type register (blue)
+	// Reset and set PA9 type register (blue)
 	GPIOA->OTYPER &= ~(0x0001 << (9));
 	GPIOA->OTYPER |= (0x0000 << (9));
 
-	// Reset and set PB4 mode register (blue)
+	// Reset and set PA9 mode register (blue)
 	GPIOA->MODER &= ~(0x00000003 << (9 * 2));
 	GPIOA->MODER |= (0x00000001 << (9 * 2));
 
