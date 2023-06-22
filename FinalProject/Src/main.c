@@ -64,6 +64,10 @@ int main(void)
 	uint8_t level = 0;
 	uint16_t kills = 0;
 	uint16_t score = 0;
+	uint8_t nukes_cnt = 0;
+	uint8_t powerup_delay = 0;
+	// Uncomment below line to reset highscore in flash memory
+	//flash_write_halfword(1, 0);
 	uint16_t high_score = flash_read_halfword(0);
 	uint16_t a = ~flash_read_halfword(1);
 	if (a) { // If the halfword after high_score is not all 1's
@@ -78,6 +82,7 @@ int main(void)
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	listnode_t* bullets = NULL;
 	listnode_t* bombs = NULL;
+	entity_t* powerup = NULL;
 	//list_push(&enemies, entity_init(Enemy, 220<<14, 10<<14, fixp_fromint(1), 0));
 	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
@@ -97,11 +102,13 @@ int main(void)
 	lcd_text_t lcd_level;
 	lcd_text_t lcd_score;
 	lcd_text_t lcd_kills;
+	lcd_text_t lcd_nukes;
 
-	lcd_init_text(&lcd_lives, "", 0, 0, 25);
-	lcd_init_text(&lcd_level, "", 0, 1, 25);
-	lcd_init_text(&lcd_score, "", 0, 2, 25);
-	lcd_init_text(&lcd_kills, "", 0, 3, 25);
+	lcd_init_text(&lcd_lives, "", 0, 0, 25*5);
+	lcd_init_text(&lcd_level, "", 0, 1, 25*5);
+	lcd_init_text(&lcd_score, "", 0, 2, 25*5);
+	lcd_init_text(&lcd_kills, "", 0, 3, 25*5);
+	lcd_init_text(&lcd_nukes, "", 12*5, 0, 13*5);
 
 	bgcolor(SPACE_COLOR);
 	clrscr();
@@ -208,6 +215,7 @@ int main(void)
   				level = 0;
 				score = 0;
 				kills = 0;
+				nukes_cnt = 0;
 
 				player->x = PLAYER_DEFAULT_X;
 				player->y = PLAYER_DEFAULT_Y;
@@ -231,6 +239,30 @@ int main(void)
   				cleanup_entities(&bullets, planet_heightmap);
   				draw_entities(enemies, planet_heightmap);
 				draw_entities(bullets, planet_heightmap);
+
+				if (powerup != NULL) {
+					uint8_t collisions = powerup->check_collision(powerup->x, powerup->y, 0b1000, NULL, player);
+
+					if (collisions) {
+						nukes_cnt++;
+						powerup->draw(powerup, NULL, 0);
+						free(powerup);
+						powerup = NULL;
+					}
+					if (powerup != NULL) {
+						powerup->draw(powerup, NULL, 1);
+					}
+				} else {
+					if (level > 3) {
+						powerup_delay++;
+						if (powerup_delay == 255) {
+							powerup_delay = 0;
+							fixp_t powerup_x = enemies ? ((entity_t *) enemies->ptr)->x : 30<<13;
+							fixp_t powerup_y = enemies ? (((entity_t *) enemies->ptr)->y) - (20<<14) : 30<<14;
+							powerup = entity_init(Powerup, powerup_x, powerup_y, 0 , 0);
+						}
+					}
+				}
 
 				update_flag &= ~1;
 			}
@@ -266,16 +298,18 @@ int main(void)
   					list_push(&bombs, entity_init(Bomb, player->x, player->y, player->vel_x, player->vel_y));
   				}
 
-  				if (red_btn_rising && !state_transition) { // Fire nuke?
+  				if (red_btn_rising && nukes_cnt && !state_transition) { // Fire nuke if enough?
   					// Fire nuke!
+  					nukes_cnt--;
   					list_push(&bombs, entity_init(Nuke, player->x, player->y, player->vel_x, player->vel_y));
   				}
 
 				// Rising edge detection of input buttons
 				prev_red_btn = red_btn;
 				prev_gray_btn = gray_btn;
-
-				score = ((level-1)<<6 )+ (kills<<3); // Arbitrary score calculation
+				if (level) {
+					score = ((level-1)<<6 )+ (kills<<3); // Arbitrary score calculation
+				}
 
 				update_flag &= ~(1<<1);
 			}
@@ -301,6 +335,11 @@ int main(void)
 					while (enemies != NULL) {
 						free(list_pop(&enemies));
 					}
+					if (powerup != NULL) {
+						free(powerup);
+						powerup = NULL;
+					}
+
 				}
   				if (score > high_score) {
   					high_score = score;
@@ -351,12 +390,21 @@ int main(void)
   		sprintf(lcd_level.content, "Level: %d", level);
   		sprintf(lcd_score.content, "Score: %d", score);
   		sprintf(lcd_kills.content, "Kills: %d", kills);
+  		sprintf(lcd_nukes.content, "Nukes: %d", nukes_cnt);
 
   		lcd_write_line(lcd_buffer, &lcd_lives);
   		lcd_write_line(lcd_buffer, &lcd_level);
   		lcd_write_line(lcd_buffer, &lcd_score);
   		lcd_write_line(lcd_buffer, &lcd_kills);
+  		uint8_t ndigits = 0;
+		uint8_t temp_nukes = nukes_cnt;
+		do {
+			temp_nukes /= 10;
+			ndigits++;
+		} while (temp_nukes != 0);
 
+		lcd_nukes.text_width = 7*5 + ndigits*5; // Set width to match digits in nukes cnt
+		lcd_write_string(lcd_buffer, &lcd_nukes);
 
   		lcd_push_buffer(lcd_buffer);
 
