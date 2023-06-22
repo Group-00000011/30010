@@ -10,6 +10,7 @@
 #include "daftpunk8bit.h"
 #include "data_structures.h"
 #include "levels.h"
+#include "flash_memory.h"
 
 #define GRAVITY 0x0400
 #define PLAYER_DEFAULT_X 200<<14
@@ -63,7 +64,12 @@ int main(void)
 	uint8_t level = 0;
 	uint16_t kills = 0;
 	uint16_t score = 0;
-	uint16_t high_score = 0;
+	uint16_t high_score = flash_read_halfword(0);
+	uint16_t a = ~flash_read_halfword(1);
+	if (a) { // If the halfword after high_score is not all 1's
+		flash_write_halfword(0, 0);
+		high_score = 0;
+	}
 
 	uint8_t* planet_heightmap;
 
@@ -132,6 +138,7 @@ int main(void)
   				if (last_state == DeathMenu) {
   					draw_menu_controls();
   				}
+  				set_led(3);
   				draw_main_menu(menu_selection);
   				draw_menu_title("Main Menu");
   			}
@@ -178,6 +185,7 @@ int main(void)
 					draw_menu_screen();
 				}
   				draw_menu_title("Help");
+  				set_led(3);
   				draw_help_menu();
   			}
 
@@ -195,8 +203,11 @@ int main(void)
   			// ------------------------------
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
+  				set_led(2);
   				lives = 3;
   				level = 0;
+				score = 0;
+				kills = 0;
 
 				player->x = PLAYER_DEFAULT_X;
 				player->y = PLAYER_DEFAULT_Y;
@@ -227,7 +238,7 @@ int main(void)
 
   			if (update_flag & (1 << 1)){ // Update player and bombs
 
-  		  		update_entities(bombs, &enemies, NULL, planet_heightmap, GRAVITY, blast_radius, 0);
+  		  		kills += update_entities(bombs, &enemies, NULL, planet_heightmap, GRAVITY, blast_radius, 0); // return number of enemies killed
   				cleanup_entities(&bombs, planet_heightmap);
   				draw_entities(bombs, planet_heightmap);
 
@@ -264,6 +275,8 @@ int main(void)
 				prev_red_btn = red_btn;
 				prev_gray_btn = gray_btn;
 
+				score = ((level-1)<<6 )+ (kills<<3); // Arbitrary score calculation
+
 				update_flag &= ~(1<<1);
 			}
 
@@ -289,8 +302,14 @@ int main(void)
 						free(list_pop(&enemies));
 					}
 				}
+  				if (score > high_score) {
+  					high_score = score;
+  					flash_write_halfword(0, high_score);
+				}
+
   				draw_menu_title("You Lost :(");
   	  			draw_death_menu(level, score, kills, high_score);
+  	  			set_led(1);
   			}
 
   			if (gray_btn) {
@@ -308,6 +327,7 @@ int main(void)
 				enable_timer_2 (0);
 				enable_timer_15 (0);
 				enable_timer_16 (0);
+				set_led(3);
   			}
 
   			if (last_keypress == 'b') {

@@ -448,6 +448,7 @@ uint8_t update_entities (listnode_t* head, listnode_t** aux_list, entity_t* aux_
 				fixp_t current_blast_radius = aux_entity->type == Bomb ? blast_radius[0] : blast_radius[1];
 				if (dist_x < current_blast_radius && dist_x > -current_blast_radius) {
 					// Current enemy is within blast radius, it should die
+					++return_value;
 					current_entity->is_dead = 1;
 				}
 			} else {
@@ -470,7 +471,7 @@ uint8_t update_entities (listnode_t* head, listnode_t** aux_list, entity_t* aux_
 
 				if (collisions & 1<<3) { // If the collision is with the ground, kill nearby enemies
 					// !!! aux_list should now be the enemies
-					update_entities(*aux_list, NULL, current_entity, NULL, 0, blast_radius, 0);
+					return_value = update_entities(*aux_list, NULL, current_entity, NULL, 0, blast_radius, 0);
 				}
 			}
 
