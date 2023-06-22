@@ -26,39 +26,39 @@ static void draw_spaceship(entity_t* self, uint8_t* ground, uint8_t redraw) {
 
 	//Switches through possible rotations and draws spaceship accordingly
 	//0 = up, 1 = right, 2 = down, 3 = left
-switch (self->rotation){
-	case 0:
-		gotoxy(x, y);
-		printf("/%c%c%c", 0xDB,0xDB,0x5C);
-		gotoxy(x, y+1);
-		printf("%c  %c", 0xDB,0xDB);
-		gotoxy(x, y+2);
-		printf("/%c%c%c", 0xDF,0xDF,0x5C);
-		break;
-	case 1:
-		gotoxy(x, y);
-		printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDF,0xDF,0xDB,0x5C);
-		gotoxy(x, y+1);
-		printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
-		break;
-	case 2:
-		gotoxy(x, y);
-		printf("%c%c%c/", 0x5C,0xDC,0xDC);
-		gotoxy(x, y+1);
-		printf("%c  %c", 0xDB,0xDB);
-		gotoxy(x, y+2);
-		printf("%c%c%c/", 0x5C, 0xDB,0xDB);
-		break;
-	case 3:
-		gotoxy(x,y);
-		printf("/%c%c%c%c/", 0xDB,0xDF,0xDF,0xDB);
-		gotoxy(x,y+1);
-		printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDC,0xDC,0xDB,0x5C);
-		break;
-	default:
-		printf("ERROR");
-		break;
-}
+	switch (self->rotation){
+		case 0:
+			gotoxy(x, y);
+			printf("/%c%c%c", 0xDB,0xDB,0x5C);
+			gotoxy(x, y+1);
+			printf("%c  %c", 0xDB,0xDB);
+			gotoxy(x, y+2);
+			printf("/%c%c%c", 0xDF,0xDF,0x5C);
+			break;
+		case 1:
+			gotoxy(x, y);
+			printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDF,0xDF,0xDB,0x5C);
+			gotoxy(x, y+1);
+			printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
+			break;
+		case 2:
+			gotoxy(x, y);
+			printf("%c%c%c/", 0x5C,0xDC,0xDC);
+			gotoxy(x, y+1);
+			printf("%c  %c", 0xDB,0xDB);
+			gotoxy(x, y+2);
+			printf("%c%c%c/", 0x5C, 0xDB,0xDB);
+			break;
+		case 3:
+			gotoxy(x,y);
+			printf("/%c%c%c%c/", 0xDB,0xDF,0xDF,0xDB);
+			gotoxy(x,y+1);
+			printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDC,0xDC,0xDB,0x5C);
+			break;
+		default:
+			printf("ERROR");
+			break;
+	}
 }
 
 static void draw_enemy(entity_t * self, uint8_t  * ground, uint8_t redraw) {
@@ -144,12 +144,20 @@ static void draw_bomb(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 
 
 static void draw_nuke(entity_t * self, uint8_t  * ground, uint8_t redraw) {
+	gotoxy(self->last_x>>14, self->last_y>>14);
+	bgcolor(0);
+	fgcolor(7);
+	printf(" ");
 	gotoxy(self->x>>14,self->y>>14);
 	printf("%c",0xDB);
 }
 
 
 static void draw_powerup(entity_t * self, uint8_t  * ground, uint8_t redraw) {
+	gotoxy(self->last_x>>14, self->last_y>>14);
+	bgcolor(0);
+	fgcolor(7);
+	printf(" ");
 	gotoxy(self->x>>14,self->y>>14);
 	printf("%c", 0x24);
 }
@@ -169,8 +177,7 @@ static void update_velocity(entity_t * self, fixp_t vel_x, fixp_t vel_y) {
 
 static void update_rotation(entity_t * self, fixp_t rotation) {
 	self->last_rotation = self->rotation;
-	fixp_t vel_x = self->vel_x;
-	fixp_t vel_y = self->vel_y;
+
 
 	switch (self->type) {
 		case Spaceship:
@@ -213,26 +220,21 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 
 			break;
 		case Bomb:
-		rotation = 0b0000;					// Resets rotation direction
+			if(self->vel_x < (1<<11) && self->vel_x > (-1<<11) && self->vel_y < (1<<11) && self->vel_y > (-1<<11)){
+				rotation = 0;
+				break;
+			}
 
-
-		// Become - if no velocity.
-		if(vel_x < (1<<11) && vel_x > (-1<<11) && vel_y < (1<<11) && vel_y > (-1<<11)){
-			break;
-		}
-
-		if(vel_y > -( vel_x << 1) && vel_y < vel_x << 1){
-			rotation |= (0b01 << 2);		// Sets horizontal direction to positive
-		}
-		if(vel_y < -( vel_x << 1) && vel_y > vel_x << 1){
-			rotation |= (0b10 << 2);		// Sets horizontal direction to negative
-		}
-		if(vel_x > -( vel_y << 1) && vel_x < vel_y << 1){
-			rotation |= (0b10 << 0);		// Sets vertical direction to negative
-		}
-		if(vel_x < -( vel_y << 1) && vel_x > vel_y << 1){
-			rotation |= (0b01 << 0);		// Sets vertical direction to positive
-		}
+			if (self->vel_y > -(self->vel_x << 1) && self->vel_y < self->vel_x << 1) {
+				rotation |= (0b0100);		// Sets horizontal direction to positive
+			} else if (self->vel_y < -(self->vel_x << 1) && self->vel_y > self->vel_x << 1) {
+				rotation |= (0b1000);		// Sets horizontal direction to negative
+			}
+			if(self->vel_x > -(self->vel_y << 1) && self->vel_x < self->vel_y << 1) {
+				rotation |= (0b0010);		// Sets vertical direction to negative
+			} else if (self->vel_x < -(self->vel_y << 1) && self->vel_x > self->vel_y << 1) {
+				rotation |= (0b0001);		// Sets vertical direction to positive
+			}
 			break;
 		default:
 			printf("ERROR");
@@ -352,7 +354,7 @@ void gravity_move (entity_t* self, fixp_t g) {
 }
 
 uint8_t player_move (entity_t* self, uint8_t* heightmap) {
-	fixp_t new_x = self->x + self->vel_x*2;
+	fixp_t new_x = self->x + self->vel_x;
 	fixp_t new_y = self->y + self->vel_y;
 
 	uint8_t collisions_tl = self->check_collision(new_x, new_y, 0b0111, heightmap, NULL); // Top-left
