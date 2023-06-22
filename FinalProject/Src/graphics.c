@@ -292,6 +292,21 @@ void draw_help_menu() {
 	bgcolor(MENU_WINDOW_COLOR);
 	fgcolor(MENU_FG_COLOR);
 
+	// Game description
+
+	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 46);
+	printf("--- GAME DESCRIPTION ---");
+
+	gotoxy((DISPLAY_WIDTH >> 1) - 28, DISPLAY_HEIGHT - 44);
+	printf("You are a rebel space bomberpilot tasked with eliminating");
+	gotoxy((DISPLAY_WIDTH >> 1) - 28, DISPLAY_HEIGHT - 43);
+	printf("an evil government's military force from your home planet.");
+	gotoxy((DISPLAY_WIDTH >> 1) - 28, DISPLAY_HEIGHT - 42);
+	printf("Throw bombs to kill enemies. When all enemies are killed ");
+	gotoxy((DISPLAY_WIDTH >> 1) - 28, DISPLAY_HEIGHT - 41);
+	printf("more spawn. Pick up powerups to get more bombs and nuclear");
+	gotoxy((DISPLAY_WIDTH >> 1) - 28, DISPLAY_HEIGHT - 40);
+	printf("weapons to eliminate the enemies faster.");
 
 	// GAME CONTROLS
 	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 34);
