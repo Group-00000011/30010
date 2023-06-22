@@ -26,39 +26,39 @@ static void draw_spaceship(entity_t* self, uint8_t* ground, uint8_t redraw) {
 
 	//Switches through possible rotations and draws spaceship accordingly
 	//0 = up, 1 = right, 2 = down, 3 = left
-switch (self->rotation){
-	case 0:
-		gotoxy(x, y);
-		printf("/%c%c%c", 0xDB,0xDB,0x5C);
-		gotoxy(x, y+1);
-		printf("%c  %c", 0xDB,0xDB);
-		gotoxy(x, y+2);
-		printf("/%c%c%c", 0xDF,0xDF,0x5C);
-		break;
-	case 1:
-		gotoxy(x, y);
-		printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDF,0xDF,0xDB,0x5C);
-		gotoxy(x, y+1);
-		printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
-		break;
-	case 2:
-		gotoxy(x, y);
-		printf("%c%c%c/", 0x5C,0xDC,0xDC);
-		gotoxy(x, y+1);
-		printf("%c  %c", 0xDB,0xDB);
-		gotoxy(x, y+2);
-		printf("%c%c%c/", 0x5C, 0xDB,0xDB);
-		break;
-	case 3:
-		gotoxy(x,y);
-		printf("/%c%c%c%c/", 0xDB,0xDF,0xDF,0xDB);
-		gotoxy(x,y+1);
-		printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDC,0xDC,0xDB,0x5C);
-		break;
-	default:
-		printf("ERROR");
-		break;
-}
+	switch (self->rotation){
+		case 0:
+			gotoxy(x, y);
+			printf("/%c%c%c", 0xDB,0xDB,0x5C);
+			gotoxy(x, y+1);
+			printf("%c  %c", 0xDB,0xDB);
+			gotoxy(x, y+2);
+			printf("/%c%c%c", 0xDF,0xDF,0x5C);
+			break;
+		case 1:
+			gotoxy(x, y);
+			printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDF,0xDF,0xDB,0x5C);
+			gotoxy(x, y+1);
+			printf("/%c%c%c%c/", 0xDB,0xDC,0xDC,0xDB);
+			break;
+		case 2:
+			gotoxy(x, y);
+			printf("%c%c%c/", 0x5C,0xDC,0xDC);
+			gotoxy(x, y+1);
+			printf("%c  %c", 0xDB,0xDB);
+			gotoxy(x, y+2);
+			printf("%c%c%c/", 0x5C, 0xDB,0xDB);
+			break;
+		case 3:
+			gotoxy(x,y);
+			printf("/%c%c%c%c/", 0xDB,0xDF,0xDF,0xDB);
+			gotoxy(x,y+1);
+			printf("%c%c%c%c%c%c", 0x5C,0xDB,0xDC,0xDC,0xDB,0x5C);
+			break;
+		default:
+			printf("ERROR");
+			break;
+	}
 }
 
 static void draw_enemy(entity_t * self, uint8_t  * ground, uint8_t redraw) {
@@ -144,12 +144,20 @@ static void draw_bomb(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 
 
 static void draw_nuke(entity_t * self, uint8_t  * ground, uint8_t redraw) {
+	gotoxy(self->last_x>>14, self->last_y>>14);
+	bgcolor(0);
+	fgcolor(7);
+	printf(" ");
 	gotoxy(self->x>>14,self->y>>14);
 	printf("%c",0xDB);
 }
 
 
 static void draw_powerup(entity_t * self, uint8_t  * ground, uint8_t redraw) {
+	gotoxy(self->last_x>>14, self->last_y>>14);
+	bgcolor(0);
+	fgcolor(7);
+	printf(" ");
 	gotoxy(self->x>>14,self->y>>14);
 	printf("%c", 0x24);
 }
