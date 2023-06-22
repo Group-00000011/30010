@@ -181,39 +181,39 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 
 	switch (self->type) {
 		case Spaceship:
-			if(vel_y > 0)
+			if(self->vel_y > 0)
 			{
-				if(vel_x > vel_y    && vel_x > 0){
+				if(self->vel_x > self->vel_y && self->vel_x > 0){
 							rotation = 1;		// right
 				}
-				else if(vel_x < (-vel_y) && vel_x < 0){
+				else if(self->vel_x < (-self->vel_y) && self->vel_x < 0){
 							rotation = 3;		// left
 				}
 
 			}
 			else{
-				if(vel_x > (-vel_y)    && vel_x > 0){
+				if(self->vel_x > (-self->vel_y)    && self->vel_x > 0){
 							rotation = 1;		// right
 				}
-				else if(vel_x < vel_y && vel_x < 0){
+				else if(self->vel_x < self->vel_y && self->vel_x < 0){
 							rotation = 3;		// left<
 				}
 
 			}
-			if(vel_x > 0)
+			if(self->vel_x > 0)
 						{
-				if( vel_y > vel_x && vel_y > 0){
+				if( self->vel_y > self->vel_x && self->vel_y > 0){
 							rotation = 2;		// down
 				}
-				else if(vel_y < (-vel_x) && vel_y < 0){
+				else if(self->vel_y < (-self->vel_x) && self->vel_y < 0){
 							rotation = 0;		// up
 				}
 			}
 			else{
-				if(vel_y > (-vel_x) && vel_y > 0){
+				if(self->vel_y > (-self->vel_x) && self->vel_y > 0){
 							rotation = 2;		// down
 				}
-				else if(vel_y < vel_x && vel_y < 0){
+				else if(self->vel_y < self->vel_x && self->vel_y < 0){
 							rotation = 0;		// up
 				}
 			}
