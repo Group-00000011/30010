@@ -315,7 +315,7 @@ void draw_help_menu() {
 }
 
 
-void draw_death_menu() {
+void draw_death_menu(uint16_t level, uint16_t score, uint16_t kills) {
 	clear_menu_content();
 	bgcolor(MENU_WINDOW_COLOR);
 	fgcolor(MENU_FG_COLOR);
@@ -327,13 +327,13 @@ void draw_death_menu() {
 	printf("You got the following stats");
 
 	gotoxy((DISPLAY_WIDTH >> 1) - 15, DISPLAY_HEIGHT - 36);
-	printf("Level: ");
+	printf("Level: %d", level);
 
 	gotoxy((DISPLAY_WIDTH >> 1) - 15, DISPLAY_HEIGHT - 34);
-	printf("Score: ");
+	printf("Score: %d", score);
 
 	gotoxy((DISPLAY_WIDTH >> 1) - 15, DISPLAY_HEIGHT - 32);
-	printf("Enemies Killed: ");
+	printf("Enemies Killed: %d", kills);
 
 
 	gotoxy((DISPLAY_WIDTH >> 1) - 8, DISPLAY_HEIGHT - 20);

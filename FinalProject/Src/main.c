@@ -299,6 +299,7 @@ int main(void)
 									//gotoxy(fixp_toint(enemy->x), fixp_toint(enemy->y));
 									gotoxy(0,5);
 									printf("Skrrt");
+									kills++;
 									if (prev_enemy_node) {
 										free(list_remove_next(prev_enemy_node));
 									} else {
@@ -349,6 +350,8 @@ int main(void)
 					// Player has hit ground, game over. TODO
 				}
 
+				score = (level-1)*50 + kills*10;
+
 				// Draw player
 				player->draw(player, planet_heightmap, 1);
 
@@ -371,7 +374,7 @@ int main(void)
 					draw_menu_screen();
 				}
   				draw_menu_title("You Lost :(");
-  	  			draw_death_menu();
+  	  			draw_death_menu(level, score, kills);
   			}
 
   			if (gray_btn) {
