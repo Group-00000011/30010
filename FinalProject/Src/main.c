@@ -141,8 +141,10 @@ int main(void)
   				if (!(last_state == HelpMenu || last_state == DeathMenu)) {
   					draw_menu_screen();
   				}
+  				set_led(3);
   				draw_main_menu(menu_selection);
   				draw_menu_title("Main Menu");
+
   			}
 
   			if (js[1] > 0) {
@@ -201,6 +203,7 @@ int main(void)
 
   		case Game:
   			if (state_transition) {
+  				set_led(2);
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
   				lives = 3;
   				level = 0;
@@ -435,6 +438,7 @@ int main(void)
 		// ------------------------------
   		case DeathMenu:
   			if(state_transition) {
+  				set_led(1);
   				if (!(last_state == MainMenu || last_state == HelpMenu)) {
 					draw_menu_screen();
 				}
@@ -461,6 +465,7 @@ int main(void)
 
   		case BossScreen:
   			if (state_transition) {
+  				set_led(3);
 				draw_boss_screen();
 				enable_timer_2 (0);
 				enable_timer_15 (0);
