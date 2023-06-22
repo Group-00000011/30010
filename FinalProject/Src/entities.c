@@ -111,9 +111,11 @@ static void draw_bullet(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 }
 
 static void draw_bomb(entity_t * self, uint8_t  * ground, uint8_t redraw) {
-	gotoxy(self->last_x>>14, self->last_y>>14);
-	printf(" ");
-	if (redraw) {
+	if (self->last_y > 0) {
+		gotoxy(self->last_x>>14, self->last_y>>14);
+		printf(" ");
+	}
+	if (redraw && self->y > 0) {
 		gotoxy(self->x>>14,self->y>>14);
 		bgcolor(0);
 		fgcolor(7);
@@ -144,11 +146,13 @@ static void draw_bomb(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 }
 
 static void draw_nuke(entity_t * self, uint8_t  * ground, uint8_t redraw) {
-	gotoxy(self->last_x>>14, self->last_y>>14);
-	bgcolor(0);
-	fgcolor(7);
-	printf(" ");
-	if (redraw) {
+	if (self->last_y > 0) {
+		gotoxy(self->last_x>>14, self->last_y>>14);
+		bgcolor(0);
+		fgcolor(7);
+		printf(" ");
+	}
+	if (redraw && self->y > 0) {
 		gotoxy(self->x>>14,self->y>>14);
 		printf("%c",0xDB);
 	}
@@ -275,7 +279,7 @@ static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* height
 
 	uint8_t collision = 0;
 
-	if (type & 1) { // Check collisions with sides
+	if (type & 0b0001) { // Check collisions with sides
 		if (x < 0) { // Left wall
 			collision |= 1;
 		} else if (x > fixp_fromint(DISPLAY_WIDTH-1)) { // Right wall
@@ -283,17 +287,19 @@ static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* height
 		}
 	}
 
-	if (type & 1<<1) { // Check collisions with roof
+	if (type & 0b0010) { // Check collisions with roof
 		if (y < 0) { // Roof
 			collision |= 1<<2;
-		} else if (type & 1<<2 && heightmap) {
-			if (y > fixp_fromint(DISPLAY_HEIGHT-1-heightmap[x>>14])) { // Ground
-				collision |= 1<<3;
-			}
 		}
 	}
 
-	if (type & 1<<3) {
+	if (type & 0b0100 && heightmap) {
+		if (y > fixp_fromint(DISPLAY_HEIGHT-1-heightmap[x>>14])) { // Ground
+			collision |= 1<<3;
+		}
+	}
+
+	if (type & 0b1000) {
 		if ((x > player->x) && (x < player->x + (5<<14)) && (y > player->y) && (y < player->y + (2<<14))) { // Spaceship
 			collision |= 1<<4;
 		}
@@ -462,7 +468,7 @@ uint8_t update_entities (listnode_t* head, listnode_t** aux_list, entity_t* aux_
 			}
 			break;
 		case Bomb:
-			collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b00000111, heightmap, NULL); // Check collision with walls/roof/ground
+			collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b00000101, heightmap, NULL); // Check collision with walls/roof/ground
 
 			if (collisions) { // If there is a collision, kill the bomb
 				current_entity->is_dead = 1;
@@ -475,7 +481,7 @@ uint8_t update_entities (listnode_t* head, listnode_t** aux_list, entity_t* aux_
 
 			break;
 		case Nuke:
-			collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b00000111, heightmap, NULL); // Check collision with walls/roof/ground
+			collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b00000101, heightmap, NULL); // Check collision with walls/roof/ground
 
 			if (collisions) { // If there is a collision, kill the bomb
 				current_entity->is_dead = 1;

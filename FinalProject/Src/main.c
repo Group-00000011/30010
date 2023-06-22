@@ -12,8 +12,11 @@
 #include "levels.h"
 
 #define GRAVITY 0x0400
+#define PLAYER_DEFAULT_X 200<<14
+#define PLAYER_DEFAULT_Y 25<<14
+#define PLAYER_DEFAULT_VEL_X -4<<14
 
-typedef enum State {NullState, MainMenu, HelpMenu, Game, DeathMenu, BossScreen} State;
+typedef enum {NullState, MainMenu, HelpMenu, Game, DeathMenu, BossScreen} State;
 
 /*
 volatile uint8_t* punk_address = punk_long;
@@ -41,7 +44,7 @@ int main(void)
 	button_init();
 
 	// Initialise state machine
-	State state = Game;
+	State state = MainMenu;
 	State last_state = NullState;
 	State next_state = state;
 	State return_state = MainMenu;
@@ -56,14 +59,14 @@ int main(void)
 
 	uint8_t last_keypress;
 
-	uint8_t lives = 3;
+	int8_t lives = 3;
 	uint8_t level = 0;
 	uint16_t kills = 0;
 	uint16_t score = 0;
 
 	uint8_t* planet_heightmap;
 
-	entity_t* player = entity_init(Spaceship, 200<<14, 25<<14, -2<<14, 0);
+	entity_t* player = entity_init(Spaceship, PLAYER_DEFAULT_X, PLAYER_DEFAULT_Y, PLAYER_DEFAULT_VEL_X, 0);
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
 	listnode_t* bullets = NULL;
@@ -71,11 +74,11 @@ int main(void)
 	//list_push(&enemies, entity_init(Enemy, 220<<14, 10<<14, fixp_fromint(1), 0));
 	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
-	list_push(&bombs, entity_init(Nuke, 120<<14, 10<<14, fixp_fromint(-1), fixp_fromint(-1)));
-	list_push(&enemies, entity_init(Enemy, 200<<14, 0, 2<<14, 0));
-	list_push(&enemies, entity_init(Enemy, 30<<14, 0, 2<<14, 0));
-	list_push(&enemies, entity_init(Enemy, 35<<14, 0, -2<<14, 0));
-	list_push(&enemies, entity_init(Enemy, 210<<14, 0, 2<<14, 0));
+//	list_push(&bombs, entity_init(Nuke, 120<<14, 10<<14, fixp_fromint(-1), fixp_fromint(-1)));
+//	list_push(&enemies, entity_init(Enemy, 200<<14, 0, 2<<14, 0));
+//	list_push(&enemies, entity_init(Enemy, 30<<14, 0, 2<<14, 0));
+//	list_push(&enemies, entity_init(Enemy, 35<<14, 0, -2<<14, 0));
+//	list_push(&enemies, entity_init(Enemy, 210<<14, 0, 2<<14, 0));
 
 	fixp_t blast_radius[2] = {20<<14, 64<<14};
 	//fixp_t nuke_blast_radius = 128<<14;
@@ -129,14 +132,14 @@ int main(void)
   				draw_menu_title("Main Menu");
   			}
 
-  			if (js[1] > (0x3 << 13)) {
+  			if (js[1] > 0) {
   				if (menu_selection) {
   					last_menu_sel = menu_selection;
   					menu_selection--;
   				}
   			}
 
-  			if (js[1] < (0x1 << 13)) {
+  			if (js[1] < 0) {
 				if (!menu_selection) {
 					last_menu_sel = menu_selection;
 					menu_selection++;
@@ -190,6 +193,11 @@ int main(void)
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
   				lives = 3;
   				level = 0;
+
+				player->x = PLAYER_DEFAULT_X;
+				player->y = PLAYER_DEFAULT_Y;
+				player->vel_x = PLAYER_DEFAULT_VEL_X;
+				player->vel_y = 0;
   			}
 
   			if (enemies == NULL) {
@@ -209,10 +217,6 @@ int main(void)
   				draw_entities(enemies, planet_heightmap);
 				draw_entities(bullets, planet_heightmap);
 
-				if (!lives) {
-					next_state = DeathMenu;
-				}
-
 				update_flag &= ~1;
 			}
 
@@ -231,8 +235,7 @@ int main(void)
 
 
 				if (collisions & 0b1000) {
-					gotoxy(1,3);
-					printf("Player hit ground, game over!");
+					lives = 0;
 					// Player has hit ground, game over. TODO
 				}
 
@@ -260,6 +263,10 @@ int main(void)
 				update_flag &= ~(1<<1);
 			}
 
+			if (lives < 1) {
+				next_state = DeathMenu;
+			}
+
   			break;
   		case DeathMenu:
   			// ------------------------------
@@ -268,6 +275,15 @@ int main(void)
   			if(state_transition) {
   				if (!(last_state == MainMenu || last_state == HelpMenu)) {
 					draw_menu_screen();
+					while (bullets != NULL) {
+						free(list_pop(&bullets));
+					}
+					while (bombs != NULL) {
+						free(list_pop(&bombs));
+					}
+					while (enemies != NULL) {
+						free(list_pop(&enemies));
+					}
 				}
   				draw_menu_title("You Lost :(");
   	  			draw_death_menu();
