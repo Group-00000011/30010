@@ -63,6 +63,7 @@ int main(void)
 	uint8_t level = 0;
 	uint16_t kills = 0;
 	uint16_t score = 0;
+	uint16_t high_score = 0;
 
 	uint8_t* planet_heightmap;
 
@@ -127,6 +128,9 @@ int main(void)
   			if (state_transition) {
   				if (!(last_state == HelpMenu || last_state == DeathMenu)) {
   					draw_menu_screen();
+  				}
+  				if (last_state == DeathMenu) {
+  					draw_menu_controls();
   				}
   				draw_main_menu(menu_selection);
   				draw_menu_title("Main Menu");
@@ -286,7 +290,7 @@ int main(void)
 					}
 				}
   				draw_menu_title("You Lost :(");
-  	  			draw_death_menu();
+  	  			draw_death_menu(level, score, kills, high_score);
   			}
 
   			if (gray_btn) {
