@@ -311,10 +311,15 @@ int main(void)
 
 					uint8_t collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b00000111, planet_heightmap, player); // Check collision with walls/roof/ground
 
-					if (collisions) { // Collision with wall/roof/ground
+					if (collisions & 1<<2) { // Check collision with roof
+						current_entity->y = 0;
+						current_entity->vel_y = 0;
+					} else if (collisions) { // Collision with wall/ground but only if not roof
 						// Kill the bomb
 						gotoxy(1,5);
 						printf("Bomb collision\n");
+
+
 						if (collisions & 1<<3) { // Collision with ground
 							// Find all enemies within radius and kill them
 							listnode_t* enemy_node = enemies;
