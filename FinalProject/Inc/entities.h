@@ -21,7 +21,9 @@ typedef struct entity {
 	fixp_t x, y, vel_x, vel_y, last_x, last_y;
 	uint8_t rotation, last_rotation;
 	uint16_t counter;
+	uint8_t is_dead;
 	void (*draw)(struct entity* self, uint8_t * ground, uint8_t redraw);
+	void (*move)(struct entity* self);
 	void (*update_position)(struct entity* self, fixp_t x, fixp_t y);
 	void (*update_rotation)(struct entity* self, fixp_t rotation);
 	void (*update_velocity)(struct entity* self, fixp_t vel_x, fixp_t vel_y);
@@ -30,6 +32,8 @@ typedef struct entity {
 
 
 entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t vel_x, fixp_t vel_y);
+void update_entities (listnode_t* head);
+void draw_entities (listnode_t* head);
 
 void enemy_move (entity_t* self, uint8_t* heightmap);
 void entity_move (entity_t* self);

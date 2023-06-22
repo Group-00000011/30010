@@ -195,7 +195,7 @@ int main(void)
   			}
 			
   			if (update_flag & 1) {	// Update enemies and bullets
-				listnode_t* current_node = enemies;
+				/*listnode_t* current_node = enemies;
 				entity_t* current_entity;
 				while (current_node != NULL) { // Loop through enemies
 					current_entity = current_node->ptr;
@@ -214,8 +214,8 @@ int main(void)
 
 					current_entity->draw(current_entity, planet_heightmap, 1);
 					current_node = current_node->next;
-				}
-				current_node = bullets;
+				}*/
+				/*current_node = bullets;
 				listnode_t* prev_node = NULL;
 				while (current_node != NULL) { // Loop through bullets
 					current_entity = current_node->ptr;
@@ -242,7 +242,10 @@ int main(void)
 						prev_node = current_node;
 						current_node = current_node->next;
 					}
-				}
+				}*/
+
+  				update_entities(enemies);
+  				update_entities(bullets); // Maybe returns number of bullets that hit player??
 				
 				if (!lives) {
 					next_state = DeathMenu;
@@ -257,20 +260,7 @@ int main(void)
   		  		uint8_t red_btn_rising = red_btn && !prev_red_btn;
   		  		uint8_t gray_btn_rising = gray_btn && !prev_gray_btn;
 
-  				// Update list of bombs
-  				/*while (current_node != NULL) {
-  					// TODO Check collision somehow
-  					current_entity = current_node->ptr;
-  					gravity_move(current_entity, GRAVITY);
-  					current_node = current_node->next;
-  				}
-  				current = bombs;
-  				while (current != NULL) {
-  					entity_t* bomb = current->ptr;
-  					bomb->update_rotation(bomb, 0);
-  					bomb->draw(bomb, NULL, 1);
-  					current = current->next;
-  				}*/
+  		  		update_entities(bombs);
 
   		  		listnode_t* current_node = bombs;
   		  		listnode_t* prev_node = NULL;
@@ -283,7 +273,6 @@ int main(void)
 					uint8_t collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b00000111, planet_heightmap, player); // Check collision with walls/roof/ground
 
 					if (collisions) { // Collision with wall/roof/ground
-						// Kill the bomb
 						gotoxy(1,5);
 						printf("%s collision\n", current_entity->type == Bomb ? "Bomb" : "Nuke");
 						if (collisions & 1<<3) { // Collision with ground
@@ -314,6 +303,7 @@ int main(void)
 						}
 						current_entity->draw(current_entity, planet_heightmap, 0); // Erase bomb
 						current_node = current_node->next;
+						// Kill the bomb
 						if (prev_node) {
 							printf("remove\n");
 							free(list_remove_next(prev_node));

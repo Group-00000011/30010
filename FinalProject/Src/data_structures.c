@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "data_structures.h"
-
+// TODO Add macro to convert to/from fixp_t
 
 
 

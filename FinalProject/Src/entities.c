@@ -290,6 +290,7 @@ entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t vel_x, fixp_t 
 	entity->vel_y = vel_y;
 	entity->counter = 0;
 	entity->rotation = 0;
+	entity->is_dead = 0;
 	switch (type) {
 	case Spaceship:
 		entity->draw = &draw_spaceship;
@@ -384,4 +385,67 @@ uint8_t player_move (entity_t* self, uint8_t* heightmap) {
 
 	self->update_position(self, new_x, new_y);
 	return collisions_tl | collisions_br;
+}
+
+void update_entities (listnode_t* head, reference_entity, ground, ) { // Takes a list of entities and updates them. reference_entity can be player or bomb
+	// Loop over all entities in the list
+	listnode_t* current_node = head;
+	entity_t* current_entity;
+	while (current_node != NULL) {
+		current_entity = current_node->ptr;
+
+		// Update position of current entity
+		if (reference_entity != Bomb) {
+			current_entity->move(); //TODO Create this function
+		}
+
+		// Update internal counter according to type
+		switch (current_entity->type){
+		case Enemy:
+			if (reference_entity->type == Bomb) {
+				// Loop over enemies to determine if they should be killed
+			} else {
+				++current_entity->counter;
+				if (current_entity->counter == (level < 15 ? 50 - level : 30)) { // If counter is reached fire bullet. max count decreases with higher level.
+					current_entity->counter = 0;
+					// TODO Fire bullet from current_entity
+					// TODO Figure out a way to increment level (return value?)
+				}
+			}
+			break;
+		case Bomb:
+			uint8_t collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b00000111, planet_heightmap, player); // Check collision with walls/roof/ground
+
+			if (collisions) { // If there is a collision, kill the bomb
+				current_entity->is_dead = 1;
+
+				if (collisions & 1<<3) { // If the collision is with the ground, kill nearby enemies
+					update_entities(enemies, current_entity); // TODO head should now point to enemies, dont know how
+				}
+			}
+
+			break;
+		case Bullet:
+			uint8_t collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b00001111, planet_heightmap, player); // Check collision with walls/roof/player
+			if (collisions) { // Collision with wall/roof/player
+				// Kill the bullet
+				current_entity->is_dead = 1;
+
+				if (collisions & 1<<4) { // Collision with player
+					// Player is hit, should loose life
+					// TODO Figure out a way to take a life away from player
+				}
+			}
+			break;
+		default:
+			break;
+		}
+
+		current_node = current_node->next;
+	}
+
+}
+
+void draw_entities (listnode_t* head) {
+
 }
