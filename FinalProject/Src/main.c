@@ -21,7 +21,7 @@ uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
 uint8_t* punk_begin = punk_long + 18500;
 */
 
-volatile uint8_t update_flag = 0; // [0]=update enemies; [1]=update player
+volatile uint8_t update_flag = 0; // [0]=update enemies/bullets; [1]=update player/bombs
 
 void spaceship_input();
 
@@ -71,11 +71,14 @@ int main(void)
 	//list_push(&enemies, entity_init(Enemy, 220<<14, 10<<14, fixp_fromint(1), 0));
 	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
 	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
-	list_push(&bombs, entity_init(Bomb, 120<<14, 10<<14, fixp_fromint(1), fixp_fromint(-1)));
+	list_push(&bombs, entity_init(Nuke, 120<<14, 10<<14, fixp_fromint(-1), fixp_fromint(-1)));
+	list_push(&enemies, entity_init(Enemy, 200<<14, 0, 2<<14, 0));
 	list_push(&enemies, entity_init(Enemy, 30<<14, 0, 2<<14, 0));
+	list_push(&enemies, entity_init(Enemy, 35<<14, 0, -2<<14, 0));
+	list_push(&enemies, entity_init(Enemy, 210<<14, 0, 2<<14, 0));
 
-	fixp_t bomb_blast_radius = 20<<14;
-	fixp_t nuke_blast_radius = 128<<14;
+	fixp_t blast_radius[2] = {20<<14, 64<<14};
+	//fixp_t nuke_blast_radius = 128<<14;
 
 	uint8_t lcd_buffer[512];
 	memset(lcd_buffer, 0, 512);
@@ -114,12 +117,10 @@ int main(void)
   		}
 
   		switch (state) {
-
-  		// ------------------------------
-  		// |  MAIN MENU STATE			|
-  		// ------------------------------
-
   		case MainMenu:
+  	  		// ------------------------------
+  	  		// |  MAIN MENU STATE			|
+  	  		// ------------------------------
   			if (state_transition) {
   				if (!(last_state == HelpMenu || last_state == DeathMenu)) {
   					draw_menu_screen();
@@ -159,11 +160,12 @@ int main(void)
   			// Check if user input is select/move up/move down
   			break;
 
-		// ------------------------------
-		// |  HELP MENU STATE			|
-		// ------------------------------
+
 
   		case HelpMenu:
+  			// ------------------------------
+  			// |  HELP MENU STATE			|
+  			// ------------------------------
   			if (state_transition) {
   				if (!(last_state == MainMenu || last_state == DeathMenu)) {
 					draw_menu_screen();
@@ -178,11 +180,12 @@ int main(void)
 
   			break;
 
-		// ------------------------------
-		// |  GAME LOOP STATE			|
-		// ------------------------------
+
 
   		case Game:
+  			// ------------------------------
+  			// |  GAME LOOP STATE			|
+  			// ------------------------------
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
   				lives = 3;
@@ -193,60 +196,19 @@ int main(void)
   				level++;
   				level_setup(&enemies, level, planet_heightmap);
   			}
+
+  			// TODO/note: kinda important, always update bombs after updating enemies, as enemies do not check for is_dead
 			
   			if (update_flag & 1) {	// Update enemies and bullets
-				/*listnode_t* current_node = enemies;
-				entity_t* current_entity;
-				while (current_node != NULL) { // Loop through enemies
-					current_entity = current_node->ptr;
 
-					enemy_move(current_entity, planet_heightmap);
+  				update_entities(enemies, &bullets, player, planet_heightmap, 0, blast_radius, (level < 20 ? 50 - level : 30));
+  				lives -= update_entities(bullets, NULL, player, planet_heightmap, 0, NULL, (level < 20 ? 50 - level : 30));
 
-					++current_entity->counter;
-					if (current_entity->counter == (level < 15 ? 50 - level : 30)) { // If counter is reached fire bullet. max count decreases with higher level.
-						current_entity->counter = 0;
+  				cleanup_entities(&enemies, planet_heightmap);
+  				cleanup_entities(&bullets, planet_heightmap);
+  				draw_entities(enemies, planet_heightmap);
+				draw_entities(bullets, planet_heightmap);
 
-						fixp_t toplayer_x = fixp_div(player->x - current_entity->x, fixp_fromint(150)); // Vector from enemy to player
-						fixp_t toplayer_y = fixp_div(player->y - current_entity->y, fixp_fromint(150));
-
-						list_push(&bullets, entity_init(Bullet, current_entity->x, current_entity->y, toplayer_x, toplayer_y));
-					}
-
-					current_entity->draw(current_entity, planet_heightmap, 1);
-					current_node = current_node->next;
-				}*/
-				/*current_node = bullets;
-				listnode_t* prev_node = NULL;
-				while (current_node != NULL) { // Loop through bullets
-					current_entity = current_node->ptr;
-
-					entity_move(current_entity);
-
-					uint8_t collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b1111, planet_heightmap, player); // Check collision with walls/roof/player
-
-					if (collisions) { // Collision with wall/roof/player
-						// Kill the bullet
-						current_entity->draw(current_entity, planet_heightmap, 0); // Erase bullet
-						current_node = current_node->next;
-						if (prev_node) {
-							free(list_remove_next(prev_node));
-						} else {
-							free(list_pop(&bullets));
-						}
-						if (collisions & 1<<4) { // Collision with player
-							lives--;
-						}
-
-					} else {
-						current_entity->draw(current_entity, planet_heightmap, 1);
-						prev_node = current_node;
-						current_node = current_node->next;
-					}
-				}*/
-
-  				update_entities(enemies);
-  				update_entities(bullets); // Maybe returns number of bullets that hit player??
-				
 				if (!lives) {
 					next_state = DeathMenu;
 				}
@@ -256,73 +218,30 @@ int main(void)
 
 
   			if (update_flag & (1 << 1)){ // Update player and bombs
+
+  		  		update_entities(bombs, &enemies, NULL, planet_heightmap, GRAVITY, blast_radius, 0);
+  				cleanup_entities(&bombs, planet_heightmap);
+  				draw_entities(bombs, planet_heightmap);
+
+  		  		// Update position of player
+				if (js[0] || js[1]) {
+					player->update_velocity(player, 4*js[0], -2*js[1]);
+				}
+				uint8_t collisions = player->move(player, planet_heightmap, 0); // Returns collision from check_collision()
+
+
+				if (collisions & 0b1000) {
+					gotoxy(1,3);
+					printf("Player hit ground, game over!");
+					// Player has hit ground, game over. TODO
+				}
+
+				// Draw player
+				player->draw(player, planet_heightmap, 1);
+
   				// Rising edge detection of input buttons
   		  		uint8_t red_btn_rising = red_btn && !prev_red_btn;
   		  		uint8_t gray_btn_rising = gray_btn && !prev_gray_btn;
-
-  		  		update_entities(bombs);
-
-  		  		listnode_t* current_node = bombs;
-  		  		listnode_t* prev_node = NULL;
-  				entity_t* current_entity;
-				while (current_node != NULL) { // Loop through bombs
-					current_entity = current_node->ptr;
-
-					gravity_move(current_entity, GRAVITY);
-
-					uint8_t collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b00000111, planet_heightmap, player); // Check collision with walls/roof/ground
-
-					if (collisions) { // Collision with wall/roof/ground
-						gotoxy(1,5);
-						printf("%s collision\n", current_entity->type == Bomb ? "Bomb" : "Nuke");
-						if (collisions & 1<<3) { // Collision with ground
-							// Find all enemies within radius and kill them
-							listnode_t* enemy_node = enemies;
-							listnode_t* prev_enemy_node = NULL;
-							entity_t* enemy;
-							while (enemy_node != NULL) {
-								enemy = enemy_node->ptr;
-
-								fixp_t dist_x = enemy->x - current_entity->x; // Horizontal distance from bomb to enemy
-								fixp_t blast_radius = current_entity->type == Nuke ? nuke_blast_radius : bomb_blast_radius;
-								if (dist_x < blast_radius && dist_x > -blast_radius) {
-									// Current enemy is within blast radius, it should die
-									//gotoxy(fixp_toint(enemy->x), fixp_toint(enemy->y));
-									gotoxy(0,6);
-									fixp_print(dist_x);
-									if (prev_enemy_node) {
-										free(list_remove_next(prev_enemy_node));
-									} else {
-										free(list_pop(&enemies));
-									}
-								}
-
-								prev_enemy_node = enemy_node;
-								enemy_node = enemy_node->next;
-							}
-						}
-						current_entity->draw(current_entity, planet_heightmap, 0); // Erase bomb
-						current_node = current_node->next;
-						// Kill the bomb
-						if (prev_node) {
-							printf("remove\n");
-							free(list_remove_next(prev_node));
-						} else {
-							printf("pop\n");
-							free(list_pop(&bombs));
-						}
-					} else {
-						if (current_entity->type == Bomb) {
-							current_entity->update_rotation(current_entity, 0);
-						}
-						current_entity->draw(current_entity, planet_heightmap, 1);
-						prev_node = current_node;
-						current_node = current_node->next;
-					}
-				}
-
-  				//gotoxy(1,1);
-  				//printf("red: %d\ngray: %d\n#bombs: %d", red_btn, gray_btn, list_length(bombs));
 
   				if (gray_btn_rising && !state_transition) { // Fire bomb?
   					// Fire bomb!
@@ -334,33 +253,18 @@ int main(void)
   					list_push(&bombs, entity_init(Nuke, player->x, player->y, player->vel_x, player->vel_y));
   				}
 
-				// Update position of player
-				if (js[0] || js[1]) {
-					player->update_velocity(player, 4*js[0], -2*js[1]);
-				}
-				uint8_t collisions = player_move(player, planet_heightmap); // Returns collision from check_collision()
-
-				if (collisions & 0b1000) {
-					// Player has hit ground, game over. TODO
-				}
-
-				// Draw player
-				player->update_rotation(player, 0);
-
 				// Rising edge detection of input buttons
 				prev_red_btn = red_btn;
 				prev_gray_btn = gray_btn;
 
-				player->draw(player, planet_heightmap, 1);
 				update_flag &= ~(1<<1);
 			}
 
   			break;
-
-		// ------------------------------
-		// |  DEATH MENU STATE			|
-		// ------------------------------
   		case DeathMenu:
+  			// ------------------------------
+  			// |  DEATH MENU STATE			|
+  			// ------------------------------
   			if(state_transition) {
   				if (!(last_state == MainMenu || last_state == HelpMenu)) {
 					draw_menu_screen();
@@ -374,15 +278,11 @@ int main(void)
   			} else if (red_btn) {
   				next_state = MainMenu;
   			}
-
-
   			break;
-
-		// ------------------------------
-		// |  DEATH MENU STATE			|
-		// ------------------------------
-
   		case BossScreen:
+  			// ------------------------------
+  			// |  BOSS SCREEN STATE			|
+  			// ------------------------------
   			if (state_transition) {
 				draw_boss_screen();
 				enable_timer_2 (0);

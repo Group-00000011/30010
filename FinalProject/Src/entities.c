@@ -113,43 +113,45 @@ static void draw_bullet(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 static void draw_bomb(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 	gotoxy(self->last_x>>14, self->last_y>>14);
 	printf(" ");
-	gotoxy(self->x>>14,self->y>>14);
-	bgcolor(0);
-	fgcolor(7);
+	if (redraw) {
+		gotoxy(self->x>>14,self->y>>14);
+		bgcolor(0);
+		fgcolor(7);
 
-	switch(self->rotation){
-	case 0b0001: printf("^"); // up
-		break;
-	case 0b0101: printf("%c", 0xBF);// right up
-		break;
-	case 0b0100: printf(">");//right
-		break;
-	case 0b0110: printf("%c", 0xD9);// right down
-		break;
-	case 0b0010: printf("v");// down
-		break;
-	case 0b1010: printf("%c", 0xC0);// left down
-		break;
-	case 0b1000: printf("<"); //left
-		break;
-	case 0b1001: printf("%c", 0xDA); //left up
-		break;
-	case 0b0000: printf("-");
-		break;
-	default:	 printf("ERROR");
-		break;
+		switch(self->rotation){
+		case 0b0001: printf("^"); // up
+			break;
+		case 0b0101: printf("%c", 0xBF);// right up
+			break;
+		case 0b0100: printf(">");//right
+			break;
+		case 0b0110: printf("%c", 0xD9);// right down
+			break;
+		case 0b0010: printf("v");// down
+			break;
+		case 0b1010: printf("%c", 0xC0);// left down
+			break;
+		case 0b1000: printf("<"); //left
+			break;
+		case 0b1001: printf("%c", 0xDA); //left up
+			break;
+		case 0b0000: printf("-");
+			break;
+		default:	 printf("ERROR");
+			break;
+		}
 	}
-
 }
-
 
 static void draw_nuke(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 	gotoxy(self->last_x>>14, self->last_y>>14);
 	bgcolor(0);
 	fgcolor(7);
 	printf(" ");
-	gotoxy(self->x>>14,self->y>>14);
-	printf("%c",0xDB);
+	if (redraw) {
+		gotoxy(self->x>>14,self->y>>14);
+		printf("%c",0xDB);
+	}
 }
 
 
@@ -158,8 +160,10 @@ static void draw_powerup(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 	bgcolor(0);
 	fgcolor(7);
 	printf(" ");
-	gotoxy(self->x>>14,self->y>>14);
-	printf("%c", 0x24);
+	if (redraw) {
+		gotoxy(self->x>>14,self->y>>14);
+		printf("%c", 0x24);
+	}
 }
 
 static void update_position(entity_t * self, fixp_t x, fixp_t y) {
@@ -175,9 +179,9 @@ static void update_velocity(entity_t * self, fixp_t vel_x, fixp_t vel_y) {
 	self->vel_y = vel_y;
 }
 
-static void update_rotation(entity_t * self, fixp_t rotation) {
+static void update_rotation(entity_t * self) {
 	self->last_rotation = self->rotation;
-
+	uint8_t rotation = 0;
 
 	switch (self->type) {
 		case Spaceship:
@@ -220,10 +224,10 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 
 			break;
 		case Bomb:
-			if(self->vel_x < (1<<11) && self->vel_x > (-1<<11) && self->vel_y < (1<<11) && self->vel_y > (-1<<11)){
-				rotation = 0;
-				break;
-			}
+//			if(self->vel_x < (1<<11) && self->vel_x > (-1<<11) && self->vel_y < (1<<11) && self->vel_y > (-1<<11)){
+//				rotation = 0;
+//				break;
+//			}
 
 			if (self->vel_y > -(self->vel_x << 1) && self->vel_y < self->vel_x << 1) {
 				rotation |= (0b0100);		// Sets horizontal direction to positive
@@ -235,6 +239,24 @@ static void update_rotation(entity_t * self, fixp_t rotation) {
 			} else if (self->vel_x < -(self->vel_y << 1) && self->vel_x > self->vel_y << 1) {
 				rotation |= (0b0001);		// Sets vertical direction to positive
 			}
+			break;
+		case Nuke:
+			if (self->vel_y > -(self->vel_x << 1) && self->vel_y < self->vel_x << 1) {
+				rotation |= (0b0100);		// Sets horizontal direction to positive
+			} else if (self->vel_y < -(self->vel_x << 1) && self->vel_y > self->vel_x << 1) {
+				rotation |= (0b1000);		// Sets horizontal direction to negative
+			}
+			if(self->vel_x > -(self->vel_y << 1) && self->vel_x < self->vel_y << 1) {
+				rotation |= (0b0010);		// Sets vertical direction to negative
+			} else if (self->vel_x < -(self->vel_y << 1) && self->vel_x > self->vel_y << 1) {
+				rotation |= (0b0001);		// Sets vertical direction to positive
+			}
+			break;
+		case Enemy:
+			break;
+		case Bullet:
+			break;
+		case Powerup:
 			break;
 		default:
 			printf("ERROR");
@@ -294,19 +316,24 @@ entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t vel_x, fixp_t 
 	switch (type) {
 	case Spaceship:
 		entity->draw = &draw_spaceship;
+		entity->move = &player_move;
 		break;
 	case Enemy:
 		entity->draw = &draw_enemy;
+		entity->move = &enemy_move;
 		entity->rotation = vel_x < 0;
 		break;
 	case Bullet:
+		entity->move = &entity_move;
 		entity->draw = &draw_bullet;
 		break;
 	case Bomb:
 		entity->draw = &draw_bomb;
+		entity->move = &gravity_move;
 		break;
 	case Nuke:
 		entity->draw = &draw_nuke;
+		entity->move = &gravity_move;
 		break;
 	case Powerup:
 		entity->draw = &draw_powerup;
@@ -323,7 +350,7 @@ entity_t* entity_init(EntityType type, fixp_t x, fixp_t y, fixp_t vel_x, fixp_t 
 	return entity;
 }
 
-void enemy_move (entity_t* self, uint8_t* heightmap) {
+uint8_t enemy_move (entity_t* self, uint8_t* heightmap, fixp_t gravity) {
 	fixp_t new_x = self->x + self->vel_x;
 	fixp_t new_y = fixp_fromint(DISPLAY_HEIGHT-1-heightmap[fixp_toint(new_x)]);
 
@@ -341,26 +368,31 @@ void enemy_move (entity_t* self, uint8_t* heightmap) {
 	}
 
 	self->update_position(self, new_x, new_y);
+	self->update_rotation(self);
+	return 0;
 }
 
-void entity_move (entity_t* self) {
+uint8_t entity_move (entity_t* self, uint8_t* heightmap, fixp_t gravity) {
 	self->update_position(self, self->x + self->vel_x, self->y+self->vel_y);
+	self->update_rotation(self);
 	//self->x = self->x + self->vel_x;
 	//self->y = self->y + self->vel_y;
+	return 0;
 }
 
-void gravity_move (entity_t* self, fixp_t g) {
-	self->vel_y += g;
+uint8_t gravity_move (entity_t* self, uint8_t* heightmap, fixp_t gravity) {
+	self->vel_y += gravity;
 	self->update_position(self, self->x + self->vel_x, self->y+self->vel_y);
+	self->update_rotation(self);
+	return 0;
 }
 
-uint8_t player_move (entity_t* self, uint8_t* heightmap) {
+uint8_t player_move (entity_t* self, uint8_t* heightmap, fixp_t gravity) {
 	fixp_t new_x = self->x + self->vel_x;
 	fixp_t new_y = self->y + self->vel_y;
 
 	uint8_t collisions_tl = self->check_collision(new_x, new_y, 0b0111, heightmap, NULL); // Top-left
 	uint8_t collisions_br = self->check_collision(new_x + (5<<14), new_y + (2<<14), 0b0111, heightmap, NULL); // Bottom-right
-
 
 	if (collisions_tl) {
 		if (collisions_tl & 0b1) { // Collision with left wall
@@ -384,58 +416,90 @@ uint8_t player_move (entity_t* self, uint8_t* heightmap) {
 	}
 
 	self->update_position(self, new_x, new_y);
+	self->update_rotation(self);
 	return collisions_tl | collisions_br;
 }
 
-void update_entities (listnode_t* head, reference_entity, ground, ) { // Takes a list of entities and updates them. reference_entity can be player or bomb
+uint8_t update_entities (listnode_t* head, listnode_t** aux_list, entity_t* aux_entity, uint8_t* heightmap, fixp_t gravity, fixp_t blast_radius[2], uint8_t enemy_fire_rate) { // Takes a list of entities and updates them. aux_entity can be player or bomb
 	// Loop over all entities in the list
+	uint8_t return_value = 0;
 	listnode_t* current_node = head;
 	entity_t* current_entity;
 	while (current_node != NULL) {
 		current_entity = current_node->ptr;
 
 		// Update position of current entity
-		if (reference_entity != Bomb) {
-			current_entity->move(); //TODO Create this function
+		if (!(aux_entity->type == Bomb || aux_entity->type == Nuke)) { // If aux is bomb, then this function was called recursively and positions should not be updated again
+			if (current_entity->move != NULL) {
+				current_entity->move(current_entity, heightmap, gravity);
+			}
 		}
 
-		// Update internal counter according to type
+		uint8_t collisions;
+
+		// Do stuff according to entity type:
 		switch (current_entity->type){
 		case Enemy:
-			if (reference_entity->type == Bomb) {
+			if (aux_entity != NULL && (aux_entity->type == Bomb || aux_entity->type == Nuke)) { // This should only run if the funtion was calles from a bomb
 				// Loop over enemies to determine if they should be killed
+				// TODO Might be necessary to check if !is_dead, dunno might work without
+				fixp_t dist_x = current_entity->x - aux_entity->x; // Horizontal distance from bomb to enemy
+				fixp_t current_blast_radius = aux_entity->type == Bomb ? blast_radius[0] : blast_radius[1];
+				if (dist_x < current_blast_radius && dist_x > -current_blast_radius) {
+					// Current enemy is within blast radius, it should die
+					current_entity->is_dead = 1;
+				}
 			} else {
 				++current_entity->counter;
-				if (current_entity->counter == (level < 15 ? 50 - level : 30)) { // If counter is reached fire bullet. max count decreases with higher level.
+				if (current_entity->counter == enemy_fire_rate) { // If counter is reached fire bullet. max count decreases with higher level.
 					current_entity->counter = 0;
-					// TODO Fire bullet from current_entity
-					// TODO Figure out a way to increment level (return value?)
+					// aux_entity should be the player here
+					fixp_t to_player_x = fixp_div(aux_entity->x - current_entity->x, fixp_fromint(150)); // Vector from enemy to player
+					fixp_t to_player_y = fixp_div(aux_entity->y - current_entity->y, fixp_fromint(150)); // TODO Make this better
+
+					list_push(aux_list, entity_init(Bullet, current_entity->x, current_entity->y, to_player_x, to_player_y));
 				}
 			}
 			break;
 		case Bomb:
-			uint8_t collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b00000111, planet_heightmap, player); // Check collision with walls/roof/ground
+			collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b00000111, heightmap, NULL); // Check collision with walls/roof/ground
 
 			if (collisions) { // If there is a collision, kill the bomb
 				current_entity->is_dead = 1;
 
 				if (collisions & 1<<3) { // If the collision is with the ground, kill nearby enemies
-					update_entities(enemies, current_entity); // TODO head should now point to enemies, dont know how
+					// !!! aux_list should now be the enemies
+					update_entities(*aux_list, NULL, current_entity, NULL, 0, blast_radius, 0);
+				}
+			}
+
+			break;
+		case Nuke:
+			collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b00000111, heightmap, NULL); // Check collision with walls/roof/ground
+
+			if (collisions) { // If there is a collision, kill the bomb
+				current_entity->is_dead = 1;
+
+				if (collisions & 1<<3) { // If the collision is with the ground, kill nearby enemies
+					update_entities(*aux_list, NULL, current_entity, NULL, 0, blast_radius, 0);
 				}
 			}
 
 			break;
 		case Bullet:
-			uint8_t collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b00001111, planet_heightmap, player); // Check collision with walls/roof/player
+			collisions = current_entity->check_collision(current_entity->x, current_entity->y, 0b00001111, heightmap, aux_entity); // Check collision with walls/roof/player
 			if (collisions) { // Collision with wall/roof/player
 				// Kill the bullet
 				current_entity->is_dead = 1;
 
 				if (collisions & 1<<4) { // Collision with player
 					// Player is hit, should loose life
-					// TODO Figure out a way to take a life away from player
+					++return_value;
 				}
 			}
+			break;
+		case Powerup:
+			// TODO Implement powerups
 			break;
 		default:
 			break;
@@ -443,9 +507,38 @@ void update_entities (listnode_t* head, reference_entity, ground, ) { // Takes a
 
 		current_node = current_node->next;
 	}
-
+	return return_value;
 }
 
-void draw_entities (listnode_t* head) {
+void cleanup_entities (listnode_t** head, uint8_t* heightmap) {
+	// Remove and erase entities that are dead
+	listnode_t* current_node = *head;
+	listnode_t* prev_node = NULL;
+	while (current_node != NULL) {
+		entity_t* current_entity = current_node->ptr;
+		if (current_entity->is_dead) {
+			// Erase the entity
+			current_entity->draw(current_entity, heightmap, 0);
 
+			// Remove entity from memory
+			if (prev_node) {
+				free(list_remove_next(prev_node));
+			} else {
+				free(list_pop(head));
+			}
+		} else {
+			prev_node = current_node;
+		}
+		current_node = current_node->next;
+	}
+}
+
+void draw_entities (listnode_t* head, uint8_t* heightmap) {
+	// Draw all entities to the screen
+	listnode_t* current_node = head;
+	while (current_node != NULL) {
+		entity_t* current_entity = current_node->ptr;
+		current_entity->draw(current_entity, heightmap, 1);
+		current_node = current_node->next;
+	}
 }
