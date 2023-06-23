@@ -456,8 +456,21 @@ uint8_t update_entities (listnode_t* head, listnode_t** aux_list, entity_t* aux_
 				if (current_entity->counter == enemy_fire_rate) { // If counter is reached fire bullet. max count decreases with higher level.
 					current_entity->counter = 0;
 					// aux_entity should be the player here
-					fixp_t to_player_x = fixp_div(aux_entity->x - current_entity->x, fixp_fromint(150)); // Vector from enemy to player
-					fixp_t to_player_y = fixp_div(aux_entity->y - current_entity->y, fixp_fromint(150)); // TODO Make this better
+					fixp_t to_player_x = aux_entity->x - current_entity->x; // Vector from enemy to player
+					fixp_t to_player_y = aux_entity->y - current_entity->y; // TODO Make this better
+
+					fixp_t scaler;
+					if (to_player_x > fixp_fromint(10) || to_player_x < fixp_fromint(-10)) {
+						 scaler = fixp_div(fixp_fromint(2), to_player_x); // Scuffed distance function but much faster than sqrt
+					} else {
+						scaler = fixp_div(fixp_fromint(2), fixp_fromint(10));
+					}
+					if (scaler < 0) {
+						scaler = -scaler;
+					}
+
+					to_player_x = fixp_mult(to_player_x, scaler); // Kinda normalize vector ish
+					to_player_y = fixp_mult(to_player_y, scaler);
 
 					list_push(aux_list, entity_init(Bullet, current_entity->x, current_entity->y, to_player_x, to_player_y));
 				}
