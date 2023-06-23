@@ -13,14 +13,14 @@
 #include "flash_memory.h"
 
 #define GRAVITY 0x0400
-#define PLAYER_DEFAULT_X 200<<14
-#define PLAYER_DEFAULT_Y 25<<14
-#define PLAYER_DEFAULT_VEL_X -4<<14
+#define PLAYER_DEFAULT_X fixp_fromint(200)
+#define PLAYER_DEFAULT_Y fixp_fromint(25)
+#define PLAYER_DEFAULT_VEL_X fixp_fromint(-4)
 
 typedef enum {NullState, MainMenu, HelpMenu, Game, DeathMenu, BossScreen} State;
 
-//volatile uint8_t* punk_address = punk;
-//uint8_t* punk_end = punk + sizeof punk / sizeof *punk;
+volatile const uint8_t* punk_address = punk;
+const uint8_t* punk_end = punk + sizeof punk / sizeof *punk;
 
 volatile uint8_t update_flag = 0; // [0]=update enemies/bullets; [1]=update player/bombs
 
@@ -78,20 +78,12 @@ int main(void)
 	entity_t* player = entity_init(Spaceship, PLAYER_DEFAULT_X, PLAYER_DEFAULT_Y, PLAYER_DEFAULT_VEL_X, 0);
 
 	listnode_t* enemies = NULL; // Initialise empty list of enemies
-	listnode_t* bullets = NULL;
-	listnode_t* bombs = NULL;
-	entity_t* powerup = NULL;
-	//list_push(&enemies, entity_init(Enemy, 220<<14, 10<<14, fixp_fromint(1), 0));
-	//list_push(&enemies, entity_init(Enemy, 25<<14, 10<<14, fixp_fromint(-1), 0));
-	//list_push(&enemies, entity_init(Enemy, 50<<14, 35<<14, fixp_fromint(1), 0));
-//	list_push(&bombs, entity_init(Nuke, 120<<14, 10<<14, fixp_fromint(-1), fixp_fromint(-1)));
-//	list_push(&enemies, entity_init(Enemy, 200<<14, 0, 2<<14, 0));
-//	list_push(&enemies, entity_init(Enemy, 30<<14, 0, 2<<14, 0));
-//	list_push(&enemies, entity_init(Enemy, 35<<14, 0, -2<<14, 0));
-//	list_push(&enemies, entity_init(Enemy, 210<<14, 0, 2<<14, 0));
+	listnode_t* bullets = NULL; // Initialise empty list of bullets
+	listnode_t* bombs = NULL; // Initialise empty list of bombs
 
-	fixp_t blast_radius[2] = {20<<14, 64<<14};
-	//fixp_t nuke_blast_radius = 128<<14;
+	entity_t* powerup = NULL; // Initialise powerup
+
+	fixp_t blast_radius[2] = {fixp_fromint(20), fixp_fromint(64)};
 
 	uint8_t lcd_buffer[512];
 	memset(lcd_buffer, 0, 512);
@@ -147,7 +139,6 @@ int main(void)
   				draw_main_menu(menu_selection);
   				draw_menu_title("Main Menu");
 
-  				//punk_address = punk;
   				enable_timer_2(1); // Turn on the punk
   				enable_timer_17(1);// Turn on the punk
   			}
@@ -180,7 +171,7 @@ int main(void)
   				}
   			}
 
-  			if (next_state != MainMenu || next_state != HelpMenu) {
+  			if (next_state == Game || next_state == BossScreen) {
   				enable_timer_2(0); // Turn off music
   				enable_timer_17(0);// Turn off music
   			}
@@ -202,6 +193,10 @@ int main(void)
   				next_state = MainMenu;
   			}
 
+  			if (next_state == BossScreen) {
+  				enable_timer_2(0); // Turn off music
+  				enable_timer_17(0);// Turn off music
+  			}
   			break;
   		case Game:
   			// ------------------------------
@@ -210,11 +205,13 @@ int main(void)
   			if (state_transition) {
   				planet_heightmap = gfx_draw_background(); // gfx_draw_background return pointer to heightmap
   				set_led(2);
+  				if (last_state != BossScreen) {
   				lives = 3;
   				level = 0;
 				score = 0;
 				kills = 0;
 				nukes_cnt = 0;
+  				}
 
 				player->x = PLAYER_DEFAULT_X;
 				player->y = PLAYER_DEFAULT_Y;
@@ -256,8 +253,8 @@ int main(void)
 						powerup_delay++;
 						if (powerup_delay == 255) {
 							powerup_delay = 0;
-							fixp_t powerup_x = enemies ? ((entity_t *) enemies->ptr)->x : 30<<13;
-							fixp_t powerup_y = enemies ? (((entity_t *) enemies->ptr)->y) - (20<<14) : 30<<14;
+							fixp_t powerup_x = enemies ? ((entity_t *) enemies->ptr)->x : fixp_fromint(30); // TODO != NULL (also was preciously 30<<13)
+							fixp_t powerup_y = enemies ? (((entity_t *) enemies->ptr)->y) - fixp_fromint(20) : fixp_fromint(30);
 							powerup = entity_init(Powerup, powerup_x, powerup_y, 0 , 0);
 						}
 					}
@@ -317,6 +314,10 @@ int main(void)
 				next_state = DeathMenu;
 			}
 
+			if (next_state != Game) {
+				punk_address = punk; // Restart punk
+			}
+
   			break;
   		case DeathMenu:
   			// ------------------------------
@@ -339,7 +340,6 @@ int main(void)
 						powerup = NULL;
 					}
 
-					//punk_address = punk;// Turn on the punk
 					enable_timer_2(1);  // Turn on the punk
 					enable_timer_17(1); // Turn on the punk
 				}
@@ -359,9 +359,9 @@ int main(void)
   				next_state = MainMenu;
   			}
 
-  			if (next_state != MainMenu || next_state != HelpMenu) {
+  			if (next_state == Game || next_state == BossScreen) {
   				enable_timer_2(0); // Turn off music
-  				enable_timer_17(0);// TUrn off music
+  				enable_timer_17(0);// Turn off music
   			}
   			break;
   		case BossScreen:
@@ -438,9 +438,9 @@ void TIM1_UP_TIM16_IRQHandler (void) {
 }
 
 void TIM1_TRG_COM_TIM17_IRQHandler (void) {
-	/*TIM2->CCR3 = *punk_address;
+	TIM2->CCR3 = *punk_address;
 	punk_address++;
 	if (punk_address == punk_end)
-		punk_address = punk;*/
-	TIM16->SR &= ~0x0001;
+		punk_address = punk;
+	TIM17->SR &= ~0x0001;
 }

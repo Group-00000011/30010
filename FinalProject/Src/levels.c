@@ -6,21 +6,14 @@
  */
 #include "levels.h"
 
-static int8_t sign_invert(int8_t a, int8_t b) { // Integer power
-	for (int i = 0; i < b; i ++) {
-		a = ~a + 1;
-	}
-	return a;
-}
-
 void level_setup(listnode_t** enemies_head, uint16_t level, uint8_t* ground) {
 	// Set timer speed
-	set_timer_16_speed(level < 25? 64000 - (level - 1)*2000 : 16000);
+	set_timer_16_speed(level < 25 ? 64000 - (level - 1)*2000 : 16000);
 
 	int16_t x;
 
 	for (int i = 1; i <= level; i++) {
-		x = 128 + sign_invert(-1, i) * 19 * i;
+		x = 128 + ((i&1) ? -1 : 1) * 19 * i;
 		while (x < 1 || x > 254) {
 			if (x < 1) {
 				x += 69;
@@ -28,7 +21,7 @@ void level_setup(listnode_t** enemies_head, uint16_t level, uint8_t* ground) {
 				x -= 69;
 			}
 		}
-		list_push(enemies_head, entity_init(Enemy, x << 14, ground[x] << 14, 2*sign_invert(-1, (i+2)>>2)<<14, 0));
+		list_push(enemies_head, entity_init(Enemy, fixp_fromint(x), fixp_fromint(ground[x]), fixp_fromint(2*((i&1) ? -1 : 1)), 0));
 	}
 }
 

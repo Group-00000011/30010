@@ -45,7 +45,7 @@ void init_timer_15() {
 	TIM15->PSC = 99;			// Set prescaling to generate 10Hz clock
 	TIM15->DIER |= 1;		// Enable timer 15 interrupts
 
-	NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 1); // Set priority of interrupt
+	NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 2); // Set priority of interrupt
 	NVIC_EnableIRQ(TIM1_BRK_TIM15_IRQn); 		// Enable the interrupt
 
 	//TIM15->CR1 |= 1;
@@ -58,7 +58,7 @@ void init_timer_16() {
 	TIM16->PSC = 99;		// Set prescaling to 1/(199+1) (original:199) (10Hz)
 	TIM16->DIER |= 1;		// Enable timer 16 interrupts
 
-	NVIC_SetPriority(TIM1_UP_TIM16_IRQn, 1); // Set priority of interrupt
+	NVIC_SetPriority(TIM1_UP_TIM16_IRQn, 2); // Set priority of interrupt
 	NVIC_EnableIRQ(TIM1_UP_TIM16_IRQn); 		// Enable the interrupt
 
 	//TIM15->CR1 |= 1;

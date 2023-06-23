@@ -96,14 +96,14 @@ static void draw_enemy(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 
 static void draw_bullet(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 	// Clear last bullet
-	gotoxy((self->last_x>>14)+1, (self->last_y>>14)+1);
+	gotoxy((fixp_toint(self->last_x))+1, (fixp_toint(self->last_y))+1);
 	printf(" ");
 	// Draw bullet
 	if (redraw) {
 		bgcolor(0);
 		fgcolor((self->counter)++);//Cycle through every colour
 		if((self->counter) == 7) self->counter = 1;
-		gotoxy((self->x>>14)+1, (self->y>>14)+1);
+		gotoxy((fixp_toint(self->x))+1, (fixp_toint(self->y))+1);
 		printf("%c", 0xDF);
 
 	}
@@ -112,11 +112,11 @@ static void draw_bullet(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 
 static void draw_bomb(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 	if (self->last_y > 0) {
-		gotoxy(self->last_x>>14, self->last_y>>14);
+		gotoxy(fixp_toint(self->last_x), fixp_toint(self->last_y));
 		printf(" ");
 	}
 	if (redraw && self->y > 0) {
-		gotoxy(self->x>>14,self->y>>14);
+		gotoxy(fixp_toint(self->x), fixp_toint(self->y));
 		bgcolor(0);
 		fgcolor(7);
 
@@ -147,25 +147,25 @@ static void draw_bomb(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 
 static void draw_nuke(entity_t * self, uint8_t  * ground, uint8_t redraw) {
 	if (self->last_y > 0) {
-		gotoxy(self->last_x>>14, self->last_y>>14);
+		gotoxy(fixp_toint(self->last_x), fixp_toint(self->last_y));
 		bgcolor(0);
 		fgcolor(7);
 		printf(" ");
 	}
 	if (redraw && self->y > 0) {
-		gotoxy(self->x>>14,self->y>>14);
+		gotoxy(fixp_toint(self->x), fixp_toint(self->y));
 		printf("%c",0xDB);
 	}
 }
 
 
 static void draw_powerup(entity_t * self, uint8_t  * ground, uint8_t redraw) {
-	gotoxy(self->last_x>>14, self->last_y>>14);
+	gotoxy(fixp_toint(self->last_x), fixp_toint(self->last_y));
 	bgcolor(0);
 	fgcolor(7);
 	printf(" ");
 	if (redraw) {
-		gotoxy(self->x>>14,self->y>>14);
+		gotoxy(fixp_toint(self->x), fixp_toint(self->y));
 		printf("%c", 0x24);
 	}
 }
@@ -293,14 +293,14 @@ static uint8_t check_collision(fixp_t x, fixp_t y, uint8_t type, uint8_t* height
 		}
 	}
 
-	if (type & 0b0100 && heightmap) {
-		if (y > fixp_fromint(DISPLAY_HEIGHT-1-heightmap[x>>14])) { // Ground
+	if ((type & 0b0100) && heightmap) {
+		if (y > fixp_fromint(DISPLAY_HEIGHT-1-heightmap[fixp_toint(x) > 255 ? 255 : fixp_toint(x)])) { // Ground
 			collision |= 1<<3;
 		}
 	}
 
 	if (type & 0b1000) {
-		if ((x > player->x) && (x < player->x + (5<<14)) && (y > player->y) && (y < player->y + (2<<14))) { // Spaceship
+		if ((x > player->x) && (x < player->x + fixp_fromint(5)) && (y > player->y) && (y < player->y + fixp_fromint(2))) { // Spaceship
 			collision |= 1<<4;
 		}
 	}
@@ -398,7 +398,7 @@ uint8_t player_move (entity_t* self, uint8_t* heightmap, fixp_t gravity) {
 	fixp_t new_y = self->y + self->vel_y;
 
 	uint8_t collisions_tl = self->check_collision(new_x, new_y, 0b0111, heightmap, NULL); // Top-left
-	uint8_t collisions_br = self->check_collision(new_x + (5<<14), new_y + (2<<14), 0b0111, heightmap, NULL); // Bottom-right
+	uint8_t collisions_br = self->check_collision(new_x + fixp_fromint(5), new_y + fixp_fromint(2), 0b0111, heightmap, NULL); // Bottom-right
 
 	if (collisions_tl) {
 		if (collisions_tl & 0b0001) { // Collision with left wall
