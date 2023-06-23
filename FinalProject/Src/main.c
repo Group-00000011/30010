@@ -19,11 +19,8 @@
 
 typedef enum {NullState, MainMenu, HelpMenu, Game, DeathMenu, BossScreen} State;
 
-/*
-volatile uint8_t* punk_address = punk_long;
-uint8_t* punk_end = punk_long + sizeof punk_long / sizeof *punk_long;
-uint8_t* punk_begin = punk_long + 18500;
-*/
+//volatile uint8_t* punk_address = punk;
+//uint8_t* punk_end = punk + sizeof punk / sizeof *punk;
 
 volatile uint8_t update_flag = 0; // [0]=update enemies/bullets; [1]=update player/bombs
 
@@ -38,8 +35,9 @@ int main(void)
 	lcd_init();
 	init_timer_2();
 	init_timer_15();
-	enable_timer_15(1);
 	init_timer_16();
+	init_timer_17();
+	enable_timer_15(1);
 	enable_timer_16(1);
 	joystick_conf();
 	button_init();
@@ -148,6 +146,10 @@ int main(void)
   				set_led(3);
   				draw_main_menu(menu_selection);
   				draw_menu_title("Main Menu");
+
+  				//punk_address = punk;
+  				enable_timer_2(1); // Turn on the punk
+  				enable_timer_17(1);// Turn on the punk
   			}
 
   			if (js[1] > 0) {
@@ -178,11 +180,11 @@ int main(void)
   				}
   			}
 
-  			// Check if user input is select/move up/move down
+  			if (next_state != MainMenu || next_state != HelpMenu) {
+  				enable_timer_2(0); // Turn off music
+  				enable_timer_17(0);// Turn off music
+  			}
   			break;
-
-
-
   		case HelpMenu:
   			// ------------------------------
   			// |  HELP MENU STATE			|
@@ -201,9 +203,6 @@ int main(void)
   			}
 
   			break;
-
-
-
   		case Game:
   			// ------------------------------
   			// |  GAME LOOP STATE			|
@@ -340,6 +339,9 @@ int main(void)
 						powerup = NULL;
 					}
 
+					//punk_address = punk;// Turn on the punk
+					enable_timer_2(1);  // Turn on the punk
+					enable_timer_17(1); // Turn on the punk
 				}
   				if (score > high_score) {
   					high_score = score;
@@ -356,6 +358,11 @@ int main(void)
   			} else if (red_btn) {
   				next_state = MainMenu;
   			}
+
+  			if (next_state != MainMenu || next_state != HelpMenu) {
+  				enable_timer_2(0); // Turn off music
+  				enable_timer_17(0);// TUrn off music
+  			}
   			break;
   		case BossScreen:
   			// ------------------------------
@@ -363,19 +370,18 @@ int main(void)
   			// ------------------------------
   			if (state_transition) {
 				draw_boss_screen();
-				enable_timer_2 (0);
+				//enable_timer_2 (0);
 				enable_timer_15 (0);
 				enable_timer_16 (0);
 				set_led(3);
   			}
 
   			if (last_keypress == 'b') {
-  				enable_timer_2 (1);
+  				//enable_timer_2 (1);
 				enable_timer_15 (1);
 				enable_timer_16 (1);
   				next_state = return_state;
   			}
-
   			break;
 
   		// DEFAULT TO MAIN MENU
@@ -421,17 +427,20 @@ int main(void)
   	}
 }
 
-void TIM1_BRK_TIM15_IRQHandler(void) {
-	/*TIM2->CCR3 = *punk_address;
-	punk_address++;
-	if (punk_address == punk_end)
-		punk_address = punk_begin;*/
-
+void TIM1_BRK_TIM15_IRQHandler (void) {
 	update_flag |= 1<<1; // Set player/bomb flag high
 	TIM15->SR &= ~0x0001;
 }
 
-void TIM1_UP_TIM16_IRQHandler(void) {
+void TIM1_UP_TIM16_IRQHandler (void) {
 	update_flag |= 1; // Set enemy/bullet flag high
+	TIM16->SR &= ~0x0001;
+}
+
+void TIM1_TRG_COM_TIM17_IRQHandler (void) {
+	/*TIM2->CCR3 = *punk_address;
+	punk_address++;
+	if (punk_address == punk_end)
+		punk_address = punk;*/
 	TIM16->SR &= ~0x0001;
 }

@@ -20,7 +20,7 @@ void set_led(uint8_t color);
 void init_timer_2();
 void init_timer_15();
 void init_timer_16();
-
+void init_timer_17();
 /*
  * Buttons
  *
@@ -47,6 +47,7 @@ void joystick_read(fixp_t* arr);
 void enable_timer_2 (uint8_t on);
 void enable_timer_15 (uint8_t on);
 void enable_timer_16 (uint8_t on);
+void enable_timer_17 (uint8_t on);
 void set_timer_16_speed(uint16_t speed);
 
 //Shouldnt we remove or outcomment it then?

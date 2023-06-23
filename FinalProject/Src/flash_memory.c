@@ -17,7 +17,7 @@ uint16_t flash_read_halfword(uint16_t offset) {
 }
 
 
-uint16_t flash_write_halfword(uint16_t offset, uint16_t data) {
+void flash_write_halfword(uint16_t offset, uint16_t data) {
 	// This function writes a halfword to flash memory at the location baseaddress + offset.
 	// The offset is a bit useless since it erases all the other data in that page, so could just as well write without offset
 

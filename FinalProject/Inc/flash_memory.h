@@ -16,7 +16,7 @@
 uint16_t flash_read_halfword(uint16_t offset);
 
 
-uint16_t flash_write_halfword(uint16_t offset, uint16_t data);
+void flash_write_halfword(uint16_t offset, uint16_t data);
 
 
 #endif /* FLASH_MEMORY_H_ */
