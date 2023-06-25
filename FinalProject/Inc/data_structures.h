@@ -26,24 +26,8 @@ typedef struct listnode {
 
 void list_push(listnode_t** head, void* elem);
 void* list_pop(listnode_t** head);
-void list_add();
-void list_append();
-void* list_remove(listnode_t** head, uint16_t idx);
 void* list_remove_next(listnode_t* head);
-listnode_t* list_getnode(listnode_t* head, uint16_t idx);
-uint16_t list_length(listnode_t* head);
-
-//fixp_t fixp_fromint (fixp_t n);
-//fixp_t fixp_toint (fixp_t n);
-//fixp_t fixp_add (fixp_t n1, fixp_t n2);
-//fixp_t fixp_mult (fixp_t n1, fixp_t n2);
-//fixp_t fixp_div (fixp_t n1, fixp_t n2);
-//fixp_t fixp_sub (fixp_t n1, fixp_t n2);
-//fixp_t fixp_sqrt(fixp_t val);
-//uint16_t int_mag(int16_t val1, int16_t val2);
 
 void fixp_print (fixp_t n);
-
-
 
 #endif /* DATA_STRUCTURES_H_ */

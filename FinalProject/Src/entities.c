@@ -228,11 +228,6 @@ static void update_rotation(entity_t * self) {
 
 			break;
 		case Bomb:
-//			if(self->vel_x < (1<<11) && self->vel_x > (-1<<11) && self->vel_y < (1<<11) && self->vel_y > (-1<<11)){
-//				rotation = 0;
-//				break;
-//			}
-
 			if (self->vel_y > -(self->vel_x << 1) && self->vel_y < self->vel_x << 1) {
 				rotation |= (0b0100);		// Sets horizontal direction to positive
 			} else if (self->vel_y < -(self->vel_x << 1) && self->vel_y > self->vel_x << 1) {
@@ -381,8 +376,6 @@ uint8_t enemy_move (entity_t* self, uint8_t* heightmap, fixp_t gravity) {
 uint8_t entity_move (entity_t* self, uint8_t* heightmap, fixp_t gravity) {
 	self->update_position(self, self->x + self->vel_x, self->y+self->vel_y);
 	self->update_rotation(self);
-	//self->x = self->x + self->vel_x;
-	//self->y = self->y + self->vel_y;
 	return 0;
 }
 
@@ -441,7 +434,7 @@ uint8_t update_entities (listnode_t* head, listnode_t** aux_list, entity_t* aux_
 		// Do stuff according to entity type:
 		switch (current_entity->type){
 		case Enemy:
-			if (aux_entity != NULL && (aux_entity->type == Bomb || aux_entity->type == Nuke)) { // This should only run if the funtion was calles from a bomb
+			if (aux_entity != NULL && (aux_entity->type == Bomb || aux_entity->type == Nuke)) { // This should only run if the funtion was called from a bomb
 				// Loop over enemies to determine if they should be killed
 				// TODO Might be necessary to check if !is_dead, dunno might work without
 				fixp_t dist_x = current_entity->x - aux_entity->x; // Horizontal distance from bomb to enemy
